@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %} Home {% endblock title %}
+{% block content %}
+<div class="container">
+  <h1 class="page-title">Home Page</h1>
+
+  {% if user.is_authenticated %}
+      <div class="user-greeting">
+          <h2>Hi, {{ user }}!</h2>
+          <a href="{% url 'logout' %}" class="btn btn-secondary">Log out</a>
+          <a href="{% url 'new_group' %}" class="btn btn-secondary">New Group</a>
+      </div>
+
+      <ul class="group-list">
+          {% for group in groups %}
+              <div id="{{ group.uuid }}" class="group-item">
+                  <li><a>{{ group.uuid }}</a></li>
+                  {% if request.user in group.members.all %}
+                      <a id="join" href="{% url 'open_chat' uuid=group.uuid %}" class="btn btn-primary">Open</a>
+                      <a id="leave" href="{% url 'leave_group' uuid=group.uuid %}" class="btn btn-danger">Leave</a>
+                      <a id="delete" href="{% url 'remove_group' uuid=group.uuid %}" class="btn btn-warning">Delete</a>
+                  {% else %}
+                      <a href="{% url 'join_group' uuid=group.uuid %}" class="btn btn-success">Join</a>
+                  {% endif %}
+              </div>
+          {% endfor %}
+      </ul>
+
+  {% else %}
+      <div class="guest-message">
+          <h2>Hmm, who are you?</h2>
+          <a href="{% url 'login' %}" class="btn btn-secondary">Log in</a> OR
+          <a href="{% url 'signup' %}" class="btn btn-info">Sign up</a>
+      </div>
+  {% endif %}
+</div>
+{% endblock content %}
+    
