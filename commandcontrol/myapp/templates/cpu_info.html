@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CPU Information</title>
+    <script>
+        function refreshPage() {
+            setTimeout(function () {
+                location.reload();
+            }, 5000); // Refresh every 5 seconds
+        }
+        window.onload = refreshPage;
+    </script>
+</head>
+<body>
+    <h1>CPU Information</h1>
+    <ul>
+        <li><strong>Timestamp:</strong> {{ timestamp }}</li>
+        <li><strong>CPU Count:</strong> {{ cpu_count }}</li>
+        <li><strong>CPU Usage:</strong> {{ cpu_percent }}%</li>
+        <li><strong>CPU Frequency:</strong> {{ cpu_freq_value }} MHz</li>
+        <li><strong>Threads:</strong> {{ threads }}</li>
+        <li><strong>Per CPU Usage:</strong> {{ per_cpu_percent }}</li>
+    </ul>
+</body>
+</html>
