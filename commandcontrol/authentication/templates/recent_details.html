@@ -1,0 +1,21 @@
+<!-- view_recent_details.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recent CPU Info</title>
+</head>
+<body>
+    <h2>Recent CPU Info for {{ recent_details.pc_name }}</h2>
+    <p>Timestamp: {{ recent_details.timestamp }}</p>
+    <p>IP Address: {{ recent_details.remote_ip }}</p>
+    <p>CPU Count: {{ recent_details.cpu_count }}</p>
+    <p>CPU Usage: {{ recent_details.cpu_percent }}%</p>
+    <p>CPU Frequency: {{ recent_details.cpu_freq_value }} MHz</p>
+    <p>Threads: {{ recent_details.threads }}</p>
+    <p>Per CPU Usage: {{ recent_details.per_cpu_percent }}</p>
+
+    <form action="{% url 'admin_view' %}" method="get">
+        <button type="submit">Back</button>
+    </form>
+</body>
+</html>

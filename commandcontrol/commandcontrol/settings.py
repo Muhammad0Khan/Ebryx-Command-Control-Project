@@ -40,8 +40,13 @@ SECRET_KEY = "django-insecure-)7@gr5gl*e0dy9n%)&m=xixky7*^f@gt9656*n37#w=*gnxa2)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["4b14-110-93-193-114.ngrok-free.app", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "0941-103-145-185-153.ngrok-free.app",
+    "localhost",
+    "127.0.0.1",
+]
 
+CSRF_TRUSTED_ORIGINS = ["https://0941-103-145-185-153.ngrok-free.app"]
 
 # Application definition
 
@@ -53,7 +58,16 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "myapp",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "authentication",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -64,6 +78,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "myapp.middleware.RemoteAddrMiddleware",
+    "authentication.middleware.RemoteAddrMiddleware",
 ]
 
 ROOT_URLCONF = "commandcontrol.urls"

@@ -17,13 +17,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from myapp.views import cpu_info_view
-from myapp.views import remote_cpu_info
 from myapp.views import remote_cpu_info_api
+from myapp.views import profile_view
+from myapp.views import logout_view
+from authentication.views import SignUpView, CustomLoginView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("myapp/", include("myapp.urls")),
-    path("", cpu_info_view, name="home"),
-    path("remote_cpu_info/", remote_cpu_info, name="remote_cpu_info"),
+    path("authentication/", include("authentication.urls")),
+    path("cpu_info/", cpu_info_view, name="home"),
+    path("signup/", SignUpView.as_view(), name="signup"),
+    path("login/", CustomLoginView.as_view(), name="login"),
     path("remote_cpu_info_api/", remote_cpu_info_api, name="remote_cpu_info_api"),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/profile/", profile_view, name="profile"),
+    path("logout/", logout_view, name="logout"),
 ]

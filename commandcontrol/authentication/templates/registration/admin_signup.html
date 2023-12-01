@@ -1,0 +1,15 @@
+<!-- admin_signup.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Signup</title>
+</head>
+<body>
+    <h2>Admin Signup</h2>
+    <form method="post" action="{% url 'admin_signup' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign Up</button>
+    </form>
+</body>
+</html>

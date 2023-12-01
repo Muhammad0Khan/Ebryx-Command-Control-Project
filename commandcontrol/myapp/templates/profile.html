@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+        <script>
+        setTimeout(function() {
+            location.reload();
+        }, 5000);
+    </script>
+</head>
+<body>
+    <h1>User Profile</h1>
+    <p><strong>User :</strong> {{ user }}</p>
+    <ul>
+        <li><strong>Status:</strong> {{ status }}</li>
+        <li><strong>Remote IP:</strong> {{ remote_ip }}</li>
+        <li><strong>PC Name:</strong> {{ pc_name }}</li>
+        <li><strong>Timestamp:</strong> {{ timestamp }}</li>
+        <li><strong>CPU Count:</strong> {{ cpu_count }}</li>
+        <li><strong>CPU Usage:</strong> {{ cpu_percent }}%</li>
+        <li><strong>CPU Frequency:</strong> {{ cpu_freq_value }} MHz</li>
+        <li><strong>Threads:</strong> {{ threads }}</li>
+        <li><strong>Per CPU Usage:</strong> {{ per_cpu_percent }}</li>
+    </ul>
+
+    <!-- Logout Button -->
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" value="Logout">
+    </form>
+</body>
+</html>
