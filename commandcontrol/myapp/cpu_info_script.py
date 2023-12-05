@@ -7,7 +7,7 @@ import requests  # Added requests library for HTTP requests
 # Set the path to your Firebase Admin SDK credentials JSON file
 os.environ[
     "GOOGLE_APPLICATION_CREDENTIALS"
-] = "/Users/stormboi/Downloads/FYP-Ebryx/Ebryx-Command-Control-Project-main/commandcontrol/firebase/command-and-control-9c601-firebase-adminsdk-zqbso-ec1942a09a.json"
+] = "/Users/admin/Desktop/Ebryx/commandcontrol/firebase/command-and-control-9c601-firebase-adminsdk-zqbso-ec1942a09a.json"
 
 # Add the Django project path to the sys.path
 sys.path.append("/commandcontrol/")

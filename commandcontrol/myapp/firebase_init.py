@@ -7,7 +7,7 @@ import os
 def initialize_firebase():
     os.environ[
         "GOOGLE_APPLICATION_CREDENTIALS"
-    ] = "/Users/stormboi/Downloads/FYP-Ebryx/Ebryx-Command-Control-Project-main/commandcontrol/firebase/command-and-control-9c601-firebase-adminsdk-zqbso-ec1942a09a.json"
+    ] = "/Users/admin/Desktop/Ebryx/commandcontrol/firebase/command-and-control-9c601-firebase-adminsdk-zqbso-ec1942a09a.json"
 
     firebase_config = {
         "apiKey": "AIzaSyCBID8mb8ppM61RFU9pgah5J20VzwOiHbo",
