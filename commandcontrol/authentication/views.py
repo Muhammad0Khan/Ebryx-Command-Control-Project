@@ -74,3 +74,4 @@ def view_recent_details(request, pc_name):
     )
     context = {"recent_details": recent_details}
     return render(request, "recent_details.html", context)
+

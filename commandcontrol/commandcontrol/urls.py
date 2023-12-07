@@ -21,6 +21,7 @@ from myapp.views import remote_cpu_info_api
 from myapp.views import profile_view
 from myapp.views import logout_view
 from authentication.views import SignUpView, CustomLoginView
+from myapp.views import running_processes
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -33,4 +34,5 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("accounts/profile/", profile_view, name="profile"),
     path("logout/", logout_view, name="logout"),
+    path('running_processes/', running_processes, name='running_processes'),
 ]

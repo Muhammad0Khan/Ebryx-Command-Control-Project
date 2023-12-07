@@ -9,3 +9,4 @@ class AdminProfile(models.Model):
     # add additional fields here
     def __str__(self):
         return self.user.username
+

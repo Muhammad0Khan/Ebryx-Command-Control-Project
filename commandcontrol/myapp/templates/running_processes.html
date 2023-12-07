@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Running Processes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function updateProcesses() {
+                $.get('{% url "running_processes" %}', function(data) {
+                    $('#processes-table').html(data);
+                });
+            }
+
+            setInterval(updateProcesses, 1000);  // Update every second
+        });
+    </script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">Currently Running Processes</h1>
+        <table class="table table-bordered table-striped" id="processes-table">
+			<tr>
+				<th>PID</th>
+				<th>Name</th>
+				<th>Username</th>
+				<th>Running Time</th>
+				<th>CPU %</th>
+				<th>Memory %</th>
+			</tr>
+			{% for process in running_processes %}
+			<tr>
+				<td>{{ process.pid }}</td>
+				<td>{{ process.name }}</td>
+				<td>{{ process.username }}</td>
+				<td>{{ process.running_time }}</td>
+				<td>{{ process.cpu_percent }}</td>
+				<td>{{ process.memory_percent }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</body>
+</html>

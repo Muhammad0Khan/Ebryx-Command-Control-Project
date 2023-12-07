@@ -31,3 +31,11 @@ class RemoteCPUInfo(models.Model):
 
     def __str__(self):
         return f"Remote CPU Info for {self.user.username} ({self.remote_ip})"
+
+class InstalledApp(models.Model):
+    name = models.CharField(max_length=255)
+    version = models.CharField(max_length=50)
+    installation_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

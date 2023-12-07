@@ -15,6 +15,9 @@ import time
 import psutil
 from firebase_admin import db
 from .firebase_init import initialize_firebase
+from .utils import get_installed_apps_last_12_hours
+from .utils import get_running_processes
+
 
 initialize_firebase()
 
@@ -174,6 +177,15 @@ def remote_cpu_info_api(request):
 
     return JsonResponse({"status": "error", "message": "Invalid request method"})
 
+def installed_apps(request):
+    installed_apps_last_12_hours = get_installed_apps_last_12_hours()
+    return render(request, 'installed_apps.html', {'installed_apps': installed_apps_last_12_hours})
+
+
+
+def running_processes(request):
+    running_processes_data = get_running_processes()
+    return render(request, 'running_processes.html', {'running_processes': running_processes_data})
 
 # @csrf_exempt
 # def remote_cpu_info_api(request):
