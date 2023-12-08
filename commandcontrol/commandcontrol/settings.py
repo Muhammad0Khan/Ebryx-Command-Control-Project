@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 import pyrebase
+from django.core.management.utils import get_random_secret_key
+
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+
 
 config = {
     "apiKey": "AIzaSyCBID8mb8ppM61RFU9pgah5J20VzwOiHbo",
@@ -40,11 +45,14 @@ SECRET_KEY = "django-insecure-)7@gr5gl*e0dy9n%)&m=xixky7*^f@gt9656*n37#w=*gnxa2)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = [
     "0941-103-145-185-153.ngrok-free.app",
     "localhost",
     "127.0.0.1",
 ]
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
+
 
 CSRF_TRUSTED_ORIGINS = ["https://0941-103-145-185-153.ngrok-free.app"]
 
