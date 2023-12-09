@@ -47,14 +47,14 @@ DEBUG = True
 
 
 ALLOWED_HOSTS = [
-    "0941-103-145-185-153.ngrok-free.app",
+    "*",
     "localhost",
     "127.0.0.1",
 ]
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 
-CSRF_TRUSTED_ORIGINS = ["https://0941-103-145-185-153.ngrok-free.app"]
+CSRF_TRUSTED_ORIGINS = []
 
 # Application definition
 
@@ -155,12 +155,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'myapp/static')]
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "myapp/static")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
