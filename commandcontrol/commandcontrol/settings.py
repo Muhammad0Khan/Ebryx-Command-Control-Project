@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     "myapp",
     "rest_framework",
     "rest_framework.authtoken",
-    # "authentication",
+    
 ]
 
 REST_FRAMEWORK = {
@@ -88,7 +88,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "myapp.middleware.RemoteAddrMiddleware",
-    "authentication.middleware.RemoteAddrMiddleware",
+    
 ]
 
 ROOT_URLCONF = "commandcontrol.urls"

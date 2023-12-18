@@ -1,6 +1,6 @@
 from django.urls import path, include
 from .views import cpu_info_view, profile_view, logout_view
-# from authentication.views import SignUpView, CustomLoginView
+
 from . import views
 from django.contrib import admin
 from .views import *
