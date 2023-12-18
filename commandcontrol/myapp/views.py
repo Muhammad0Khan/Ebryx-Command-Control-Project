@@ -6,7 +6,7 @@ from myapp.models import *
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
-from django.contrib.auth import logout
+from django.contrib.auth import logout, authenticate, login
 from datetime import datetime
 import subprocess,json,time, psutil
 from firebase_admin import db
@@ -21,11 +21,14 @@ from .serializers import InstalledAppSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from .forms import SignupForm, LoginForm
+from .models import FirebaseUser
 
 
 
 
-initialize_firebase()
+
+# initialize_firebase()
 
 
 @csrf_exempt
@@ -203,6 +206,9 @@ def generate_token(request):
     ref = db.reference('tokens')
     ref.push().set({'token': token})
 
+    ref_create_online_status= db.reference('status')
+    ref_create_online_status.push().set({'token': token, 'status':"offline"})
+
     # Return the token in the API response
     return Response({'token': token})
 
@@ -239,3 +245,70 @@ class InstalledAppAPIView(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            # Create a new FirebaseUser instance and save it to Firebase RTDB
+            user = FirebaseUser(email=form.cleaned_data['email'], password=form.cleaned_data['password'])
+            user.save_to_firebase()
+            return redirect('login')  # Redirect to login page after successful signup
+    else:
+        form = SignupForm()
+
+        return render(request, 'registration/signup.html', {'form': form})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+
+            # Fetch user data from Firebase based on the email
+            user_data = db.reference('/users').child(email.replace('.', ',')).get()
+            print(user_data)
+
+            if user_data:
+                # Authenticate user against provided credentials
+                user = authenticate(request, email=email, password=password)
+                
+
+                if user:
+                    login(request, user)
+                    print(f'Sign-in successful for user: {user.email}')
+                    return redirect('home')  # Redirect to the home page after successful sign-in
+                else:
+                    # Authentication failed
+                    # You may want to add an error message here
+                    print(f'Authentication failed for user: {email}')
+            else:
+                # User data not found
+                # You may want to add an error message here
+                print(f'User not found for email: {email}')
+    else:
+        form = LoginForm()
+
+    return render(request, 'registration/login.html', {'form': form})
+
+def dashboard_view(request):
+    tokens_ref = db.reference('tokens')
+    tokens_data = tokens_ref.order_by_child('token').get()
+    tokens = [{'token': token['token'], 'details_url': f'/token-details/{token["token"]}/'} for token in tokens_data.values()]
+
+    return render(request, 'dashboard.html', {'tokens': tokens})
+
+def token_details_view(request, token):
+    # Fetch data from the installed_apps collection for the specific token
+    apps_ref = db.reference('installed_apps').child(token)
+    token_data = apps_ref.get()
+
+    if token_data:
+        installed_apps_data = token_data.get('data', [])
+    else:
+        installed_apps_data = []
+
+    return render(request, 'token_details.html', {'token': token, 'installed_apps': installed_apps_data})

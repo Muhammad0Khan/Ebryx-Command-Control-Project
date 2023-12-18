@@ -1,0 +1,14 @@
+{% extends 'base.html' %} {%block content %}
+
+<h1>Token Dashboard</h1>
+<ol>
+	{% for token in tokens %}
+	<li>
+		{{ token.token }}
+		<a href="{{ token.details_url }}">
+      <button>Details</button>
+  </a>
+	</li>
+	{% endfor %}
+</ol>
+{% endblock %}
