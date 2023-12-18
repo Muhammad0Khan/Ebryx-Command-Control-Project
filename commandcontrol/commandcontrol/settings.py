@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     "myapp",
     "rest_framework",
     "rest_framework.authtoken",
-    "authentication",
+    # "authentication",
 ]
 
 REST_FRAMEWORK = {
@@ -96,7 +96,7 @@ ROOT_URLCONF = "commandcontrol.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [os.path.join(BASE_DIR, "myapp/templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -166,3 +166,8 @@ STATIC_ROOT= os.path.join(BASE_DIR, "static")
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]

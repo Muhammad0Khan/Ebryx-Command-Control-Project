@@ -39,3 +39,14 @@ class InstalledApp(models.Model):
 
     def __str__(self):
         return self.name
+
+class APIToken(models.Model):
+    token = models.CharField(max_length=40, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class InstalledApp(models.Model):
+    token = models.CharField(max_length=50)
+    data = models.JSONField()
+
+    def __str__(self):
+        return f"InstalledApp - Token: {self.token}"
