@@ -23,6 +23,8 @@ from myapp.views import *
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("myapp/", include("myapp.urls")),
+    path('signup/', signup, name='signup'),
+    path('login/', login_view, name='login'),
     path("cpu_info/", cpu_info_view, name="home"),
     path("remote_cpu_info_api/", remote_cpu_info_api, name="remote_cpu_info_api"),
     # path("accounts/", include("django.contrib.auth.urls")),
@@ -31,6 +33,8 @@ urlpatterns = [
     path('running_processes/', running_processes, name='running_processes'),
     path('api/generate_token/', generate_token, name='generate_token'),
     path('api/check-token/<str:token>/', check_token, name='check_token'),
+     path('dashboard/', dashboard_view, name='dashboard'),
+      path('token-details/<str:token>/', token_details_view, name='token_details'),
 
     
 ]
