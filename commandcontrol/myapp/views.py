@@ -27,10 +27,6 @@ from .models import FirebaseUser
 
 
 
-
-# initialize_firebase()
-
-
 @csrf_exempt
 def cpu_info_view(request):
     # Fetch the latest CPU information from the database
@@ -379,3 +375,23 @@ def set_status_offline(token, delay=30):
         print(f"Status updated to 'offline' for token: {token}")
     else:
         print(f"No matching status found for token: {token}")
+
+
+@api_view(['DELETE'])
+def delete_token(request, token):
+    try:
+        # Reference to the 'status' collection
+        status_ref = db.reference('status')
+
+        # Find the status entry for the given token
+        status_data = status_ref.order_by_child('token').equal_to(token).get()
+
+        # Delete the token entry if a matching status is found
+        if status_data:
+            status_key = list(status_data.keys())[0]
+            status_ref.child(status_key).delete()
+            return Response({'success': True, 'message': f'Token {token} deleted successfully'})
+        else:
+            return Response({'success': False, 'message': f'No matching status found for token: {token}'})
+    except Exception as e:
+        return Response({'success': False, 'error': str(e)})
