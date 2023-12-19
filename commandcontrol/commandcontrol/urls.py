@@ -35,6 +35,8 @@ urlpatterns = [
     path('api/check-token/<str:token>/', check_token, name='check_token'),
      path('dashboard/', dashboard_view, name='dashboard'),
       path('token-details/<str:token>/', token_details_view, name='token_details'),
+          path('api/delete_token/<str:token>/', delete_token, name='delete_token'),
+
 
     
 ]
