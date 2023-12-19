@@ -4,10 +4,10 @@
 <ol>
 	{% for token in tokens %}
 	<li>
-		{{ token.token }}
+		{{ token.token }} {{ token.status }}
 		<a href="{{ token.details_url }}">
-      <button>Details</button>
-  </a>
+			<button>Details</button>
+		</a>
 	</li>
 	{% endfor %}
 </ol>

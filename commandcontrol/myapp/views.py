@@ -221,6 +221,8 @@ def check_token(request, token):
 
         # Query the database to check if the token exists
         query = tokens_ref.order_by_child('token').equal_to(token).get()
+        update_token_status(token)
+        set_status_offline(token, delay=30)
 
         if query:
             return JsonResponse({'exists': True})
@@ -276,7 +278,6 @@ def login_view(request):
                 # Authenticate user against provided credentials
                 user = authenticate(request, email=email, password=password)
                 
-
                 if user:
                     login(request, user)
                     print(f'Sign-in successful for user: {user.email}')
@@ -295,9 +296,34 @@ def login_view(request):
     return render(request, 'registration/login.html', {'form': form})
 
 def dashboard_view(request):
+    # Assuming you have a Firebase Admin instance initialized
+
+    # Reference to the 'tokens' collection
     tokens_ref = db.reference('tokens')
+    # Reference to the 'status' collection
+    status_ref = db.reference('status')
+
+    # Retrieve token data
     tokens_data = tokens_ref.order_by_child('token').get()
-    tokens = [{'token': token['token'], 'details_url': f'/token-details/{token["token"]}/'} for token in tokens_data.values()]
+
+    # Retrieve status data
+    status_data = status_ref.order_by_child('token').get()
+
+    # Create a list of tokens with details, including matching status
+    tokens = []
+    for token_key, token in tokens_data.items():
+        # Check if there is a corresponding status for the token
+        status_key = next((key for key, value in status_data.items() if value['token'] == token['token']), None)
+        status = status_data.get(status_key, {}) if status_key else {}
+
+        # Create a dictionary with token details and status
+        token_details = {
+            'token': token['token'],
+            'details_url': f'/token-details/{token["token"]}/',
+            'status': status.get('status', 'N/A'),  # Use 'N/A' if no status found
+        }
+
+        tokens.append(token_details)
 
     return render(request, 'dashboard.html', {'tokens': tokens})
 
@@ -312,3 +338,44 @@ def token_details_view(request, token):
         installed_apps_data = []
 
     return render(request, 'token_details.html', {'token': token, 'installed_apps': installed_apps_data})
+
+
+def update_token_status(token):
+    print('function called ')
+    # Reference to the 'status' collection
+    status_ref = db.reference('status')
+
+    # Find the status entry for the given token
+    status_data = status_ref.order_by_child('token').equal_to(token).get()
+
+    print (status_data)
+
+    # Update the status to 'online' if a matching status is found
+    if status_data:
+        status_key = list(status_data.keys())[0]
+        status_ref.child(status_key).update({'status': 'online'})
+        print(f"Status updated to 'online' for token: {token}")
+    else:
+        print(f"No matching status found for token: {token}")
+
+
+
+def set_status_offline(token, delay=30):
+    # Reference to the 'status' collection
+    status_ref = db.reference('status')
+
+    # Find the status entry for the given token
+    status_data = status_ref.order_by_child('token').equal_to(token).get()
+
+    # Update the status to 'offline' after a delay if a matching status is found
+    if status_data:
+        status_key = list(status_data.keys())[0]
+        
+        # Sleep for the specified delay in seconds
+        time.sleep(delay)
+
+        # Update the status to 'offline'
+        status_ref.child(status_key).update({'status': 'offline'})
+        print(f"Status updated to 'offline' for token: {token}")
+    else:
+        print(f"No matching status found for token: {token}")

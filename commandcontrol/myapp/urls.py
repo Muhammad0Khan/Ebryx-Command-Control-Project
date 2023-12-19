@@ -9,7 +9,7 @@ from .views import *
 urlpatterns = [
     path("cpu_info/", cpu_info_view, name="cpu_info"),
     path("remote_cpu_info_api/", views.remote_cpu_info_api, name="remote_cpu_info_api"),
-    path('login/', login_view, name='login'),
+    path('', login_view, name='login'),
     path('signup/', signup, name='signup'),
     # path("login/", CustomLoginView.as_view(), name="login"),
     # path("accounts/", include("django.contrib.auth.urls")),
