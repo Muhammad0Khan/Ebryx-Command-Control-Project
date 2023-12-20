@@ -1,29 +1,69 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>CPU Information</title>
-    <script>
-        function refreshPage() {
-            setTimeout(function () {
-                location.reload();
-            }, 5000); // Refresh every 5 seconds
-        }
-        window.onload = refreshPage;
-    </script>
-</head>
-<body>
-    <h1>CPU Information</h1>
-    {% if error_message %}
-        <p>{{ error_message }}</p>
-    {% else %}
-        <ul>
-            <li><strong>Timestamp:</strong> {{ timestamp }}</li>
-            <li><strong>CPU Count:</strong> {{ cpu_count }}</li>
-            <li><strong>CPU Usage:</strong> {{ cpu_percent }}%</li>
-            <li><strong>CPU Frequency:</strong> {{ cpu_freq_value }} MHz</li>
-            <li><strong>Threads:</strong> {{ threads }}</li>
-            <li><strong>Per CPU Usage:</strong> {{ per_cpu_percent }}</li>
-        </ul>
-    {% endif %}
-</body>
-</html>
+{% extends 'base.html' %} {% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<h1>CPU Information</h1>
+
+{% if error_message %}
+<p>{{ error_message }}</p>
+{% else %}
+<p>Timestamp: {{ timestamp }}</p>
+<canvas id="cpuUsageChart" width="400" height="200"></canvas>
+<canvas id="perCpuUsageChart" width="400" height="200"></canvas>
+
+<script>
+	// Get the CPU data from the server-side context
+	var cpuPercent = {{ cpu_percent }};
+	var perCpuPercent = {{ per_cpu_percent }};
+
+	// Chart.js configuration for CPU Usage
+	var cpuUsageConfig = {
+	    type: 'bar',
+	    data: {
+	        labels: ['CPU 1', 'CPU 2', 'CPU 3', 'CPU 4'],  // Adjust labels based on your CPU count
+	        datasets: [{
+	            label: 'CPU Usage (%)',
+	            data: cpuPercent,
+	            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+	            borderColor: 'rgba(75, 192, 192, 1)',
+	            borderWidth: 1
+	        }]
+	    },
+	    options: {
+	        scales: {
+	            y: {
+	                beginAtZero: true,
+	                max: 100
+	            }
+	        }
+	    }
+	};
+
+	// Chart.js configuration for Per CPU Usage
+	var perCpuUsageConfig = {
+	    type: 'bar',
+	    data: {
+	        labels: ['Thread 1', 'Thread 2', 'Thread 3', 'Thread 4'],  // Adjust labels based on your threads
+	        datasets: [{
+	            label: 'Per CPU Usage (%)',
+	            data: perCpuPercent,
+	            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+	            borderColor: 'rgba(255, 99, 132, 1)',
+	            borderWidth: 1
+	        }]
+	    },
+	    options: {
+	        scales: {
+	            y: {
+	                beginAtZero: true,
+	                max: 100
+	            }
+	        }
+	    }
+	};
+
+	// Create charts
+	var cpuUsageChart = new Chart(document.getElementById('cpuUsageChart').getContext('2d'), cpuUsageConfig);
+	var perCpuUsageChart = new Chart(document.getElementById('perCpuUsageChart').getContext('2d'), perCpuUsageConfig);
+</script>
+{% endif %} {% endblock %}
