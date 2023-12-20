@@ -18,10 +18,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('installed-apps/', installed_apps, name='installed_apps'),
     path('api/installed_apps/', InstalledAppAPIView.as_view(), name='installed_apps'),
-    
+    path('api/cpu_data/', store_cpu_data, name='cpu_data'),
     path('dashboard/', dashboard_view, name='dashboard'),
      path('token-details/<str:token>/', token_details_view, name='token_details'),
          path('api/delete_token/<str:token>/', delete_token, name='delete_token'),
+          path('api/cpu_info/<str:token>/', cpu_info_page, name='cpu_info'),
 
 
 ]

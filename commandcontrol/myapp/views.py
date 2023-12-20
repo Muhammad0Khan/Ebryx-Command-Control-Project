@@ -23,6 +23,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .forms import SignupForm, LoginForm
 from .models import FirebaseUser
+from django.views.decorators.http import require_POST
 
 
 
@@ -395,3 +396,80 @@ def delete_token(request, token):
             return Response({'success': False, 'message': f'No matching status found for token: {token}'})
     except Exception as e:
         return Response({'success': False, 'error': str(e)})
+    
+
+@csrf_exempt
+@require_POST
+def store_cpu_data(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get('token')
+
+        if not token:
+            response_data = {
+                'status': 'error',
+                'message': 'Token is required in the JSON data.',
+            }
+            return JsonResponse(response_data, status=400)
+
+        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
+        cpu_data_ref = db.reference(f'cpu_data/{token}')
+
+        # Fetch the existing data array or initialize an empty array
+        existing_data = cpu_data_ref.child('data').get() or []
+
+        # Append the new data section to the array
+        existing_data.append(data['data'])
+
+        # Update the RTDB with the new data array
+        cpu_data_ref.update({'data': existing_data})
+
+        response_data = {
+            'status': 'success',
+            'message': 'CPU data stored successfully',
+            'data_id': len(existing_data) - 1,  # Index of the last appended data section
+        }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        response_data = {
+            'status': 'error',
+            'message': 'Invalid JSON data',
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        response_data = {
+            'status': 'error',
+            'message': f'An error occurred: {str(e)}',
+        }
+        return JsonResponse(response_data, status=500)
+
+
+def cpu_info_page(request, token):
+    try:
+        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
+        cpu_data_ref = db.reference(f'cpu_data/{token}')
+
+        # Fetch the CPU data for the specified token
+        cpu_data = cpu_data_ref.get()
+
+        if cpu_data:
+            # Get the last data section (assuming it's a list of dictionaries)
+            last_data_section = cpu_data.get('data', [])[-1]
+
+            context = {
+                'timestamp': last_data_section.get('Timestamp', ''),
+                'cpu_count': last_data_section.get('CPU Count', ''),
+                'cpu_percent': last_data_section.get('CPU Usage (%)', ''),
+                'cpu_freq_value': last_data_section.get('CPU Frequency (MHz)', ''),
+                'threads': last_data_section.get('Threads', ''),
+                'per_cpu_percent': last_data_section.get('Per CPU Usage (%)', ''),
+            }
+
+            return render(request, 'cpu_info.html', context)
+        else:
+            return render(request, 'cpu_info.html', {'error_message': f'No data found for token: {token}'})
+    except Exception as e:
+        return render(request, 'cpu_info.html', {'error_message': f'An error occurred: {str(e)}'})
