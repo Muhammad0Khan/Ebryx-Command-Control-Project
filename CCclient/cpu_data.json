@@ -1,0 +1,16 @@
+{
+  "token": "gVIrFKccgkE7bjaS0KQH5x0DpQ62umJMBwhl84z3",
+  "CPU Count": 2,
+  "Threads": 2,
+  "data": {
+    "Timestamp": "2023-12-20 23:41:32",
+    "CPU Usage (%)": 29.5,
+    "CPU Frequency (MHz)": 2700,
+    "Per CPU Usage (%)": [
+      48.7,
+      11.7,
+      46.2,
+      11.3
+    ]
+  }
+}
