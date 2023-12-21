@@ -12,24 +12,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-import pyrebase
 from django.core.management.utils import get_random_secret_key
 
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 
-config = {
-    "apiKey": "AIzaSyCBID8mb8ppM61RFU9pgah5J20VzwOiHbo",
-    "authDomain": "command-and-control-9c601.firebaseapp.com",
-    "databaseURL": "https://command-and-control-9c601-default-rtdb.firebaseio.com",
-    "projectId": "command-and-control-9c601",
-    "storageBucket": "command-and-control-9c601.appspot.com",
-    "messagingSenderId": "595205364194",
-    "appId": "1:595205364194:web:7d77ff7d256f2526db81bb",
-}
-
-firebase = pyrebase.initialize_app(config)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
