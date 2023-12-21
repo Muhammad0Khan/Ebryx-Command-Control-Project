@@ -66,86 +66,6 @@ def cpu_info_view(request):
     return render(request, "cpu_info.html", context)
 
 
-@login_required
-def profile_view(request):
-    user = request.user
-    # Get the IP address and PC name of the remote client
-    remote_ip = request.META.get("REMOTE_ADDR", "")
-    # Used if fetching the PC name for Windows clients
-    pc_name_windows = request.META.get("COMPUTERNAME", "")
-
-    # Used if fetching the PC name for Mac clients
-    try:
-        pc_name_mac = subprocess.check_output(
-            ["scutil", "--get", "LocalHostName"], universal_newlines=True
-        ).strip()
-    except subprocess.CalledProcessError:
-        pc_name_mac = ""
-
-    # Determine the PC name based on the OS of the remote client
-    pc_name = pc_name_windows if pc_name_windows else pc_name_mac
-
-    # Get CPU Information of the remote client
-    cpu_info = psutil.cpu_stats()
-    cpu_count = psutil.cpu_count()
-    cpu_percent = psutil.cpu_percent(interval=None)
-    try:
-        cpu_freq = psutil.cpu_freq().current
-    except FileNotFoundError:
-        cpu_freq = -1
-    threads = psutil.cpu_count(logical=False)
-    per_cpu_percent = psutil.cpu_percent(interval=None, percpu=True)
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
-    # Save or update CPU information of the remote client in the database
-    remote_cpu_info, created = RemoteCPUInfo.objects.update_or_create(
-        user=user,
-        remote_ip=remote_ip,
-        defaults={
-            "pc_name": pc_name,
-            "timestamp": timestamp,
-            "cpu_count": cpu_count,
-            "cpu_percent": cpu_percent,
-            "cpu_freq_value": cpu_freq,
-            "threads": threads,
-            "per_cpu_percent": per_cpu_percent,
-            "status": "Online",
-        },
-    )
-
-    # save the same information in firebase
-    firebase_ref = db.reference("remote_cpu_information")
-    firebase_ref.push(
-        {
-            "user": user.username,
-            "remote_ip": remote_ip,
-            "pc_name": pc_name,
-            "timestamp": timestamp,
-            "cpu_count": cpu_count,
-            "cpu_percent": cpu_percent,
-            "cpu_freq_value": cpu_freq,
-            "threads": threads,
-            "per_cpu_percent": per_cpu_percent,
-            "status": "Online",
-        }
-    )
-
-    # Prepare data to pass to the template
-    context = {
-        "user": user,
-        "status": "Online",
-        "remote_ip": remote_ip,
-        "pc_name": pc_name,
-        "timestamp": timestamp,
-        "cpu_count": cpu_count,
-        "cpu_percent": cpu_percent,
-        "cpu_freq_value": cpu_freq,
-        "threads": threads,
-        "per_cpu_percent": per_cpu_percent,
-    }
-
-    # Render the template with the data
-    return render(request, "profile.html", context)
 
 
 # @login_required
@@ -154,40 +74,6 @@ def logout_view(request):
         del request.session["firebase_user_id_token"]
 
     return redirect("login")
-
-@csrf_exempt
-def remote_cpu_info_api(request):
-    if request.method == "POST":
-        remote_ip = request.META.get("REMOTE_ADDR", "")
-        try:
-            payload = json.loads(request.body.decode("utf-8"))
-        except json.JSONDecodeError:
-            return JsonResponse({"status": "error", "message": "Invalid JSON format"})
-
-        user, created = User.objects.get_or_create(username=payload.get("username"))
-
-        timestamp_str = payload.get("timestamp")
-        parsed_timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
-
-        aware_timestamp = timezone.make_aware(parsed_timestamp, timezone=timezone.utc)
-
-        payload["timestamp"] = timezone.localtime(aware_timestamp)
-        payload["user"] = user
-        payload["remote_ip"] = remote_ip
-        payload["cpu_count"] = payload.get("cpu_count")
-        payload["cpu_percent"] = payload.get("cpu_percent")
-        payload["cpu_freq_value"] = payload.get("cpu_freq_value")
-        payload["threads"] = payload.get("threads")
-        payload["per_cpu_percent"] = payload.get("per_cpu_percent")
-
-        remote_cpu_info, created = RemoteCPUInfo.objects.update_or_create(
-            remote_ip=remote_ip,
-            defaults=payload,
-        )
-
-        return JsonResponse({"status": "success"})
-
-    return JsonResponse({"status": "error", "message": "Invalid request method"})
 
 def installed_apps(request):
     installed_apps_last_12_hours = get_installed_apps_last_12_hours()
