@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth.models import (
+    User
+)
 
 
 class CPUInfo(models.Model):
@@ -53,6 +55,38 @@ class InstalledApp(models.Model):
 
     def __str__(self):
         return f"InstalledApp - Token: {self.token}"
+
+
+# class CustomUserManager(BaseUserManager):
+#     def create_user(self, email, password=None, **extra_fields):
+#         if not email:
+#             raise ValueError("The Email field must be set")
+#         email = self.normalize_email(email)
+#         user = self.model(email=email, **extra_fields)
+#         user.set_password(password)
+#         user.save(using=self._db)
+#         return user
+
+#     def create_superuser(self, email, password=None, **extra_fields):
+#         extra_fields.setdefault("is_staff", True)
+#         extra_fields.setdefault("is_superuser", True)
+
+#         return self.create_user(email, password, **extra_fields)
+
+
+# class CustomUser(AbstractUser):
+#     email = models.EmailField(unique=True)
+#     # Add your additional fields here
+
+#     # Specify unique related names for groups and user_permissions
+#     groups = models.ManyToManyField(
+#         "auth.Group", related_name="customuser_set", blank=True
+#     )
+#     user_permissions = models.ManyToManyField(
+#         "auth.Permission", related_name="customuser_set", blank=True
+#     )
+
+#     objects = CustomUserManager()
 
 
 # class FirebaseUser(models.Model):

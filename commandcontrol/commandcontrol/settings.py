@@ -12,17 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-import pyrebase
 from django.core.management.utils import get_random_secret_key
 
-
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-
-os.environ["GOOGLE_CLOUD_PROJECT"] = "command-and-control-9c601"
-
-from myapp.firebase_init import initialize_firebase
-
-initialize_firebase()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,7 +30,6 @@ SECRET_KEY = "django-insecure-)7@gr5gl*e0dy9n%)&m=xixky7*^f@gt9656*n37#w=*gnxa2)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 
 ALLOWED_HOSTS = [
     "*",

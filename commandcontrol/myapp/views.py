@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import HttpResponseServerError, JsonResponse
 from myapp.models import *
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -9,8 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout, authenticate, login
 from datetime import datetime
 import subprocess, json, time, psutil
-from firebase_admin import db, auth
-from .firebase_init import initialize_firebase
+from firebase_admin import db
 from .utils import *
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -23,7 +22,26 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .forms import SignupForm, LoginForm
 from django.views.decorators.http import require_POST
-from firebase_admin.auth import create_user, InvalidIdTokenError
+import pyrebase
+from .firebase_init import initialize_firebase
+
+try:
+    firebase_admin = initialize_firebase()
+except ValueError:
+    pass
+
+config = {
+    "apiKey": "AIzaSyCBID8mb8ppM61RFU9pgah5J20VzwOiHbo",
+    "authDomain": "command-and-control-9c601.firebaseapp.com",
+    "databaseURL": "https://command-and-control-9c601-default-rtdb.firebaseio.com",
+    "storageBucket": "command-and-control-9c601.appspot.com",
+    "messagingSenderId": "595205364194",
+    "appId": "1:595205364194:web:7d77ff7d256f2526db81bb",
+}
+
+firebase = pyrebase.initialize_app(config)
+auth = firebase.auth()
+database = firebase.database()
 
 
 @csrf_exempt
@@ -257,24 +275,19 @@ def signup_view(request):
             password = form.cleaned_data["password"]
 
             try:
-                # Create user in Firebase Authentication
-                user = create_user(email=email, password=password)
+                # Create a new user in Firebase Authentication
+                user = auth.create_user_with_email_and_password(email, password)
 
-                # Save additional user data to Firebase Realtime Database
-                db.reference("/users").child(email.replace(".", ",")).set(
-                    {
-                        "uid": user.uid,
-                        "email": user.email,
-                    }
-                )
+                # Store additional user data in the Firebase Realtime Database
+                user_data = {"email": email}
+                database.child("users").child(user["localId"]).set(user_data)
 
-                print(f"User created and data saved for: {user.email}")
-                return redirect(
-                    "login"
-                )  # Redirect to login page after successful signup
-            except InvalidIdTokenError as e:
-                print(f"Error creating user: {e}")
-                # Handle error and display a user-friendly message to the user
+                # Redirect to login after successful signup
+                return redirect("login")
+            except Exception as e:
+                # Handle signup failure
+                print(f"Error in signup_view: {e}")
+                # You might want to add an error message here
 
     else:
         form = SignupForm()
@@ -290,25 +303,18 @@ def login_view(request):
             password = form.cleaned_data["password"]
 
             try:
-                # Verify Firebase ID token
-                decoded_token = auth.verify_id_token(password)
-                uid = decoded_token["uid"]
+                # Authenticate user against Firebase Authentication
+                user = auth.sign_in_with_email_and_password(email, password)
 
-                # Authenticate user against Django's authentication system
-                django_user = authenticate(request, email=email, password=uid)
+                # Authenticate Django user (optional, only if you need to use Django authentication)
+                # django_user = authenticate(request, email=email, password=password)
 
-                if django_user:
-                    login(request, django_user)
-                    print(f"Sign-in successful for user: {django_user.email}")
-                    return redirect(
-                        "dashboard"
-                    )  # Redirect to dashboard after successful sign-in
-                else:
-                    # Django authentication failed
-                    print(f"Django authentication failed for user: {email}")
-
-            except auth.InvalidIdTokenError as e:
-                print(f"Authentication failed for user: {email}. Firebase error: {e}")
+                # You can redirect to the dashboard or any other page upon successful login
+                return redirect("dashboard")
+            except Exception as e:
+                # Handle login failure
+                print(f"Error in login_view: {e}")
+                # You might want to add an error message here
 
     else:
         form = LoginForm()
@@ -316,44 +322,49 @@ def login_view(request):
     return render(request, "registration/login.html", {"form": form})
 
 
+@login_required(login_url="/login/")  # Redirect to login if not authenticated
 def dashboard_view(request):
-    # Assuming you have a Firebase Admin instance initialized
+    try:
+        # Reference to the 'tokens' collection
+        tokens_ref = db.reference("tokens")
+        # Reference to the 'status' collection
+        status_ref = db.reference("status")
 
-    # Reference to the 'tokens' collection
-    tokens_ref = db.reference("tokens")
-    # Reference to the 'status' collection
-    status_ref = db.reference("status")
+        # Retrieve token data
+        tokens_data = tokens_ref.order_by_child("token").get()
 
-    # Retrieve token data
-    tokens_data = tokens_ref.order_by_child("token").get()
+        # Retrieve status data
+        status_data = status_ref.order_by_child("token").get()
 
-    # Retrieve status data
-    status_data = status_ref.order_by_child("token").get()
+        # Create a list of tokens with details, including matching status
+        tokens = []
+        for token_key, token in tokens_data.items():
+            # Check if there is a corresponding status for the token
+            status_key = next(
+                (
+                    key
+                    for key, value in status_data.items()
+                    if value["token"] == token["token"]
+                ),
+                None,
+            )
+            status = status_data.get(status_key, {}) if status_key else {}
 
-    # Create a list of tokens with details, including matching status
-    tokens = []
-    for token_key, token in tokens_data.items():
-        # Check if there is a corresponding status for the token
-        status_key = next(
-            (
-                key
-                for key, value in status_data.items()
-                if value["token"] == token["token"]
-            ),
-            None,
-        )
-        status = status_data.get(status_key, {}) if status_key else {}
+            # Create a dictionary with token details and status
+            token_details = {
+                "token": token["token"],
+                "details_url": f'/token-details/{token["token"]}/',
+                "status": status.get("status", "N/A"),  # Use 'N/A' if no status found
+            }
 
-        # Create a dictionary with token details and status
-        token_details = {
-            "token": token["token"],
-            "details_url": f'/token-details/{token["token"]}/',
-            "status": status.get("status", "N/A"),  # Use 'N/A' if no status found
-        }
+            tokens.append(token_details)
 
-        tokens.append(token_details)
+        return render(request, "dashboard.html", {"tokens": tokens})
 
-    return render(request, "dashboard.html", {"tokens": tokens})
+    except Exception as e:
+        # Handle exceptions, you might want to log them or show an error page
+        print(f"Error in dashboard_view: {e}")
+        return HttpResponseServerError("Internal Server Error")
 
 
 def token_details_view(request, token):
