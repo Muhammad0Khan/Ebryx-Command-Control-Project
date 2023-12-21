@@ -45,5 +45,18 @@ while True:
         else:
             print("Server is not available")
 
+    else:
+        response = requests.get(api_url)
+        if response.status_code == 200:
+        
+            json_response = response.json()
+            token = json_response.get('token')
+            print(f'Token (from API): {token}')
+            with open(token_response_file, 'w') as json_file:
+                json.dump(json_response, json_file, indent=2)
+        else:
+            print(f'Error: {response.status_code}')
+            print(response.text)
+
     # Sleep for 5 seconds before the next iteration
     time.sleep(5)
