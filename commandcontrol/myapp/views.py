@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from myapp.models import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -20,8 +20,29 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .forms import SignupForm, LoginForm
-from .models import FirebaseUser
 from django.views.decorators.http import require_POST
+import pyrebase
+from .firebase_init import initialize_firebase
+from django.urls import reverse
+from functools import wraps
+
+try:
+    firebase_admin = initialize_firebase()
+except ValueError:
+    pass
+
+config = {
+    "apiKey": "AIzaSyCBID8mb8ppM61RFU9pgah5J20VzwOiHbo",
+    "authDomain": "command-and-control-9c601.firebaseapp.com",
+    "databaseURL": "https://command-and-control-9c601-default-rtdb.firebaseio.com",
+    "storageBucket": "command-and-control-9c601.appspot.com",
+    "messagingSenderId": "595205364194",
+    "appId": "1:595205364194:web:7d77ff7d256f2526db81bb",
+}
+
+firebase = pyrebase.initialize_app(config)
+auth = firebase.auth()
+database = firebase.database()
 
 
 
@@ -127,25 +148,12 @@ def profile_view(request):
     return render(request, "profile.html", context)
 
 
-@login_required
+# @login_required
 def logout_view(request):
-    user = request.user
-
-    logout(request)
-
-    if user.is_authenticated:
-        RemoteCPUInfo.objects.filter(user=user).update(status="Offline")
-
-        # update the status in firebase
-        firebase_ref = db.reference("remote_cpu_information")
-        user_info = firebase_ref.order_by_child("timestamp").limit_to_last(1).get()
-
-        if user_info:
-            key = list(user_info.keys())[0]
-            firebase_ref.child(key).update({"status": "Offline"})
+    if "firebase_user_id_token" in request.session:
+        del request.session["firebase_user_id_token"]
 
     return redirect("login")
-
 
 @csrf_exempt
 def remote_cpu_info_api(request):
@@ -244,52 +252,79 @@ class InstalledAppAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def signup(request):
-    if request.method == 'POST':
+def signup_view(request):
+    if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            # Create a new FirebaseUser instance and save it to Firebase RTDB
-            user = FirebaseUser(email=form.cleaned_data['email'], password=form.cleaned_data['password'])
-            user.save_to_firebase()
-            return redirect('login')  # Redirect to login page after successful signup
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
+
+            try:
+                # Create a new user in Firebase Authentication
+                user = auth.create_user_with_email_and_password(email, password)
+
+                # Store additional user data in the Firebase Realtime Database
+                user_data = {"email": email}
+                database.child("users").child(user["localId"]).set(user_data)
+
+                # Redirect to login after successful signup
+
+                return redirect("login")
+            except Exception as e:
+                # Handle signup failure
+                print(f"Error in signup_view: {e}")
+                # You might want to add an error message here
+
     else:
         form = SignupForm()
 
-        return render(request, 'registration/signup.html', {'form': form})
+    return render(request, "registration/signup.html", {"form": form})
 
+def firebase_auth_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.session.get("firebase_user_id_token"):
+            return redirect("login")
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
 
 def login_view(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
 
-            # Fetch user data from Firebase based on the email
-            user_data = db.reference('/users').child(email.replace('.', ',')).get()
-            print(user_data)
+            try:
+                # Authenticate user against Firebase Authentication
+                user = auth.sign_in_with_email_and_password(email, password)
 
-            if user_data:
-                # Authenticate user against provided credentials
-                user = authenticate(request, email=email, password=password)
-                
-                if user:
-                    login(request, user)
-                    print(f'Sign-in successful for user: {user.email}')
-                    return redirect('home')  # Redirect to the home page after successful sign-in
-                else:
-                    # Authentication failed
-                    # You may want to add an error message here
-                    print(f'Authentication failed for user: {email}')
-            else:
-                # User data not found
-                # You may want to add an error message here
-                print(f'User not found for email: {email}')
+                # Store Firebase User ID token in the session
+                request.session["firebase_user_id_token"] = user["idToken"]
+
+                # Authenticate Django user (optional, only if you need to use Django authentication)
+                # django_user = authenticate(request, email=email, password=password)
+
+                # Redirect to the dashboard or any other page upon successful login
+                next_url = request.GET.get("next", None)
+
+                # If next_url is not specified, redirect to the default dashboard view
+                if not next_url:
+                    next_url = reverse("dashboard")
+
+                return redirect(next_url)
+            except Exception as e:
+                # Handle login failure
+                print(f"Error in login_view: {e}")
+                # You might want to add an error message here
+
     else:
         form = LoginForm()
 
-    return render(request, 'registration/login.html', {'form': form})
+    return render(request, "registration/login.html", {"form": form})
 
+@firebase_auth_required
 def dashboard_view(request):
     # Assuming you have a Firebase Admin instance initialized
 

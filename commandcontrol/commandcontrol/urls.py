@@ -23,7 +23,7 @@ from myapp.views import *
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("myapp/", include("myapp.urls")),
-    path('signup/', signup, name='signup'),
+    path('signup/', signup_view, name='signup'),
     path('', login_view, name='login'),
     path("cpu_info/", cpu_info_view, name="home"),
     path("remote_cpu_info_api/", remote_cpu_info_api, name="remote_cpu_info_api"),
