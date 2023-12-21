@@ -24,6 +24,8 @@ from .forms import SignupForm, LoginForm
 from django.views.decorators.http import require_POST
 import pyrebase
 from .firebase_init import initialize_firebase
+from django.urls import reverse
+from functools import wraps
 
 try:
     firebase_admin = initialize_firebase()
@@ -145,22 +147,9 @@ def profile_view(request):
     return render(request, "profile.html", context)
 
 
-@login_required
 def logout_view(request):
-    user = request.user
-
-    logout(request)
-
-    if user.is_authenticated:
-        RemoteCPUInfo.objects.filter(user=user).update(status="Offline")
-
-        # update the status in firebase
-        firebase_ref = db.reference("remote_cpu_information")
-        user_info = firebase_ref.order_by_child("timestamp").limit_to_last(1).get()
-
-        if user_info:
-            key = list(user_info.keys())[0]
-            firebase_ref.child(key).update({"status": "Offline"})
+    if "firebase_user_id_token" in request.session:
+        del request.session["firebase_user_id_token"]
 
     return redirect("login")
 
@@ -283,6 +272,7 @@ def signup_view(request):
                 database.child("users").child(user["localId"]).set(user_data)
 
                 # Redirect to login after successful signup
+
                 return redirect("login")
             except Exception as e:
                 # Handle signup failure
@@ -293,6 +283,16 @@ def signup_view(request):
         form = SignupForm()
 
     return render(request, "registration/signup.html", {"form": form})
+
+
+def firebase_auth_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.session.get("firebase_user_id_token"):
+            return redirect("login")
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
 
 
 def login_view(request):
@@ -306,11 +306,20 @@ def login_view(request):
                 # Authenticate user against Firebase Authentication
                 user = auth.sign_in_with_email_and_password(email, password)
 
+                # Store Firebase User ID token in the session
+                request.session["firebase_user_id_token"] = user["idToken"]
+
                 # Authenticate Django user (optional, only if you need to use Django authentication)
                 # django_user = authenticate(request, email=email, password=password)
 
-                # You can redirect to the dashboard or any other page upon successful login
-                return redirect("dashboard")
+                # Redirect to the dashboard or any other page upon successful login
+                next_url = request.GET.get("next", None)
+
+                # If next_url is not specified, redirect to the default dashboard view
+                if not next_url:
+                    next_url = reverse("dashboard")
+
+                return redirect(next_url)
             except Exception as e:
                 # Handle login failure
                 print(f"Error in login_view: {e}")
@@ -322,7 +331,7 @@ def login_view(request):
     return render(request, "registration/login.html", {"form": form})
 
 
-@login_required(login_url="/login/")  # Redirect to login if not authenticated
+@firebase_auth_required
 def dashboard_view(request):
     try:
         # Reference to the 'tokens' collection
