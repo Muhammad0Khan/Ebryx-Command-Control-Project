@@ -9,7 +9,7 @@ from installed_software import *
 # Replace the URL with the actual URL of your Django API
 token_response_file = 'token_response.json'
 
-base_url='http://127.0.0.1:8000/'
+base_url='http://127.0.0.1:8000'
 api_url = base_url+'/api/generate_token'
 check_token_api_url = base_url+'/api/check-token/'
 send_installed_apps_api = base_url+'/myapp/api/installed_apps/'

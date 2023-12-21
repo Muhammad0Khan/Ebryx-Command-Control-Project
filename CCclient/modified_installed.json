@@ -1,4 +1,19 @@
 {
   "token": "gVIrFKccgkE7bjaS0KQH5x0DpQ62umJMBwhl84z3",
-  "data": []
+  "data": [
+    {
+      "_name": "Firefox",
+      "arch_kind": "arch_arm_i64",
+      "info": "Firefox 121.0",
+      "lastModified": "2023-12-20T17:30:18Z",
+      "obtained_from": "identified_developer",
+      "path": "/Applications/Firefox.app",
+      "signed_by": [
+        "Developer ID Application: Mozilla Corporation (43AQ936H96)",
+        "Developer ID Certification Authority",
+        "Apple Root CA"
+      ],
+      "version": "121.0"
+    }
+  ]
 }

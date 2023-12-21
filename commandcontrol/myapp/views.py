@@ -4,14 +4,12 @@ from django.utils import timezone
 from django.http import JsonResponse
 from myapp.models import *
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.contrib.auth import logout, authenticate, login
 from datetime import datetime
 import subprocess,json,time, psutil
 from firebase_admin import db
-from .firebase_init import initialize_firebase
-from .utils import *
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.utils.crypto import get_random_string
@@ -419,7 +417,7 @@ def store_cpu_data(request):
         existing_data = cpu_data_ref.child('data').get() or []
 
         # Append the new data section to the array
-        existing_data.append(data['data'])
+        existing_data.append(data)
 
         # Update the RTDB with the new data array
         cpu_data_ref.update({'data': existing_data})
@@ -449,7 +447,6 @@ def store_cpu_data(request):
 
 def cpu_info_page(request, token):
     try:
-        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
         cpu_data_ref = db.reference(f'cpu_data/{token}')
 
         # Fetch the CPU data for the specified token
@@ -460,14 +457,18 @@ def cpu_info_page(request, token):
             last_data_section = cpu_data.get('data', [])[-1]
 
             context = {
-                'timestamp': last_data_section.get('Timestamp', ''),
-                'cpu_count': last_data_section.get('CPU Count', ''),
-                'cpu_percent': last_data_section.get('CPU Usage (%)', ''),
-                'cpu_freq_value': last_data_section.get('CPU Frequency (MHz)', ''),
-                'threads': last_data_section.get('Threads', ''),
-                'per_cpu_percent': last_data_section.get('Per CPU Usage (%)', ''),
+                'system_name': last_data_section.get('system_name', ''),
+                'hostname': last_data_section.get('hostname', ''),
+                'threads': last_data_section.get('threads', ''),
+                'cpu_count': last_data_section.get('cpu_count', ''),
+                'cpu_usage': last_data_section.get('data', {}).get('cpu_usage', ''),
+                'cpu_frequency': last_data_section.get('data', {}).get('cpu_frequency', ''),
+                'per_cpu_percent': last_data_section.get('data', {}).get('per_cpu_percent', ''),
+                'timestamp': last_data_section.get('data', {}).get('timestamp', ''),
+                
             }
 
+            print (context)
             return render(request, 'cpu_info.html', context)
         else:
             return render(request, 'cpu_info.html', {'error_message': f'No data found for token: {token}'})
