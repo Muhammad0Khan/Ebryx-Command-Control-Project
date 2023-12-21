@@ -3,6 +3,8 @@ import time
 import json
 import os
 import requests
+import platform
+import socket
 
 
 def send_cpu_data(api="http://127.0.0.1:8000/myapp/api/cpu_data/"):
@@ -34,6 +36,9 @@ def get_cpu_data(token):
         cpu_info = psutil.cpu_stats()
         cpu_count = psutil.cpu_count()
         cpu_percent = psutil.cpu_percent(interval=None)
+        system_name = platform.system()
+        hostname = socket.gethostname()
+
 
         try:
             cpu_freq = psutil.cpu_freq()
@@ -52,13 +57,15 @@ def get_cpu_data(token):
         # Save CPU Information to a JSON file
         cpu_data = {
             "token": token,
-            "CPU Count": cpu_count,
-            "Threads": threads,
+            "cpu_count": cpu_count,
+            "threads": threads,
+            "system_name": system_name,
+            "hostname": hostname,
             "data": {
-                "Timestamp": timestamp,
-                "CPU Usage (%)": cpu_percent,
-                "CPU Frequency (MHz)": cpu_freq_value,
-                "Per CPU Usage (%)": per_cpu_percent,
+                "timestamp": timestamp,
+                "cpu_usage": cpu_percent,
+                "cpu_frequency": cpu_freq_value,
+                "per_cpu_percent": per_cpu_percent,
             }
         }
         with open('cpu_data.json', 'w') as json_file:

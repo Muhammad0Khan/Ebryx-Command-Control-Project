@@ -8,62 +8,42 @@
 <p>{{ error_message }}</p>
 {% else %}
 <p>Timestamp: {{ timestamp }}</p>
+<p>System Name: {{ system_name }}</p>
+<p>Hostname: {{ hostname }}</p>
+
 <canvas id="cpuUsageChart" width="400" height="200"></canvas>
 <canvas id="perCpuUsageChart" width="400" height="200"></canvas>
 
+<canvas id="perCpuChart" width="400" height="200"></canvas>
+
 <script>
-	// Get the CPU data from the server-side context
-	var cpuPercent = {{ cpu_percent }};
-	var perCpuPercent = {{ per_cpu_percent }};
+	// Extract per_cpu_percent array from the context
+	var perCpuPercent = {{ per_cpu_percent|safe }};
 
-	// Chart.js configuration for CPU Usage
-	var cpuUsageConfig = {
-	    type: 'bar',
-	    data: {
-	        labels: ['CPU 1', 'CPU 2', 'CPU 3', 'CPU 4'],  // Adjust labels based on your CPU count
-	        datasets: [{
-	            label: 'CPU Usage (%)',
-	            data: cpuPercent,
-	            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-	            borderColor: 'rgba(75, 192, 192, 1)',
-	            borderWidth: 1
-	        }]
-	    },
-	    options: {
-	        scales: {
-	            y: {
-	                beginAtZero: true,
-	                max: 100
-	            }
-	        }
+	// Get the canvas element
+	var ctx = document.getElementById('perCpuChart').getContext('2d');
+
+	// Create a line chart
+	var myChart = new Chart(ctx, {
+	  type: 'bar',
+	  data: {
+	    labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
+	    datasets: [{
+	      label: 'Per CPU Usage (%)',
+	      data: perCpuPercent,
+	      borderColor: 'rgba(75, 192, 192, 1)',
+	      borderWidth: 1,
+	      fill: false,
+	    }]
+	  },
+	  options: {
+	    scales: {
+	      y: {
+	        beginAtZero: true,
+	        max: 100,
+	      }
 	    }
-	};
-
-	// Chart.js configuration for Per CPU Usage
-	var perCpuUsageConfig = {
-	    type: 'bar',
-	    data: {
-	        labels: ['Thread 1', 'Thread 2', 'Thread 3', 'Thread 4'],  // Adjust labels based on your threads
-	        datasets: [{
-	            label: 'Per CPU Usage (%)',
-	            data: perCpuPercent,
-	            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-	            borderColor: 'rgba(255, 99, 132, 1)',
-	            borderWidth: 1
-	        }]
-	    },
-	    options: {
-	        scales: {
-	            y: {
-	                beginAtZero: true,
-	                max: 100
-	            }
-	        }
-	    }
-	};
-
-	// Create charts
-	var cpuUsageChart = new Chart(document.getElementById('cpuUsageChart').getContext('2d'), cpuUsageConfig);
-	var perCpuUsageChart = new Chart(document.getElementById('perCpuUsageChart').getContext('2d'), perCpuUsageConfig);
+	  }
+	});
 </script>
 {% endif %} {% endblock %}
