@@ -25,15 +25,16 @@ urlpatterns = [
     path("myapp/", include("myapp.urls")),
     path('signup/', signup_view, name='signup'),
     path('', login_view, name='login'),
+    path('login/', login_view, name='login'),
     path("logout/", logout_view, name="logout"),
     path('running_processes/', running_processes, name='running_processes'),
     path('api/generate_token/', generate_token, name='generate_token'),
     path('api/check-token/<str:token>/', check_token, name='check_token'),
-     path('dashboard/', dashboard_view, name='dashboard'),
-      path('token-details/<str:token>/', token_details_view, name='token_details'),
-          path('api/delete_token/<str:token>/', delete_token, name='delete_token'),
-          path('api/cpu_data/', store_cpu_data, name='cpu_data'),
-           path('api/cpu_info/<str:token>/', cpu_info_page, name='cpu_info'),
+    path('dashboard/', dashboard_view, name='dashboard'),
+    path('token-details/<str:token>/', token_details_view, name='token_details'),
+    path('api/delete_token/<str:token>/', delete_token, name='delete_token'),
+    path('api/cpu_data/', store_cpu_data, name='cpu_data'),
+    path('api/cpu_info/<str:token>/', cpu_info_page, name='cpu_info'),
 
 
     
