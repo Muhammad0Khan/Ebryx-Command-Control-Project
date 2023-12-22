@@ -2,6 +2,19 @@
   "token": "gVIrFKccgkE7bjaS0KQH5x0DpQ62umJMBwhl84z3",
   "data": [
     {
+      "_name": "XProtect",
+      "arch_kind": "arch_arm_i64",
+      "lastModified": "2023-12-21T17:36:01Z",
+      "obtained_from": "apple",
+      "path": "/Library/Apple/System/Library/CoreServices/XProtect.app",
+      "signed_by": [
+        "Software Signing",
+        "Apple Code Signing Certification Authority",
+        "Apple Root CA"
+      ],
+      "version": "122"
+    },
+    {
       "_name": "Firefox",
       "arch_kind": "arch_arm_i64",
       "info": "Firefox 121.0",
