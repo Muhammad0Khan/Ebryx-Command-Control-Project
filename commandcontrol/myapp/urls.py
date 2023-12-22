@@ -1,12 +1,10 @@
 from django.urls import path, include
-from .views import cpu_info_view, logout_view
 from .import views
 from django.contrib import admin
 from .views import *
 
 
 urlpatterns = [
-    path("cpu_info/", cpu_info_view, name="cpu_info"),
     path('', login_view, name='login'),
     path('signup/', signup_view, name='signup'),
     path("logout/", logout_view, name="logout"),

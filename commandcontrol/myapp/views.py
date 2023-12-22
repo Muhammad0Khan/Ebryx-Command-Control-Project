@@ -45,29 +45,6 @@ auth = firebase.auth()
 database = firebase.database()
 
 
-
-
-@csrf_exempt
-def cpu_info_view(request):
-    # Fetch the latest CPU information from the database
-    latest_cpu_info = CPUInfo.objects.latest("timestamp")
-
-    # Prepare data to pass to the template
-    context = {
-        "timestamp": timezone.localtime(latest_cpu_info.timestamp),
-        "cpu_count": latest_cpu_info.cpu_count,
-        "cpu_percent": latest_cpu_info.cpu_percent,
-        "cpu_freq_value": latest_cpu_info.cpu_freq_value,
-        "threads": latest_cpu_info.threads,
-        "per_cpu_percent": latest_cpu_info.per_cpu_percent,
-    }
-
-    # Render the template with the data
-    return render(request, "cpu_info.html", context)
-
-
-
-
 # @login_required
 def logout_view(request):
     if "firebase_user_id_token" in request.session:
