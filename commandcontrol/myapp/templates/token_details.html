@@ -27,9 +27,20 @@ th {
 	}
 </style>
 
+<div class="container mt-4">
+	<div class="">
+		<h1>Apps Installed in the last 12 hours</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+				<li class="breadcrumb-item"><a href="">Installed Apps</a></li>
+			</ol>
+		</nav>
+</div>
+
 <div class="card mt-4">
 	<div class="card-body">
-		<h1>Apps Installed in the last 12 hours</h1>
+		
 		<p class="card-title">Token: {{ token }}</p>
 		<table>
 			<thead>
@@ -50,5 +61,6 @@ th {
 			</tbody>
 		</table>
 	</div>
+</div>
 </div>
 {% endblock %}

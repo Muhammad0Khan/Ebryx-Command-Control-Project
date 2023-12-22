@@ -28,11 +28,22 @@
 	}
 </style>
 
+
+
 <div class="container mt-4">
+    <div class="">
+        <h1>System Dashboard</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          </ol>
+        </nav>
+    </div>
+
     <div class="card">
             <div class="card-body">
-	<h2>System Dashboard</h2>
-	<table>
+	
+	<table class="mt-4">
 		<thead>
 			<tr>
 				<th>Token</th>
