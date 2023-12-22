@@ -1,49 +1,81 @@
 {% extends 'base.html' %} {% block content %}
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<h1>CPU Information</h1>
 
 {% if error_message %}
 <p>{{ error_message }}</p>
 {% else %}
-<p>Timestamp: {{ timestamp }}</p>
-<p>System Name: {{ system_name }}</p>
-<p>Hostname: {{ hostname }}</p>
 
-<canvas id="cpuUsageChart" width="400" height="200"></canvas>
-<canvas id="perCpuUsageChart" width="400" height="200"></canvas>
+<div class="col-lg-8">
+	<div class="card">
+		<div class="card-body">
+			<h1>CPU Information</h1>
+			<h5>Timestamp: {{ timestamp }}</h5>
+			<h5>System Name: {{ system_name }}</h5>
+			<h5>Hostname: {{ hostname }}</h5>
+			<h5>User Name: Omer Khan</h5>
+		</div>
+	</div>
+</div>
 
-<canvas id="perCpuChart" width="400" height="200"></canvas>
+<div class="col-lg-8">
+	<div class="card">
+		<div class="card-body">
+			<h5 class="card-title">Average Over 12 Hours</h5>
+			<div id="barChart">
+				<canvas id="perCpuChart" width="400" height="200"></canvas>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
-	// Extract per_cpu_percent array from the context
-	var perCpuPercent = {{ per_cpu_percent|safe }};
+	   // Extract per_cpu_percent array from the context
+	   var perCpuPercent = {{ per_cpu_percent|safe }};
 
-	// Get the canvas element
-	var ctx = document.getElementById('perCpuChart').getContext('2d');
+	   // Get the canvas element
+	   var ctx = document.getElementById('perCpuChart').getContext('2d');
 
-	// Create a line chart
-	var myChart = new Chart(ctx, {
-	  type: 'bar',
-	  data: {
-	    labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
-	    datasets: [{
-	      label: 'Per CPU Usage (%)',
-	      data: perCpuPercent,
-	      borderColor: 'rgba(75, 192, 192, 1)',
-	      borderWidth: 1,
-	      fill: false,
-	    }]
-	  },
-	  options: {
-	    scales: {
-	      y: {
-	        beginAtZero: true,
-	        max: 100,
-	      }
-	    }
-	  }
-	});
+	   // Create a bar chart with lighter colors
+	   var myChart = new Chart(ctx, {
+	       type: 'bar',
+	       data: {
+	           labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
+	           datasets: [{
+	               label: 'Per CPU Usage (%)',
+	               data: perCpuPercent,
+	               backgroundColor: 'rgba(173, 216, 230, 0.7)', // Lighter turquoise
+	               borderColor: 'rgba(255, 255, 255, 0.8)',
+	               borderWidth: 1,
+	           }]
+	       },
+	       options: {
+			scales: {
+					y: {
+							beginAtZero: true,
+							max: 100,
+							ticks: {
+									color: 'rgba(173, 216, 230, 0.7)' // Lighter text color
+							},
+							gridLines:{
+								color: "rgba(173, 216, 230, 0.7)",
+								lineWidth:2,
+								zeroLineColor :"rgba(173, 216, 230, 0.7)",
+								zeroLineWidth : 2
+							},
+					},
+					x: {
+							ticks: {
+									color: 'rgba(255, 255, 255, 0.8)' // Lighter text color
+							},
+							gridLines:{
+								color: "rgba(173, 216, 230, 0.7)",
+								lineWidth:2,
+								zeroLineColor :"rgba(173, 216, 230, 0.7)",
+								zeroLineWidth : 2
+							},
+					}
+			},
+	}
+	   });
 </script>
 {% endif %} {% endblock %}

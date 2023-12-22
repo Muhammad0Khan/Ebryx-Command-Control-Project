@@ -224,6 +224,8 @@ def dashboard_view(request):
 
     # Retrieve status data
     status_data = status_ref.order_by_child('token').get()
+    # print(status_data)
+
 
     # Create a list of tokens with details, including matching status
     tokens = []
@@ -236,8 +238,10 @@ def dashboard_view(request):
         token_details = {
             'token': token['token'],
             'details_url': f'/token-details/{token["token"]}/',
+            'cpu_info': f'/api/cpu_info/{token["token"]}/',
             'status': status.get('status', 'N/A'),  # Use 'N/A' if no status found
         }
+        print(token_details)
 
         tokens.append(token_details)
 

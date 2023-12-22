@@ -5,14 +5,14 @@
   "system_name": "Darwin",
   "hostname": "boneless-pizza.local",
   "data": {
-    "timestamp": "2023-12-21 22:06:32",
-    "cpu_usage": 39.9,
+    "timestamp": "2023-12-22 16:04:43",
+    "cpu_usage": 48.3,
     "cpu_frequency": 2700,
     "per_cpu_percent": [
-      65.0,
-      16.6,
-      61.9,
-      15.9
+      71.8,
+      23.9,
+      74.9,
+      22.5
     ]
   }
 }
