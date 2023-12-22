@@ -5,10 +5,21 @@
 <p>{{ error_message }}</p>
 {% else %}
 
-<div class="col-lg-8">
+<div class="container mt-4">
+
+	<div class="">
+		<h1>Cpu Stats</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+				<li class="breadcrumb-item"><a href=""> Cpu Stats</a></li>
+			</ol>
+		</nav>
+</div>
+
+<div class="">
 	<div class="card">
-		<div class="card-body">
-			<h1>CPU Information</h1>
+		<div class="card-body mt-4">
 			<h5>Timestamp: {{ timestamp }}</h5>
 			<h5>System Name: {{ system_name }}</h5>
 			<h5>Hostname: {{ hostname }}</h5>
@@ -78,4 +89,5 @@
 	}
 	   });
 </script>
+</div>
 {% endif %} {% endblock %}
