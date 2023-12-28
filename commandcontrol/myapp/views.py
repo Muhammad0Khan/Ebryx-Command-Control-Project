@@ -52,15 +52,6 @@ def logout_view(request):
 
     return redirect("login")
 
-def installed_apps(request):
-    installed_apps_last_12_hours = get_installed_apps_last_12_hours()
-    return render(request, 'installed_apps.html', {'installed_apps': installed_apps_last_12_hours})
-
-
-def running_processes(request):
-    running_processes_data = get_running_processes()
-    return render(request, 'running_processes.html', {'running_processes': running_processes_data})
-
 
 # added apis here 
 @api_view(['GET'])
@@ -376,3 +367,54 @@ def cpu_info_page(request, token):
             return render(request, 'cpu_info.html', {'error_message': f'No data found for token: {token}'})
     except Exception as e:
         return render(request, 'cpu_info.html', {'error_message': f'An error occurred: {str(e)}'})
+    
+
+# /api/network_data
+
+@csrf_exempt
+@require_POST
+def store_network_data(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get('token')
+
+        if not token:
+            response_data = {
+                'status': 'error',
+                'message': 'Token is required in the JSON data.',
+            }
+            return JsonResponse(response_data, status=400)
+
+        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
+        cpu_data_ref = db.reference(f'network_data/{token}')
+
+        # Fetch the existing data array or initialize an empty array
+        existing_data = cpu_data_ref.child('data').get() or []
+
+        # Append the new data section to the array
+        existing_data.append(data)
+
+        # Update the RTDB with the new data array
+        cpu_data_ref.update({'data': existing_data})
+
+        response_data = {
+            'status': 'success',
+            'message': 'network data stored successfully',
+            'data_id': len(existing_data) - 1,  # Index of the last appended data section
+        }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        response_data = {
+            'status': 'error',
+            'message': 'Invalid JSON data',
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        response_data = {
+            'status': 'error',
+            'message': f'An error occurred: {str(e)}',
+        }
+        return JsonResponse(response_data, status=500)
