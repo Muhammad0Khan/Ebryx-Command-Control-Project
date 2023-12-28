@@ -39,10 +39,15 @@ def save_network_stats(token):
             # new - old stats gets us the speed
             upload_speed, download_speed = io_2[iface].bytes_sent - iface_io.bytes_sent, io_2[iface].bytes_recv - iface_io.bytes_recv
             data["data"].append({
-                "iface": iface, "Download": get_size(io_2[iface].bytes_recv),
-                "Upload": get_size(io_2[iface].bytes_sent),
-                "Upload Speed": f"{get_size(upload_speed / 1)}/s",
-                "Download Speed": f"{get_size(download_speed / 1)}/s",
+                {"iface": iface,
+                 data:{
+                     "download": get_size(io_2[iface].bytes_recv),
+                "total_upload": get_size(io_2[iface].bytes_sent),
+                "upload_speed": f"{get_size(upload_speed / 1)}",
+                "download_speed": f"{get_size(download_speed / 1)}",
+                     
+                 }}
+                
             })
         # update the I/O stats for the next iteration
     io = io_2
