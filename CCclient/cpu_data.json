@@ -1,18 +1,22 @@
 {
-  "token": "gVIrFKccgkE7bjaS0KQH5x0DpQ62umJMBwhl84z3",
-  "cpu_count": 2,
-  "threads": 2,
+  "token": "K5SWoU2Hwc910yjwL8Wi4OBZh9xbE0eXXhmpMrok",
+  "cpu_count": 8,
+  "threads": 8,
   "system_name": "Darwin",
-  "hostname": "boneless-pizza.local",
+  "hostname": "Alis-MacBook-Air.local",
   "data": {
-    "timestamp": "2023-12-22 16:04:43",
-    "cpu_usage": 48.3,
-    "cpu_frequency": 2700,
+    "timestamp": "2023-12-28 21:35:17",
+    "cpu_usage": 13.4,
+    "cpu_frequency": -1,
     "per_cpu_percent": [
-      71.8,
-      23.9,
-      74.9,
-      22.5
+      27.1,
+      25.3,
+      21.3,
+      19.4,
+      5.6,
+      3.8,
+      2.8,
+      2.4
     ]
   }
 }
