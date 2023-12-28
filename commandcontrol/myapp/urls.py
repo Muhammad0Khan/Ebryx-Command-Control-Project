@@ -15,4 +15,5 @@ urlpatterns = [
     path('token-details/<str:token>/', token_details_view, name='token_details'),
     path('api/delete_token/<str:token>/', delete_token, name='delete_token'),
     path('api/cpu_info/<str:token>/', cpu_info_page, name='cpu_info'),
+    path('api/network_data/', store_network_data, name='network_data'),
 ]
