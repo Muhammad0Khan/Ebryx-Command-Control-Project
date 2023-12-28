@@ -1,0 +1,5 @@
+# .gitignore
+
+# Ignore Python __pycache__ directories
+__pycache__/
+commandcontrol/firebase/*
