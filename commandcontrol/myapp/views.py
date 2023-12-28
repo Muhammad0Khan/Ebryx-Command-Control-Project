@@ -274,20 +274,29 @@ def delete_token(request, token):
     try:
         # Reference to the 'status' collection
         status_ref = db.reference('status')
-
-        # Find the status entry for the given token
         status_data = status_ref.order_by_child('token').equal_to(token).get()
 
-        # Delete the token entry if a matching status is found
+        user_token_ref = db.reference('tokens')
+        user_token_data= user_token_ref.order_by_child('token').equal_to(token).get()
+
+        cpu_ref = db.reference('cpu_data')
+        cpu_data= cpu_ref.child(token).get()
+
+
+        # Delete all matching token entries
         if status_data:
-            status_key = list(status_data.keys())[0]
-            status_ref.child(status_key).delete()
-            return Response({'success': True, 'message': f'Token {token} deleted successfully'})
-        else:
-            return Response({'success': False, 'message': f'No matching status found for token: {token}'})
+            for status_key in status_data.keys():
+                status_ref.child(status_key).delete()
+
+        if cpu_data:
+            cpu_ref.child(token).delete()
+
+        if user_token_data:
+           for token_key in user_token_data.keys():
+                user_token_ref.child(token_key).delete()
+            
     except Exception as e:
         return Response({'success': False, 'error': str(e)})
-    
 
 @csrf_exempt
 @require_POST
