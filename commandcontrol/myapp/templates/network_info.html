@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="">
+        <h1>Network Information</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="#">Network Information</a></li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h2>Token: {{ token }}</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>Download</th>
+                        <th>Total Upload</th>
+                        <th>Upload Speed</th>
+                        <th>Download Speed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in last_data_section.data %}
+                        <tr>
+                            <td>{{ entry.iface }}</td>
+                            <td>{{ entry.data.download }}</td>
+                            <td>{{ entry.data.total_upload }}</td>
+                            <td>{{ entry.data.upload_speed }}</td>
+                            <td>{{ entry.data.download_speed }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- <h3>All Network Data:</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>Download</th>
+                        <th>Total Upload</th>
+                        <th>Upload Speed</th>
+                        <th>Download Speed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in network_info %}
+                        <tr>
+                            <td>{{ entry.iface }}</td>
+                            <td>{{ entry.data.download }}</td>
+                            <td>{{ entry.data.total_upload }}</td>
+                            <td>{{ entry.data.upload_speed }}</td>
+                            <td>{{ entry.data.download_speed }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table> -->
+        </div>
+    </div>
+</div>
+{% endblock %}
