@@ -295,6 +295,9 @@ def delete_token(request, token):
         cpu_ref = db.reference("cpu_data")
         cpu_data = cpu_ref.child(token).get()
 
+        network_ref = db.reference("network_data")
+        network_data = network_ref.child(token).get()
+
         # Delete all matching token entries
         if status_data:
             for status_key in status_data.keys():
@@ -303,9 +306,14 @@ def delete_token(request, token):
         if cpu_data:
             cpu_ref.child(token).delete()
 
+        if network_data:
+            network_ref.child(token).delete()
+
         if user_token_data:
             for token_key in user_token_data.keys():
                 user_token_ref.child(token_key).delete()
+
+        return Response({"success": True, "message": "Token deleted successfully"})
 
     except Exception as e:
         return Response({"success": False, "error": str(e)})
@@ -375,6 +383,7 @@ def cpu_info_page(request, token):
             context = {
                 "system_name": last_data_section.get("system_name", ""),
                 "hostname": last_data_section.get("hostname", ""),
+                "username": last_data_section.get("username", ""),
                 "threads": last_data_section.get("threads", ""),
                 "cpu_count": last_data_section.get("cpu_count", ""),
                 "cpu_usage": last_data_section.get("data", {}).get("cpu_usage", ""),
