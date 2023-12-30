@@ -2,10 +2,11 @@ import requests
 import json
 import os
 import time
-from process import *
-from cpu import *
-from installed_software import *
-from network import*
+
+from methods.process import *
+from methods.cpu import *
+from methods.installed_software import *
+from methods.network import*
 
 # Replace the URL with the actual URL of your Django API
 token_response_file = 'token_response.json'

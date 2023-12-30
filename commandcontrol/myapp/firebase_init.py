@@ -5,9 +5,12 @@ import os
 
 
 def initialize_firebase():
-    os.environ[
-        "GOOGLE_APPLICATION_CREDENTIALS"
-    ] = "/Users/stormboi/Downloads/project/Ebryx-Command-Control-Project/commandcontrol/firebase/command-and-control-9c601-firebase-adminsdk-zqbso-ec1942a09a.json"
+
+    # will now use system relative path to see this file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    firebase_dir = os.path.abspath(os.path.join(script_dir, "..", "firebase"))
+    json_file_path = os.path.join(firebase_dir, "command-and-control-9c601-firebase-adminsdk-zqbso-ec1942a09a.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_file_path
 
     firebase_config = {
         "apiKey": "AIzaSyCBID8mb8ppM61RFU9pgah5J20VzwOiHbo",
