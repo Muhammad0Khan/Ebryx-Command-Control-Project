@@ -16,7 +16,8 @@
 
     <div class="card">
         <div class="card-body">
-            <h2>Token: {{ token }}</h2>
+            <h2>Username: {{ username }}</h2>
+            <h3>WIFI (en0)</h3>
             <canvas id="networkChart" width="400" height="200"></canvas>
 
             <table class="table mt-4">
@@ -30,7 +31,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for entry in last_data_section.data %}
+                    {% for entry in last_data_section %}
                         <tr>
                             <td>{{ entry.iface }}</td>
                             <td>{{ entry.data.download }}</td>
@@ -46,34 +47,57 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var interfaces = [];
-        var downloadData = [];
-        var uploadData = [];
+    // Function to convert data to MB
+    function convertToMB(value) {
+        // Parse the value and extract the numeric part
+        var numericValue = parseFloat(value);
 
-        {% for entry in last_data_section.data %}
-            {% if entry.iface in 'en0 lo0 awdl0' %}
-                interfaces.push("{{ entry.iface }}");
-                downloadData.push(parseFloat("{{ entry.data.download }}"));
-                uploadData.push(parseFloat("{{ entry.data.total_upload }}"));
+        // Extract the unit part (assuming it's at the end of the string)
+        var unit = value.replace(numericValue, '').trim().toUpperCase();
+
+        // Convert to MB based on the unit
+        if (unit === 'GB') {
+            return numericValue * 1024; // Convert GB to MB
+        }
+
+        return numericValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var dataPoints = [];
+        var uploadData = [];
+        var downloadData = [];
+
+        {% for entry in network_info %}
+            {% if entry.iface == 'en0' %}
+                uploadData.push(convertToMB("{{ entry.data.total_upload }}"));
+                downloadData.push(convertToMB("{{ entry.data.download }}"));
             {% endif %}
         {% endfor %}
+
+        // Generate data points based on the number of entries
+        for (var i = 0; i < uploadData.length; i++) {
+            dataPoints.push(i * 30); // Assuming each data point corresponds to a 30-second interval
+        }
+
+        console.log(dataPoints, downloadData, uploadData);
+
 
         var ctx = document.getElementById('networkChart').getContext('2d');
         var myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: interfaces,
+                labels: dataPoints,
                 datasets: [{
-                    label: 'Download',
-                    data: downloadData,
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    label: 'Upload (MB)',
+                    data: uploadData,
+                    borderColor: 'rgba(255, 0, 0, 1)', // Red
                     borderWidth: 1,
                     fill: false
                 }, {
-                    label: 'Upload',
-                    data: uploadData,
-                    borderColor: 'rgba(255, 99, 132, 1)',
+                    label: 'Download (MB)',
+                    data: downloadData,
+                    borderColor: 'rgba(0, 128, 0, 1)', // Green
                     borderWidth: 1,
                     fill: false
                 }]
@@ -81,8 +105,17 @@
             options: {
                 scales: {
                     x: {
-                        type: 'linear',
-                        position: 'bottom'
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Data (MB)'
+                        }
                     }
                 }
             }

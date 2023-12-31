@@ -465,16 +465,33 @@ def network_info_page(request, token):
     try:
         # Assuming 'network_data' is the reference to the desired location in your Firebase
         network_data_ref = db.reference(f"network_data/{token}")
+        cpu_data_ref = db.reference(f"cpu_data/{token}")
 
-        # Fetch the network data for the specified token
+        # Fetch all network data for the specified token
         network_data = network_data_ref.get()
 
         if network_data:
-            # Get the last data section (assuming it's a list of dictionaries)
-            last_data_section = network_data.get("data", [])[-1]
-
             # Convert network_data to a format suitable for JSON serialization
-            network_info_serialized = [
+            network_info_serialized = []
+
+            for data_section in network_data.get("data", []):
+                for entry in data_section.get("data", []):
+                    network_info_serialized.append(
+                        {
+                            "iface": entry.get("iface", ""),
+                            "data": {
+                                "download": entry["data"].get("download", ""),
+                                "total_upload": entry["data"].get("total_upload", ""),
+                                "upload_speed": entry["data"].get("upload_speed", ""),
+                                "download_speed": entry["data"].get(
+                                    "download_speed", ""
+                                ),
+                            },
+                        }
+                    )
+
+            last_data_section = network_data.get("data", [])[-1]
+            last_data_serialized = [
                 {
                     "iface": entry.get("iface", ""),
                     "data": {
@@ -487,19 +504,23 @@ def network_info_page(request, token):
                 for entry in last_data_section.get("data", [])
             ]
 
+            username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
+
             context = {
-                "token": token,
+                "username": username,
                 "network_info": network_info_serialized,
-                "last_data_section": last_data_section,
+                "all_data_sections": network_data.get("data", []),
+                "last_data_section": last_data_serialized,
             }
 
             if request.headers.get("Content-Type") == "application/json":
                 # Return JSON response for API requests
                 response_data = {
                     "success": True,
-                    "token": token,
+                    "username": username,
                     "network_info": network_info_serialized,
-                    "last_data_section": last_data_section,
+                    "all_data_sections": network_data.get("data", []),
+                    "last_data_section": last_data_serialized,
                 }
                 return JsonResponse(response_data)
             else:
