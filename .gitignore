@@ -12,3 +12,7 @@ CCclient/cpu_data.json
 CCclient/modified_installed.json
 CCclient/network_stats.json
 commandcontrol/db.sqlite3
+CCclient/cpu_data.json
+CCclient/modified_installed.json
+CCclient/network_stats.json
+commandcontrol/db.sqlite3

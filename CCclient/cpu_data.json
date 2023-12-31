@@ -6,18 +6,18 @@
   "hostname": "Alis-MacBook-Air.local",
   "username": "stormboi",
   "data": {
-    "timestamp": "2023-12-31 17:32:40",
-    "cpu_usage": 17.7,
+    "timestamp": "2023-12-31 20:11:06",
+    "cpu_usage": 14.4,
     "cpu_frequency": -1,
     "per_cpu_percent": [
-      35.8,
-      34.2,
-      30.3,
-      27.7,
-      8.0,
-      4.6,
-      1.3,
-      0.8
+      28.2,
+      26.6,
+      23.9,
+      20.7,
+      6.6,
+      4.4,
+      3.0,
+      2.4
     ]
   }
 }

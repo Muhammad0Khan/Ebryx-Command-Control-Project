@@ -228,6 +228,8 @@ def dashboard_view(request):
 def token_details_view(request, token):
     # Fetch data from the installed_apps collection for the specific token
     apps_ref = db.reference("installed_apps").child(token)
+    cpu_data_ref = db.reference("cpu_data").child(token)
+    username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
     token_data = apps_ref.get()
 
     if token_data:
@@ -238,7 +240,7 @@ def token_details_view(request, token):
     return render(
         request,
         "token_details.html",
-        {"token": token, "installed_apps": installed_apps_data},
+        {"username": username, "installed_apps": installed_apps_data},
     )
 
 
