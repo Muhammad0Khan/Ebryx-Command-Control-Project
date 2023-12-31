@@ -7,3 +7,12 @@ commandcontrol/firebase/*
 CCclient/__pycache__/
 CCclient/**/*.json
 CCclient/methods/__pycache__/
+.DS_Store
+CCclient/cpu_data.json
+CCclient/modified_installed.json
+CCclient/network_stats.json
+commandcontrol/db.sqlite3
+CCclient/cpu_data.json
+CCclient/modified_installed.json
+CCclient/network_stats.json
+commandcontrol/db.sqlite3

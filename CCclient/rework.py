@@ -45,7 +45,7 @@ while True:
                 # sending data here 
                 send_cpu_data(send_cpu_data_api)
                 send_network_stats(send_network_data_api)
-                # get_installed_software(send_installed_apps_api)
+                send_installed_software(send_installed_apps_api)
 
                 print("Monitoring logic executed")
             else:

@@ -2,107 +2,93 @@
   "token": "K5SWoU2Hwc910yjwL8Wi4OBZh9xbE0eXXhmpMrok",
   "data": [
     {
-      "_name": "Love_Season",
-      "arch_kind": "arch_arm_i64",
-      "lastModified": "2023-12-27T19:18:01Z",
-      "obtained_from": "unknown",
-      "path": "/Users/stormboi/Downloads/Love_Season.app",
-      "version": "1.7"
-    },
-    {
-      "_name": "Revision Tool",
-      "arch_kind": "arch_arm_i64",
-      "info": "18.0, C:\\Program Files (x86)\\Revision Tool\\revitool.exe",
-      "lastModified": "2023-12-27T19:39:11Z",
-      "obtained_from": "unknown",
-      "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Revision Tool.app",
-      "version": "Windows 11"
-    },
-    {
-      "_name": "Python",
-      "arch_kind": "arch_arm_i64",
-      "info": "3.9.6, (c) 2001-2020 Python Software Foundation.",
-      "lastModified": "2023-12-26T10:04:07Z",
-      "obtained_from": "apple",
-      "path": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app",
-      "signed_by": [
-        "Software Signing",
-        "Apple Code Signing Certification Authority",
-        "Apple Root CA"
-      ],
-      "version": "3.9.6"
-    },
-    {
-      "_name": "Paint",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, Microsoft.Paint_8wekyb3d8bbwe!App",
       "lastModified": "2023-12-27T19:18:52Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Paint.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Paint"
     },
     {
-      "_name": "Windows Security",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, Microsoft.SecHealthUI_8wekyb3d8bbwe!SecHealthUI",
       "lastModified": "2023-12-27T19:18:52Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Windows Security.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Windows Security"
     },
     {
-      "_name": "Notepad",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, Microsoft.WindowsNotepad_8wekyb3d8bbwe!App",
       "lastModified": "2023-12-27T19:59:55Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Notepad.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Notepad"
     },
     {
-      "_name": "Terminal",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, Microsoft.WindowsTerminal_8wekyb3d8bbwe!App",
       "lastModified": "2023-12-27T19:18:52Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Terminal.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Terminal"
     },
     {
-      "_name": "Xbox Game Bar",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, Microsoft.XboxGamingOverlay_8wekyb3d8bbwe!App",
       "lastModified": "2023-12-27T19:18:52Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Xbox Game Bar.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Xbox Game Bar"
     },
     {
-      "_name": "Your Phone",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, Microsoft.YourPhone_8wekyb3d8bbwe!App",
       "lastModified": "2023-12-27T19:18:52Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Your Phone.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Your Phone"
     },
     {
-      "_name": "Get Started",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, MicrosoftWindows.Client.CBS_cw5n1h2txyewy!WebExperienceHost",
       "lastModified": "2023-12-27T19:43:55Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Get Started.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Get Started"
     },
     {
-      "_name": "Windows Backup",
       "arch_kind": "arch_arm_i64",
       "info": "18.0, MicrosoftWindows.Client.CBS_cw5n1h2txyewy!WindowsBackup",
       "lastModified": "2023-12-27T19:43:55Z",
       "obtained_from": "unknown",
       "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Windows Backup.app",
-      "version": "Windows 11"
+      "version": "Windows 11",
+      "name": "Windows Backup"
+    },
+    {
+      "arch_kind": "arch_arm_i64",
+      "lastModified": "2023-12-27T19:18:01Z",
+      "obtained_from": "unknown",
+      "path": "/Users/stormboi/Downloads/Love_Season.app",
+      "version": "1.7",
+      "name": "Love_Season"
+    },
+    {
+      "arch_kind": "arch_arm_i64",
+      "info": "18.0, C:\\Program Files (x86)\\Revision Tool\\revitool.exe",
+      "lastModified": "2023-12-27T19:39:11Z",
+      "obtained_from": "unknown",
+      "path": "/Users/stormboi/Applications (Parallels)/{800ca54c-2141-404b-9233-a4aab1534965} Applications.localized/Revision Tool.app",
+      "version": "Windows 11",
+      "name": "Revision Tool"
     }
   ]
 }

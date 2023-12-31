@@ -4,8 +4,8 @@
     {
       "iface": "lo0",
       "data": {
-        "download": "53.09MB",
-        "total_upload": "53.09MB",
+        "download": "1.26GB",
+        "total_upload": "1.26GB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -95,7 +95,7 @@
       "iface": "ap1",
       "data": {
         "download": "0.00B",
-        "total_upload": "4.70MB",
+        "total_upload": "6.74MB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -103,8 +103,8 @@
     {
       "iface": "en0",
       "data": {
-        "download": "1.92GB",
-        "total_upload": "1.28GB",
+        "download": "3.74GB",
+        "total_upload": "1.73GB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -113,7 +113,7 @@
       "iface": "awdl0",
       "data": {
         "download": "3.57GB",
-        "total_upload": "13.43MB",
+        "total_upload": "14.13MB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -175,8 +175,8 @@
     {
       "iface": "utun5",
       "data": {
-        "download": "11.00KB",
-        "total_upload": "11.00KB",
+        "download": "18.00KB",
+        "total_upload": "25.00KB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -202,8 +202,8 @@
     {
       "iface": "vmenet0",
       "data": {
-        "download": "1.00KB",
-        "total_upload": "41.00KB",
+        "download": "3.00KB",
+        "total_upload": "647.00KB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -211,8 +211,8 @@
     {
       "iface": "bridge100",
       "data": {
-        "download": "2.00KB",
-        "total_upload": "83.00KB",
+        "download": "5.00KB",
+        "total_upload": "1.26MB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -220,8 +220,8 @@
     {
       "iface": "vmenet1",
       "data": {
-        "download": "1.00KB",
-        "total_upload": "39.00KB",
+        "download": "3.00KB",
+        "total_upload": "648.00KB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -229,8 +229,8 @@
     {
       "iface": "bridge101",
       "data": {
-        "download": "2.00KB",
-        "total_upload": "79.00KB",
+        "download": "5.00KB",
+        "total_upload": "1.27MB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }
@@ -238,8 +238,8 @@
     {
       "iface": "utun8",
       "data": {
-        "download": "425.00KB",
-        "total_upload": "188.00KB",
+        "download": "171.00KB",
+        "total_upload": "73.00KB",
         "upload_speed": "0.00B",
         "download_speed": "0.00B"
       }

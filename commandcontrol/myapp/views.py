@@ -228,6 +228,8 @@ def dashboard_view(request):
 def token_details_view(request, token):
     # Fetch data from the installed_apps collection for the specific token
     apps_ref = db.reference("installed_apps").child(token)
+    cpu_data_ref = db.reference("cpu_data").child(token)
+    username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
     token_data = apps_ref.get()
 
     if token_data:
@@ -238,7 +240,7 @@ def token_details_view(request, token):
     return render(
         request,
         "token_details.html",
-        {"token": token, "installed_apps": installed_apps_data},
+        {"username": username, "installed_apps": installed_apps_data},
     )
 
 
@@ -295,6 +297,9 @@ def delete_token(request, token):
         cpu_ref = db.reference("cpu_data")
         cpu_data = cpu_ref.child(token).get()
 
+        network_ref = db.reference("network_data")
+        network_data = network_ref.child(token).get()
+
         # Delete all matching token entries
         if status_data:
             for status_key in status_data.keys():
@@ -303,9 +308,14 @@ def delete_token(request, token):
         if cpu_data:
             cpu_ref.child(token).delete()
 
+        if network_data:
+            network_ref.child(token).delete()
+
         if user_token_data:
             for token_key in user_token_data.keys():
                 user_token_ref.child(token_key).delete()
+
+        return Response({"success": True, "message": "Token deleted successfully"})
 
     except Exception as e:
         return Response({"success": False, "error": str(e)})
@@ -375,6 +385,7 @@ def cpu_info_page(request, token):
             context = {
                 "system_name": last_data_section.get("system_name", ""),
                 "hostname": last_data_section.get("hostname", ""),
+                "username": last_data_section.get("username", ""),
                 "threads": last_data_section.get("threads", ""),
                 "cpu_count": last_data_section.get("cpu_count", ""),
                 "cpu_usage": last_data_section.get("data", {}).get("cpu_usage", ""),
@@ -456,16 +467,33 @@ def network_info_page(request, token):
     try:
         # Assuming 'network_data' is the reference to the desired location in your Firebase
         network_data_ref = db.reference(f"network_data/{token}")
+        cpu_data_ref = db.reference(f"cpu_data/{token}")
 
-        # Fetch the network data for the specified token
+        # Fetch all network data for the specified token
         network_data = network_data_ref.get()
 
         if network_data:
-            # Get the last data section (assuming it's a list of dictionaries)
-            last_data_section = network_data.get("data", [])[-1]
-
             # Convert network_data to a format suitable for JSON serialization
-            network_info_serialized = [
+            network_info_serialized = []
+
+            for data_section in network_data.get("data", []):
+                for entry in data_section.get("data", []):
+                    network_info_serialized.append(
+                        {
+                            "iface": entry.get("iface", ""),
+                            "data": {
+                                "download": entry["data"].get("download", ""),
+                                "total_upload": entry["data"].get("total_upload", ""),
+                                "upload_speed": entry["data"].get("upload_speed", ""),
+                                "download_speed": entry["data"].get(
+                                    "download_speed", ""
+                                ),
+                            },
+                        }
+                    )
+
+            last_data_section = network_data.get("data", [])[-1]
+            last_data_serialized = [
                 {
                     "iface": entry.get("iface", ""),
                     "data": {
@@ -478,19 +506,23 @@ def network_info_page(request, token):
                 for entry in last_data_section.get("data", [])
             ]
 
+            username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
+
             context = {
-                "token": token,
+                "username": username,
                 "network_info": network_info_serialized,
-                "last_data_section": last_data_section,
+                "all_data_sections": network_data.get("data", []),
+                "last_data_section": last_data_serialized,
             }
 
             if request.headers.get("Content-Type") == "application/json":
                 # Return JSON response for API requests
                 response_data = {
                     "success": True,
-                    "token": token,
+                    "username": username,
                     "network_info": network_info_serialized,
-                    "last_data_section": last_data_section,
+                    "all_data_sections": network_data.get("data", []),
+                    "last_data_section": last_data_serialized,
                 }
                 return JsonResponse(response_data)
             else:
