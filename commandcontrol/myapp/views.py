@@ -181,20 +181,15 @@ def login_view(request):
 @firebase_auth_required
 def dashboard_view(request):
     # Assuming you have a Firebase Admin instance initialized
-
     # Reference to the 'tokens' collection
     tokens_ref = db.reference('tokens')
     # Reference to the 'status' collection
-    status_ref = db.reference('status')
-
+    status_ref = db.reference("status")
     # Retrieve token data
-    tokens_data = tokens_ref.order_by_child('token').get()
-
+    tokens_data = tokens_ref.order_by_child("token").get()
     # Retrieve status data
     status_data = status_ref.order_by_child('token').get()
     # print(status_data)
-
-
     # Create a list of tokens with details, including matching status
     tokens = []
     for token_key, token in tokens_data.items():
@@ -214,6 +209,37 @@ def dashboard_view(request):
         tokens.append(token_details)
 
     return render(request, 'dashboard.html', {'tokens': tokens})
+
+@firebase_auth_required
+def cpu_dashboard_view(request):
+    tokens_ref = db.reference("tokens")
+    status_ref = db.reference("status")
+
+    tokens_data = tokens_ref.order_by_child("token").get()
+    status_data = status_ref.order_by_child("token").get()
+
+    tokens = []
+    for token_key, token in tokens_data.items():
+        status_key = next(
+            (
+                key
+                for key, value in status_data.items()
+                if value["token"] == token["token"]
+            ),
+            None,
+        )
+        status = status_data.get(status_key, {}) if status_key else {}
+
+        token_details = {
+            "token": token["token"],
+            "cpu_info": f'/api/cpu_info/{token["token"]}/',
+            "status": status.get("status", "N/A"),
+        }
+        print(token_details)
+        tokens.append(token_details)
+
+    return render(request, "cpu_dashboard.html", {"tokens": tokens})
+
 
 def token_details_view(request, token):
     # Fetch data from the installed_apps collection for the specific token
@@ -418,3 +444,160 @@ def store_network_data(request):
             'message': f'An error occurred: {str(e)}',
         }
         return JsonResponse(response_data, status=500)
+
+
+def network_info_page(request, token):
+    try:
+        # Assuming 'network_data' is the reference to the desired location in your Firebase
+        network_data_ref = db.reference(f"network_data/{token}")
+        cpu_data_ref = db.reference(f"cpu_data/{token}")
+
+        # Fetch all network data for the specified token
+        network_data = network_data_ref.get()
+
+        if network_data:
+            # Convert network_data to a format suitable for JSON serialization
+            network_info_serialized = []
+
+            for data_section in network_data.get("data", []):
+                for entry in data_section.get("data", []):
+                    network_info_serialized.append(
+                        {
+                            "iface": entry.get("iface", ""),
+                            "data": {
+                                "download": entry["data"].get("download", ""),
+                                "total_upload": entry["data"].get("total_upload", ""),
+                                "upload_speed": entry["data"].get("upload_speed", ""),
+                                "download_speed": entry["data"].get(
+                                    "download_speed", ""
+                                ),
+                            },
+                        }
+                    )
+
+            last_data_section = network_data.get("data", [])[-1]
+            last_data_serialized = [
+                {
+                    "iface": entry.get("iface", ""),
+                    "data": {
+                        "download": entry["data"].get("download", ""),
+                        "total_upload": entry["data"].get("total_upload", ""),
+                        "upload_speed": entry["data"].get("upload_speed", ""),
+                        "download_speed": entry["data"].get("download_speed", ""),
+                    },
+                }
+                for entry in last_data_section.get("data", [])
+            ]
+
+            username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
+
+            context = {
+                "username": username,
+                "network_info": network_info_serialized,
+                "all_data_sections": network_data.get("data", []),
+                "last_data_section": last_data_serialized,
+            }
+
+            if request.headers.get("Content-Type") == "application/json":
+                # Return JSON response for API requests
+                response_data = {
+                    "success": True,
+                    "username": username,
+                    "network_info": network_info_serialized,
+                    "all_data_sections": network_data.get("data", []),
+                    "last_data_section": last_data_serialized,
+                }
+                return JsonResponse(response_data)
+            else:
+                # Render HTML template for regular requests
+                return render(request, "network_info.html", context)
+
+        else:
+            response_data = {
+                "success": False,
+                "message": f"No data found for network with token: {token}",
+            }
+            if request.headers.get("Content-Type") == "application/json":
+                return JsonResponse(response_data, status=404)
+            else:
+                return render(
+                    request,
+                    "network_info.html",
+                    {"error_message": f"No data found for network with token: {token}"},
+                )
+
+    except Exception as e:
+        response_data = {
+            "success": False,
+            "message": f"An error occurred: {str(e)}",
+        }
+        if request.headers.get("Content-Type") == "application/json":
+            return JsonResponse(response_data, status=500)
+        else:
+            return render(
+                request,
+                "network_info.html",
+                {"error_message": f"An error occurred: {str(e)}"},
+            )
+
+
+@firebase_auth_required
+def network_dashboard_view(request):
+    tokens_ref = db.reference("tokens")
+    status_ref = db.reference("status")
+
+    tokens_data = tokens_ref.order_by_child("token").get()
+    status_data = status_ref.order_by_child("token").get()
+
+    tokens = []
+    for token_key, token in tokens_data.items():
+        status_key = next(
+            (
+                key
+                for key, value in status_data.items()
+                if value["token"] == token["token"]
+            ),
+            None,
+        )
+        status = status_data.get(status_key, {}) if status_key else {}
+
+        token_details = {
+            "token": token["token"],
+            "network_info": f'/api/network_info/{token["token"]}/',
+            "status": status.get("status", "N/A"),
+        }
+        print(token_details)
+        tokens.append(token_details)
+
+    return render(request, "network_dashboard.html", {"tokens": tokens})
+
+
+@firebase_auth_required
+def installed_apps_dashboard_view(request):
+    tokens_ref = db.reference("tokens")
+    status_ref = db.reference("status")
+
+    tokens_data = tokens_ref.order_by_child("token").get()
+    status_data = status_ref.order_by_child("token").get()
+
+    tokens = []
+    for token_key, token in tokens_data.items():
+        status_key = next(
+            (
+                key
+                for key, value in status_data.items()
+                if value["token"] == token["token"]
+            ),
+            None,
+        )
+        status = status_data.get(status_key, {}) if status_key else {}
+
+        token_details = {
+            "token": token["token"],
+            "details_url": f'/token-details/{token["token"]}/',
+            "status": status.get("status", "N/A"),
+        }
+        print(token_details)
+        tokens.append(token_details)
+
+    return render(request, "installed_apps_dashboard.html", {"tokens": tokens})

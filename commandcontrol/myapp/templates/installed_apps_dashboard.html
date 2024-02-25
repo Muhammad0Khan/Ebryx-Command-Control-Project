@@ -1,42 +1,40 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
+
+{% block content %}
 <style>
-	table {
+    table {
         border-collapse: collapse;
         width: 100%;
         background-color: #ffffff; /* Light background color */
         color: #000000; /* Dark text color */
         border-radius: 6px; /* Rounded corners */
         overflow: hidden; /* Ensure rounded corners are visible */
-    
     }
-    
+
     th,
     td {
         border: 1px solid #dddddd; /* Light border color */
         text-align: left;
         padding: 12px;
     }
-    
+
     th {
         background-color: #f2f2f2; /* Light background color for header */
         color: #000000; /* Dark text color for header */
     }
-    
 
-	.status {
-		font-weight: bold;
-	}
+    .status {
+        font-weight: bold;
+    }
 </style>
-
-
 
 <div class="container mt-4">
     <div class="">
-        <h1>System Dashboard</h1>
+        <h1>Installed Apps Dashboard</h1>
         <nav>
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-          </ol>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ol>
         </nav>
     </div>
 
@@ -47,7 +45,7 @@
                     <tr>
                         <th>Token</th>
                         <th>Status</th>
-                        <th>Delete</th>
+                        <th>Installed Apps</th>
                     </tr>
                 </thead>
                 <tbody id="tokenTableBody">
@@ -58,7 +56,9 @@
                             {% if token.status == 'online' %}Online{% else %}Offline{% endif %}
                         </td>
                         <td>
-                            <button class="btn btn-primary delete-btn w-96" onclick="deleteToken('{{ token.token }}')">Delete</button>
+                            <a href="{{ token.details_url }}">
+                                <button class="btn btn-primary w-96">Installed Apps</button>
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -69,7 +69,7 @@
     <script>
         // Reload data every 5 seconds
         setInterval(function () {
-            fetch("/dashboard/") // Replace with the actual URL of your dashboard view
+            fetch("/installed_apps_dashboard/") // Replace with the actual URL of your dashboard view
                 .then(response => response.text())
                 .then(html => {
                     const parser = new DOMParser();
@@ -80,24 +80,6 @@
                 })
                 .catch(error => console.error("Error fetching data:", error));
         }, 5000);
-
-        // Function to delete a token
-        function deleteToken(token) {
-            fetch(`/api/delete_token/${token}/`, {
-                method: "DELETE",
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log(data.message);
-                        // Optionally, update the UI or take additional actions upon successful deletion
-                    } else {
-                        console.error(data.message);
-                        // Handle the case where deletion was not successful
-                    }
-                })
-                .catch(error => console.error("Error deleting token:", error));
-        }
     </script>
 </div>
 {% endblock %}
