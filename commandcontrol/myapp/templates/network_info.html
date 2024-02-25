@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container mt-4">
+    <div class="">
+        <h1>Network Information</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="#">Network Information</a></li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h2>Username: {{ username }}</h2>
+            <h3>WIFI (en0)</h3>
+            <canvas id="networkChart" width="400" height="200"></canvas>
+
+            <table class="table mt-4">
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>Download</th>
+                        <th>Total Upload</th>
+                        <th>Upload Speed</th>
+                        <th>Download Speed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in last_data_section %}
+                        <tr>
+                            <td>{{ entry.iface }}</td>
+                            <td>{{ entry.data.download }}</td>
+                            <td>{{ entry.data.total_upload }}</td>
+                            <td>{{ entry.data.upload_speed }}</td>
+                            <td>{{ entry.data.download_speed }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to convert data to MB
+    function convertToMB(value) {
+        // Parse the value and extract the numeric part
+        var numericValue = parseFloat(value);
+
+        // Extract the unit part (assuming it's at the end of the string)
+        var unit = value.replace(numericValue, '').trim().toUpperCase();
+
+        // Convert to MB based on the unit
+        if (unit === 'GB') {
+            return numericValue * 1024; // Convert GB to MB
+        }
+
+        return numericValue;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var dataPoints = [];
+        var uploadData = [];
+        var downloadData = [];
+
+        {% for entry in network_info %}
+            {% if entry.iface == 'en0' %}
+                uploadData.push(convertToMB("{{ entry.data.total_upload }}"));
+                downloadData.push(convertToMB("{{ entry.data.download }}"));
+            {% endif %}
+        {% endfor %}
+
+        // Generate data points based on the number of entries
+        for (var i = 0; i < uploadData.length; i++) {
+            dataPoints.push(i * 30); // Assuming each data point corresponds to a 30-second interval
+        }
+
+        console.log(dataPoints, downloadData, uploadData);
+
+
+        var ctx = document.getElementById('networkChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dataPoints,
+                datasets: [{
+                    label: 'Upload (MB)',
+                    data: uploadData,
+                    borderColor: 'rgba(255, 0, 0, 1)', // Red
+                    borderWidth: 1,
+                    fill: false
+                }, {
+                    label: 'Download (MB)',
+                    data: downloadData,
+                    borderColor: 'rgba(0, 128, 0, 1)', // Green
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Time (seconds)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Data (MB)'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}
