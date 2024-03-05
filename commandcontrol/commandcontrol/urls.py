@@ -44,4 +44,5 @@ urlpatterns = [
     path("api/cpu_info/<str:token>/", cpu_info_page, name="cpu_info"),
     path("api/network_info/<str:token>/", network_info_page, name="network_info"),
     path("api/network_data/", store_network_data, name="network_data"),
+    path("index/", index_view, name="index"),
 ]

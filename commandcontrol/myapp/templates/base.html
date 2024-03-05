@@ -1,133 +1,102 @@
 {% load static %}
 
-<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My App{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+	<head>
+		<meta charset="utf-8" />
+		<meta content="width=device-width, initial-scale=1.0" name="viewport" />
 
-<style>
-    /* Dropdown styles */
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #fff; /* White background color */
-        min-width: 200px; /* Adjusted width */
-        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-        z-index: 1;
-        border-radius: 4px; /* Rounded corners */
-        margin-top: 8px; /* Spacing from the parent */
-    }
+		<title>Dashboard - NiceAdmin Bootstrap Template</title>
+		<meta content="" name="description" />
+		<meta content="" name="keywords" />
 
-    .dropdown-content.show {
-        display: block;
-    }
+		<!-- Favicons -->
+		<link href="{% static "assets/img/favicon.png" %}" rel="icon" />
+		<link href="{% static "assets/img/apple-touch-icon.png" %}" rel="apple-touch-icon" />
 
-    /* Button style */
-    .dropbtn {
-        background-color: #343a40; /* Darker background color */
-        color: #fff; /* White text color */
-        padding: 12px 16px; /* Adjusted padding */
-        font-size: 16px;
-        border: none;
-        cursor: pointer;
-        display: block;
-        width: 100%; /* Adjusted width */
-        text-align: left; /* Align text to the left */
-    }
+		<!-- Google Fonts -->
+		<link href="https://fonts.gstatic.com" rel="preconnect" />
+		<link
+			href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+			rel="stylesheet" />
 
-    .dropbtn:hover {
-        background-color: #3e444a; /* Darker background color on hover */
-    }
+		<!-- Vendor CSS Files -->
+		<link
+			href="{% static "assets/vendor/bootstrap/css/bootstrap.min.css" %}"
+			rel="stylesheet" />
+		<link
+			href="{% static "assets/vendor/bootstrap-icons/bootstrap-icons.css" %}"
+			rel="stylesheet" />
+		<link href="{% static "assets/vendor/boxicons/css/boxicons.min.css" %}"rel="stylesheet" />
+		<link href="{% static "assets/vendor/quill/quill.snow.css" rel="stylesheet" %}" />
+		<link href="{% static "assets/vendor/quill/quill.bubble.css" rel="stylesheet" %}"/>
+		<link href="{% static "assets/vendor/remixicon/remixicon.css" rel="stylesheet" %}"/>
+		<link href="{% static "assets/vendor/simple-datatables/style.css" rel="stylesheet"  %}"/>
 
-    /* Dropdown item style */
-    .dropdown-content a {
-        color: #000; /* Black text color */
-        padding: 10px 16px; /* Adjusted padding */
-        text-decoration: none;
-        display: block;
-        font-weight: bold;
-    }
+		<!-- Template Main CSS File -->
+		<link href="{% static "css/style.css" %}" rel="stylesheet">
 
-    .dropdown-content a:hover {
-        background-color: #f2f2f2; /* Lighter background color on hover */
-    }
-</style>
-</head>
-<body class="{% if request.session.firebase_user_id_token %}authenticated{% else %}unauthenticated{% endif %}">
+		<!-- =======================================================
+  * Template Name: NiceAdmin
+  * Updated: Nov 17 2023 with Bootstrap v5.3.2
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+	</head>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Command Control Monitor</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-            {% if request.session.firebase_user_id_token %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'signup' %}">Signup</a>
-                </li>
-            {% endif %}
-        </ul>
-    </div>
-</nav>
-{% if request.session.firebase_user_id_token %}
-<div class="sidebar bg-dark">
-    <a href="{% url 'dashboard' %}" class="nav-link text-white">Dashboard</a>
-    <div class="dropdown" id="monitorDropdown">
-        <label for="monitorDropdown" class="dropbtn">Monitor</label>
-        <div class="dropdown-content">
-            <a href="{% url 'cpu_dashboard' %}" class="dropdown-item">CPU Dashboard</a>
-            <a href="{% url 'network_dashboard' %}" class="dropdown-item">Network Dashboard</a>
-            <a href="{% url 'installed_apps_dashboard' %}" class="dropdown-item">Apps Dashboard</a>
-        </div>
-    </div>
-</div>
-{% endif %}
+	<body>
+		<!-- ======= Header ======= -->
+		<header id="header" class="header fixed-top d-flex align-items-center">
+			<div class="d-flex align-items-center justify-content-between">
+				<a href="index.html" class="logo d-flex align-items-center">
+					<img src="{% static "assets/img/logo.png" %}" alt="" />
+					<span class="d-none d-lg-block">Command Control</span>
+				</a>
+				<i class="bi bi-list toggle-sidebar-btn"></i>
+			</div>
 
-<script>
-    // Show dropdown on click
-    document.getElementById('monitorDropdown').addEventListener('click', function () {
-        document.querySelector('.dropdown-content').classList.toggle('show');
-    });
+        </header>
+            <!-- End Header -->    
 
-    // Hide dropdown on click outside
-    window.onclick = function (event) {
-        if (!event.target.matches('.dropbtn')) {
-            var dropdowns = document.getElementsByClassName('dropdown-content');
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains('show')) {
-                    openDropdown.classList.remove('show');
-                }
-            }
-        }
-    }
-</script>
+            <main id="main" class="main">
+                <div class="mt-4">
+                  <div id="content">{% block content %}{% endblock %}</div>
+                </div>
+            </main>
+            <!-- ======= Footer ======= -->
+		<footer id="footer" class="footer">
+			<div class="copyright">
+				&copy; Copyright <strong><span>NiceAdmin</span></strong
+				>. All Rights Reserved
+			</div>
+			<div class="credits">
+				<!-- All the links in the footer should remain intact. -->
+				<!-- You can delete the links only if you purchased the pro version. -->
+				<!-- Licensing information: https://bootstrapmade.com/license/ -->
+				<!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
+				Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+			</div>
 
-<div class="container mt-4">
-	<div id="content">{% block content %}{% endblock %}</div>
-</div>
+		</footer>
+		<!-- End Footer -->
 
-<!-- Bootstrap JavaScript and dependencies -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
-</body>
+		<a
+			href="#"
+			class="back-to-top d-flex align-items-center justify-content-center"
+			><i class="bi bi-arrow-up-short"></i
+		></a>
+
+		<!-- Vendor JS Files -->
+		<script src="{% static "assets/vendor/apexcharts/apexcharts.min.js" %}"></script>
+		<script src="{% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+		<script src="{% static "assets/vendor/chart.js/chart.umd.js" %}"></script>
+		<script src="{% static "assets/vendor/echarts/echarts.min.js" %}"></script>
+		<script src="{% static "assets/vendor/quill/quill.min.js" %}"></script>
+		<script src="{% static "assets/vendor/simple-datatables/simple-datatables.js" %}"></script>
+		<script src="{% static "assets/vendor/tinymce/tinymce.min.js" %}"></script>
+		<script src="{% static "assets/vendor/php-email-form/validate.js" %}"></script>
+
+		<!-- Template Main JS File -->
+		<script src="{% static "assets/js/main.js" %}"></script>
+	</body>
 </html>

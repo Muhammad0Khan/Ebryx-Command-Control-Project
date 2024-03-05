@@ -636,3 +636,7 @@ def installed_apps_dashboard_view(request):
         tokens.append(token_details)
 
     return render(request, "installed_apps_dashboard.html", {"tokens": tokens})
+
+
+def index_view(request):
+    return render(request, 'index.html')
