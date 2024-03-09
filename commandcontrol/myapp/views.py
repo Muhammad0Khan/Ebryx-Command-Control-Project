@@ -260,17 +260,14 @@ def delete_token(request, token):
 @csrf_exempt
 def store_cpu_data(request):
     try:
-        print("Received request to store CPU data...")
+        print("\nReceived request to store CPU data...")
 
         # Parse request body
         data = json.loads(request.body)
-        print("Parsed request body:", data)
-
         token_value = data.get("token")
-        print("Extracted token from data:", token_value)
 
         if not token_value:
-            print("Token is required. Sending error response...")
+            print("\nToken is required. Sending error response...")
             return JsonResponse(
                 {"status": "error", "message": "Token is required"}, status=400
             )
@@ -278,14 +275,14 @@ def store_cpu_data(request):
         # Check if the token exists
         token = APIToken.objects.filter(token=token_value).first()
         if not token:
-            print("Invalid token. Sending error response...")
+            print("\nInvalid token. Sending error response...")
             return JsonResponse(
                 {"status": "error", "message": "Invalid token"}, status=400
             )
 
         cpu_data = data.get("data")
         if not cpu_data:
-            print("CPU data is missing. Sending error response...")
+            print("\nCPU data is missing. Sending error response...")
             return JsonResponse(
                 {"status": "error", "message": "CPU data is missing"}, status=400
             )
@@ -300,7 +297,9 @@ def store_cpu_data(request):
         # convert timestamp to timezone-aware datetime object
         timestamp_str = cpu_data.get("timestamp")
         timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
-        timestamp_aware = timezone.make_aware(timestamp, timezone.get_current_timezone())
+        timestamp_aware = timezone.make_aware(
+            timestamp, timezone.get_current_timezone()
+        )
 
         # Create or update CPUInfo object
         cpu_info, created = CPUInfo.objects.update_or_create(
@@ -316,25 +315,25 @@ def store_cpu_data(request):
         )
 
         if created:
-            print("Created new CPU data:", cpu_info)
+            print("\nCreated new CPU data:", cpu_info)
             response_data = {
                 "status": "success",
                 "message": "New CPU data stored successfully",
                 "data_id": cpu_info.id,
             }
         else:
-            print("Updated existing CPU data:", cpu_info)
+            print("\nUpdated existing CPU data:", cpu_info)
             response_data = {
                 "status": "success",
                 "message": "CPU data updated successfully",
                 "data_id": cpu_info.id,
             }
 
-        print("Sending success response...")
+        print("\nSending success response...")
         return JsonResponse(response_data)
 
     except json.JSONDecodeError:
-        print("Invalid JSON data. Sending error response...")
+        print("\nInvalid JSON data. Sending error response...")
         return JsonResponse(
             {"status": "error", "message": "Invalid JSON data"}, status=400
         )
@@ -389,41 +388,63 @@ def cpu_info_page(request, token):
 
 # /api/network_data
 @csrf_exempt
-@require_POST
 def store_network_data(request):
     try:
+        print("Received request to store network data...")
         data = json.loads(request.body)
-        token = data.get("token")
+        token_value = data.get("token")
 
-        if not token:
+        if not token_value:
             response_data = {
                 "status": "error",
                 "message": "Token is required in the JSON data.",
             }
             return JsonResponse(response_data, status=400)
 
-        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
-        cpu_data_ref = db.reference(f"network_data/{token}")
+        token = APIToken.objects.filter(token=token_value).first()
+        if not token:
+            response_data = {
+                "status": "error",
+                "message": "Invalid token",
+            }
+            return JsonResponse(response_data, status=400)
 
-        # Fetch the existing data array or initialize an empty array
-        existing_data = cpu_data_ref.child("data").get() or []
+        network_data_list = data.get(
+            "data", []
+        )  # Fetch the 'data' key from the JSON payload
+        if not network_data_list:
+            response_data = {
+                "status": "error",
+                "message": "Network data is missing",
+            }
+            return JsonResponse(response_data, status=400)
 
-        # Append the new data section to the array
-        existing_data.append(data)
+        # Construct a dictionary to hold all interface data
+        all_interface_data = {}
+        for network_data in network_data_list:
+            iface = network_data.get("iface")
+            if not iface:
+                print("Interface name is missing. Skipping...")
+                continue
 
-        # Update the RTDB with the new data array
-        cpu_data_ref.update({"data": existing_data})
+            # Add interface data to the dictionary
+            all_interface_data[iface] = network_data.get("data", {})
+
+        # Create or update the NetworkStats object with all interface data
+        network_stats, created = NetworkStats.objects.update_or_create(
+            token=token, defaults={"data": all_interface_data}
+        )
 
         response_data = {
             "status": "success",
-            "message": "network data stored successfully",
-            "data_id": len(existing_data)
-            - 1,  # Index of the last appended data section
+            "message": "Network data stored successfully",
         }
 
+        print("Sending success response...")
         return JsonResponse(response_data)
 
     except json.JSONDecodeError:
+        print("Invalid JSON data. Sending error response...")
         response_data = {
             "status": "error",
             "message": "Invalid JSON data",
@@ -431,6 +452,7 @@ def store_network_data(request):
         return JsonResponse(response_data, status=400)
 
     except Exception as e:
+        print(f"An error occurred: {str(e)}. Sending error response...")
         response_data = {
             "status": "error",
             "message": f"An error occurred: {str(e)}",

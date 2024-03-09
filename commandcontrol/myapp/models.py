@@ -25,6 +25,14 @@ class CPUInfo(models.Model):
         return f"CPU Info - ID: {self.id}, Token: {self.token}, Timestamp: {self.timestamp}"
 
 
+class NetworkStats(models.Model):
+    token = models.ForeignKey(APIToken, on_delete=models.CASCADE)
+    data = models.JSONField()
+
+    def __str__(self):
+        return f"Network Stats - Token: {self.token}"
+
+
 class InstalledApp(models.Model):
     name = models.CharField(max_length=255)
     version = models.CharField(max_length=50)

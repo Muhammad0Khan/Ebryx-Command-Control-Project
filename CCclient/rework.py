@@ -34,15 +34,15 @@ while True:
         # get_installed_software(token)
         # print("installed data stored")
 
-        # save_network_stats(token)
-        # print("network stats stored")
+        save_network_stats(token)
+        print("network stats stored")
 
         if check_token_response.status_code == 200:
             check_token_json_response = check_token_response.json()
             if check_token_json_response.get("exists"):
                 # sending data here
                 send_cpu_data(send_cpu_data_api)
-                # send_network_stats(send_network_data_api)
+                send_network_stats(send_network_data_api)
                 # send_installed_software(send_installed_apps_api)
 
                 print("Monitoring logic executed")
