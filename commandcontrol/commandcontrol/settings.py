@@ -18,7 +18,6 @@ from django.core.management.utils import get_random_secret_key
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,9 +41,7 @@ ALLOWED_HOSTS = [
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://commandcontrol.systems"
-]
+CSRF_TRUSTED_ORIGINS = ["https://commandcontrol.systems"]
 
 # Application definition
 
@@ -58,7 +55,6 @@ INSTALLED_APPS = [
     "myapp",
     "rest_framework",
     "rest_framework.authtoken",
-    
 ]
 
 REST_FRAMEWORK = {
@@ -75,8 +71,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "myapp.middleware.RemoteAddrMiddleware",
-    
 ]
 
 ROOT_URLCONF = "commandcontrol.urls"
@@ -99,14 +93,44 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "commandcontrol.wsgi.application"
 
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "console": {
+#             "level": "DEBUG",  # Adjust the logging level as needed
+#             "class": "logging.StreamHandler",
+#         },
+#     },
+#     "loggers": {
+#         "": {
+#             "handlers": ["console"],
+#             "level": "DEBUG",  # Adjust the logging level as needed
+#             "propagate": True,
+#         },
+#     },
+# }
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "djongo",
+        "NAME": "commandcontrol",
+        "ENFORCE_SCHEMA": False,
+        "CLIENT": {
+            "host": "localhost",
+            "port": 27017,
+        },
+        "LOGGING": {
+            "version": 1,
+            "loggers": {
+                "djongo": {
+                    "level": "DEBUG",
+                },
+            },
+        },
     }
 }
 
@@ -147,7 +171,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "/static")]
-STATIC_ROOT= os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 # Default primary key field type
@@ -156,6 +180,6 @@ STATIC_ROOT= os.path.join(BASE_DIR, "static")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]

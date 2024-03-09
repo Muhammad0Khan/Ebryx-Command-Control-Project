@@ -7,7 +7,7 @@ import platform
 import socket
 
 
-def send_cpu_data(api="http://127.0.0.1:8000/myapp/api/cpu_data/"):
+def send_cpu_data(api="http://127.0.0.1:8000/api/cpu_data/"):
     if os.path.exists("cpu_data.json"):
         with open("cpu_data.json", "r") as cpu_data_file:
             cpu_data = json.load(cpu_data_file)
@@ -45,7 +45,7 @@ def get_cpu_data(token):
         threads = psutil.cpu_count(logical=False)
 
         # Get per-CPU Usage
-        per_cpu_percent = psutil.cpu_percent(interval=None, percpu=True)
+        percent_per_cpu = psutil.cpu_percent(interval=None, percpu=True)
 
         # Get current Timestamp
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -62,9 +62,9 @@ def get_cpu_data(token):
             "username": username,
             "data": {
                 "timestamp": timestamp,
-                "cpu_usage": cpu_percent,
-                "cpu_frequency": cpu_freq_value,
-                "per_cpu_percent": per_cpu_percent,
+                "cpu_percent": cpu_percent,
+                "cpu_freq_value": cpu_freq_value,
+                "percent_per_cpu": percent_per_cpu,
             },
         }
         with open("cpu_data.json", "w") as json_file:

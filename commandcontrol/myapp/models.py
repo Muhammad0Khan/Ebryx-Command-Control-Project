@@ -1,16 +1,28 @@
-from django.db import models
+from djongo import models
 from django.utils import timezone
 
 
+class APIToken(models.Model):
+    token = models.CharField(max_length=40, primary_key=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_active = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=20, default="offline")
+
+    def __str__(self):
+        return self.token
+
 
 class CPUInfo(models.Model):
-    timestamp = models.DateTimeField(auto_now_add=True)
+    token = models.ForeignKey(APIToken, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField()
     cpu_count = models.IntegerField()
     cpu_percent = models.FloatField()
     cpu_freq_value = models.FloatField()
     threads = models.IntegerField()
-    per_cpu_percent = models.JSONField()
+    percent_per_cpu = models.JSONField()
 
+    def __str__(self):
+        return f"CPU Info - ID: {self.id}, Token: {self.token}, Timestamp: {self.timestamp}"
 
 
 class InstalledApp(models.Model):
@@ -20,15 +32,3 @@ class InstalledApp(models.Model):
 
     def __str__(self):
         return self.name
-
-class APIToken(models.Model):
-    token = models.CharField(max_length=40, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-class InstalledApp(models.Model):
-    token = models.CharField(max_length=50)
-    data = models.JSONField()
-
-    def __str__(self):
-        return f"InstalledApp - Token: {self.token}"
-    

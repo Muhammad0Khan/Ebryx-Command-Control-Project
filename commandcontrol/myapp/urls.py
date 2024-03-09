@@ -6,9 +6,10 @@ from .views import *
 
 urlpatterns = [
     path("", login_view, name="login"),
-    path("signup/", signup_view, name="signup"),
     path("logout/", logout_view, name="logout"),
     path("admin/", admin.site.urls),
+    path("api/generate_token/", generate_token, name="generate_token"),
+    path("api/check_token/<str:token>/", check_token, name="check_token"),
     path("api/installed_apps/", InstalledAppAPIView.as_view(), name="installed_apps"),
     path("api/cpu_data/", store_cpu_data, name="cpu_data"),
     path("dashboard/", dashboard_view, name="dashboard"),

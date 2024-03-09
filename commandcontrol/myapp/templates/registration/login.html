@@ -38,8 +38,8 @@
                                         <div class="col-12">
                                         {% csrf_token %}
                                         <div class="form-group">
-                                            <label for="{{ form.email.id_for_label }}">Email:</label>
-                                            <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" class="form-control" placeholder="Enter your email" required>
+                                            <label for="{{ form.email.id_for_label }}">Username:</label>
+                                            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" class="form-control" placeholder="Enter your username" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="{{ form.password.id_for_label }}">Password:</label>
@@ -50,14 +50,6 @@
 												
                                         </input>
 										</div>
-										<div class="col-12">
-											<p class="small mb-0">
-												Don't have account?
-												<a href="{% url 'signup' %}">Create an account</a>
-											</p>
-										</div>
-
-                                        
                                     </div>
                                     </form>
 

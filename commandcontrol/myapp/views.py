@@ -1,15 +1,11 @@
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from django.http import JsonResponse, HttpResponseServerError
+from django.http import JsonResponse
 from myapp.models import *
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.contrib.auth import logout, authenticate, login
-from datetime import datetime
-import subprocess, json, time, psutil
+import json, time
 from firebase_admin import db
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.utils.crypto import get_random_string
@@ -19,12 +15,12 @@ from .serializers import InstalledAppSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .forms import SignupForm, LoginForm
+from .forms import LoginForm
 from django.views.decorators.http import require_POST
 import pyrebase
 from .firebase_init import initialize_firebase
-from django.urls import reverse
-from functools import wraps
+from pymongo import MongoClient
+from datetime import datetime
 
 try:
     firebase_admin = initialize_firebase()
@@ -47,50 +43,48 @@ database = firebase.database()
 
 # @login_required
 def logout_view(request):
-    if "firebase_user_id_token" in request.session:
-        del request.session["firebase_user_id_token"]
-
+    logout(request)
     return redirect("login")
 
 
 # added apis here
 @api_view(["GET"])
+@csrf_exempt
 def generate_token(request):
-    # Generate a unique token
-    token = get_random_string(length=40)
-
-    # Store the token in Firestore
-    ref = db.reference("tokens")
-    ref.push().set({"token": token})
-
-    ref_create_online_status = db.reference("status")
-    ref_create_online_status.push().set({"token": token, "status": "offline"})
-
-    # Return the token in the API response
-    return Response({"token": token})
-
-
-def check_token(request, token):
     try:
-        # Reference to the Firebase Realtime Database node where you store tokens
-        tokens_ref = db.reference("/tokens")
+        # Generate a random token
+        token = get_random_string(length=40)
 
-        # Query the database to check if the token exists
-        query = tokens_ref.order_by_child("token").equal_to(token).get()
+        # Store the token in MongoDB
+        APIToken.objects.create(token=token)
+
+        # Update the token status to 'online'
         update_token_status(token)
-        set_status_offline(token, delay=30)
 
-        if query:
-            return JsonResponse({"exists": True})
-        else:
-            return JsonResponse({"exists": False})
+        # Return the token in the response
+        return JsonResponse({"token": token})
+
     except Exception as e:
-        return JsonResponse({"error": str(e)})
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @csrf_exempt
-def save_firebase_token(token_value):
-    APIToken.objects.create(token_value=token_value)
+def check_token(request, token):
+    try:
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["commandcontrol"]
+        collection = db["myapp_apitoken"]
+
+        # Check if the token exists in MongoDB
+        token_exists = collection.find_one({"token": token}) is not None
+
+        return JsonResponse({"exists": token_exists})
+
+    except Exception as e:
+        return JsonResponse(
+            {"error": f"An error occurred while checking the token: {str(e)}"},
+            status=500,
+        )
 
 
 class InstalledAppAPIView(APIView):
@@ -106,82 +100,28 @@ class InstalledAppAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def signup_view(request):
-    if request.method == "POST":
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data["email"]
-            password = form.cleaned_data["password"]
-
-            try:
-                # Create a new user in Firebase Authentication
-                user = auth.create_user_with_email_and_password(email, password)
-
-                # Store additional user data in the Firebase Realtime Database
-                user_data = {"email": email}
-                database.child("users").child(user["localId"]).set(user_data)
-
-                # Redirect to login after successful signup
-
-                return redirect("login")
-            except Exception as e:
-                # Handle signup failure
-                print(f"Error in signup_view: {e}")
-                # You might want to add an error message here
-
-    else:
-        form = SignupForm()
-
-    return render(request, "registration/signup.html", {"form": form})
-
-
-def firebase_auth_required(view_func):
-    @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.session.get("firebase_user_id_token"):
-            return redirect("login")
-        return view_func(request, *args, **kwargs)
-
-    return _wrapped_view
-
-
 def login_view(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data["email"]
+            username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
-
-            try:
-                # Authenticate user against Firebase Authentication
-                user = auth.sign_in_with_email_and_password(email, password)
-
-                # Store Firebase User ID token in the session
-                request.session["firebase_user_id_token"] = user["idToken"]
-
-                # Authenticate Django user (optional, only if you need to use Django authentication)
-                # django_user = authenticate(request, email=email, password=password)
-
-                # Redirect to the dashboard or any other page upon successful login
-                next_url = request.GET.get("next", None)
-
-                # If next_url is not specified, redirect to the default dashboard view
-                if not next_url:
-                    next_url = reverse("dashboard")
-
-                return redirect(next_url)
-            except Exception as e:
-                # Handle login failure
-                print(f"Error in login_view: {e}")
-                # You might want to add an error message here
-
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect("dashboard")
+            else:
+                return render(
+                    request,
+                    "registration/login.html",
+                    {"form": form, "error": "Invalid username or password"},
+                )
     else:
         form = LoginForm()
-
     return render(request, "registration/login.html", {"form": form})
 
 
-@firebase_auth_required
+@login_required
 def dashboard_view(request):
     # Assuming you have a Firebase Admin instance initialized
 
@@ -245,43 +185,39 @@ def token_details_view(request, token):
 
 
 def update_token_status(token):
-    print("function called ")
-    # Reference to the 'status' collection
-    status_ref = db.reference("status")
+    try:
+        # Find the APIToken entry for the given token
+        token_entry = APIToken.objects.filter(token=token).first()
 
-    # Find the status entry for the given token
-    status_data = status_ref.order_by_child("token").equal_to(token).get()
+        # Update the status to 'online' if a matching token is found
+        if token_entry:
+            token_entry.status = "online"
+            token_entry.last_active = timezone.now()
+            token_entry.save()
+            print(f"Status updated to 'online' for token: {token}")
+        else:
+            print(f"No matching token found for status update: {token}")
 
-    print(status_data)
-
-    # Update the status to 'online' if a matching status is found
-    if status_data:
-        status_key = list(status_data.keys())[0]
-        status_ref.child(status_key).update({"status": "online"})
-        print(f"Status updated to 'online' for token: {token}")
-    else:
-        print(f"No matching status found for token: {token}")
+    except Exception as e:
+        print(f"Error updating status for token: {token}: {e}")
 
 
 def set_status_offline(token, delay=30):
-    # Reference to the 'status' collection
-    status_ref = db.reference("status")
+    try:
+        # Find the APIToken entry for the given token
+        token_entry = APIToken.objects.filter(token=token).first()
 
-    # Find the status entry for the given token
-    status_data = status_ref.order_by_child("token").equal_to(token).get()
+        # Update the status to 'offline' if a matching token is found
+        if token_entry:
+            time.sleep(delay)
+            token_entry.status = "offline"
+            token_entry.save()
+            print(f"Status updated to 'offline' for token: {token}")
+        else:
+            print(f"No matching token found for status update: {token}")
 
-    # Update the status to 'offline' after a delay if a matching status is found
-    if status_data:
-        status_key = list(status_data.keys())[0]
-
-        # Sleep for the specified delay in seconds
-        time.sleep(delay)
-
-        # Update the status to 'offline'
-        status_ref.child(status_key).update({"status": "offline"})
-        print(f"Status updated to 'offline' for token: {token}")
-    else:
-        print(f"No matching status found for token: {token}")
+    except Exception as e:
+        print(f"Error updating status for token: {token}: {e}")
 
 
 @api_view(["DELETE"])
@@ -322,53 +258,92 @@ def delete_token(request, token):
 
 
 @csrf_exempt
-@require_POST
 def store_cpu_data(request):
     try:
+        print("Received request to store CPU data...")
+
+        # Parse request body
         data = json.loads(request.body)
-        token = data.get("token")
+        print("Parsed request body:", data)
 
+        token_value = data.get("token")
+        print("Extracted token from data:", token_value)
+
+        if not token_value:
+            print("Token is required. Sending error response...")
+            return JsonResponse(
+                {"status": "error", "message": "Token is required"}, status=400
+            )
+
+        # Check if the token exists
+        token = APIToken.objects.filter(token=token_value).first()
         if not token:
+            print("Invalid token. Sending error response...")
+            return JsonResponse(
+                {"status": "error", "message": "Invalid token"}, status=400
+            )
+
+        cpu_data = data.get("data")
+        if not cpu_data:
+            print("CPU data is missing. Sending error response...")
+            return JsonResponse(
+                {"status": "error", "message": "CPU data is missing"}, status=400
+            )
+
+        # Extract CPU information from the data
+        cpu_count = data.get("cpu_count")
+        threads = data.get("threads")
+        cpu_percent = cpu_data.get("cpu_percent")
+        cpu_freq_value = cpu_data.get("cpu_freq_value")
+        percent_per_cpu = cpu_data.get("percent_per_cpu")
+
+        # convert timestamp to timezone-aware datetime object
+        timestamp_str = cpu_data.get("timestamp")
+        timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+        timestamp_aware = timezone.make_aware(timestamp, timezone.get_current_timezone())
+
+        # Create or update CPUInfo object
+        cpu_info, created = CPUInfo.objects.update_or_create(
+            token=token,
+            defaults={
+                "timestamp": timestamp_aware,
+                "cpu_count": cpu_count,
+                "threads": threads,
+                "cpu_percent": cpu_percent,
+                "cpu_freq_value": cpu_freq_value,
+                "percent_per_cpu": percent_per_cpu,
+            },
+        )
+
+        if created:
+            print("Created new CPU data:", cpu_info)
             response_data = {
-                "status": "error",
-                "message": "Token is required in the JSON data.",
+                "status": "success",
+                "message": "New CPU data stored successfully",
+                "data_id": cpu_info.id,
             }
-            return JsonResponse(response_data, status=400)
+        else:
+            print("Updated existing CPU data:", cpu_info)
+            response_data = {
+                "status": "success",
+                "message": "CPU data updated successfully",
+                "data_id": cpu_info.id,
+            }
 
-        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
-        cpu_data_ref = db.reference(f"cpu_data/{token}")
-
-        # Fetch the existing data array or initialize an empty array
-        existing_data = cpu_data_ref.child("data").get() or []
-
-        # Append the new data section to the array
-        existing_data.append(data)
-
-        # Update the RTDB with the new data array
-        cpu_data_ref.update({"data": existing_data})
-
-        response_data = {
-            "status": "success",
-            "message": "CPU data stored successfully",
-            "data_id": len(existing_data)
-            - 1,  # Index of the last appended data section
-        }
-
+        print("Sending success response...")
         return JsonResponse(response_data)
 
     except json.JSONDecodeError:
-        response_data = {
-            "status": "error",
-            "message": "Invalid JSON data",
-        }
-        return JsonResponse(response_data, status=400)
+        print("Invalid JSON data. Sending error response...")
+        return JsonResponse(
+            {"status": "error", "message": "Invalid JSON data"}, status=400
+        )
 
     except Exception as e:
-        response_data = {
-            "status": "error",
-            "message": f"An error occurred: {str(e)}",
-        }
-        return JsonResponse(response_data, status=500)
+        print(f"An error occurred: {str(e)}. Sending error response...")
+        return JsonResponse(
+            {"status": "error", "message": f"An error occurred: {str(e)}"}, status=500
+        )
 
 
 def cpu_info_page(request, token):

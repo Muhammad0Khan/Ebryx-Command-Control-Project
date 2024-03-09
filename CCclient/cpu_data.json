@@ -1,23 +1,23 @@
 {
-  "token": "K5SWoU2Hwc910yjwL8Wi4OBZh9xbE0eXXhmpMrok",
+  "token": "i15Fl4eebuSkJUGdGHaFO3e6Fsc8kGPlzjIKduTh",
   "cpu_count": 8,
   "threads": 8,
   "system_name": "Darwin",
   "hostname": "Alis-MacBook-Air.local",
   "username": "stormboi",
   "data": {
-    "timestamp": "2023-12-31 20:11:06",
-    "cpu_usage": 14.4,
-    "cpu_frequency": -1,
-    "per_cpu_percent": [
-      28.2,
-      26.6,
-      23.9,
-      20.7,
-      6.6,
-      4.4,
-      3.0,
-      2.4
+    "timestamp": "2024-03-09 17:58:32",
+    "cpu_percent": 12.2,
+    "cpu_freq_value": -1,
+    "percent_per_cpu": [
+      22.0,
+      20.0,
+      16.7,
+      16.1,
+      9.1,
+      9.5,
+      2.8,
+      2.0
     ]
   }
 }
