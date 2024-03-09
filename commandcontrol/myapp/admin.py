@@ -27,5 +27,21 @@ class CPUInfoAdmin(admin.ModelAdmin):
     )  # Define the fields you want to display in the admin list view
 
 
+class NetworkInfoAdmin(admin.ModelAdmin):
+    list_display = (
+        "token",
+        "data",
+    )
+
+
+class InstalledAppAdmin(admin.ModelAdmin):
+    list_display = (
+        "token",
+        "data",
+    )
+
+
 admin.site.register(APIToken, YourModelAdmin)
 admin.site.register(CPUInfo, CPUInfoAdmin)
+admin.site.register(NetworkStats, NetworkInfoAdmin)
+admin.site.register(InstalledApp, InstalledAppAdmin)

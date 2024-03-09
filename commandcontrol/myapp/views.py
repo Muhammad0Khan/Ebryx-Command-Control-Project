@@ -78,6 +78,8 @@ def check_token(request, token):
         # Check if the token exists in MongoDB
         token_exists = collection.find_one({"token": token}) is not None
 
+        update_token_status(token)
+
         return JsonResponse({"exists": token_exists})
 
     except Exception as e:
@@ -87,17 +89,65 @@ def check_token(request, token):
         )
 
 
-class InstalledAppAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = InstalledAppSerializer(data=request.data)
-        if serializer.is_valid():
-            # Save to the Firebase Realtime Database
-            token = serializer.validated_data.get("token")
-            firebase_ref = db.reference(f"/installed_apps/{token}")
-            firebase_ref.set(serializer.data)
+@csrf_exempt
+@require_POST
+def store_installed_apps(request):
+    try:
+        print("\nReceived request to store installed apps...")
+        data = json.loads(request.body)
+        token_value = data.get("token")
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not token_value:
+            response_data = {
+                "status": "error",
+                "message": "Token is required in the JSON data.",
+            }
+            return JsonResponse(response_data, status=400)
+
+        token = APIToken.objects.filter(token=token_value).first()
+        if not token:
+            response_data = {
+                "status": "error",
+                "message": "Invalid token",
+            }
+            return JsonResponse(response_data, status=400)
+
+        installed_apps_list = data.get("data", [])
+        if not installed_apps_list:
+            response_data = {
+                "status": "error",
+                "message": "Installed apps data is missing",
+            }
+            return JsonResponse(response_data, status=400)
+
+        # Create or update the InstalledApp object
+        installed_apps, created = InstalledApp.objects.update_or_create(
+            token=token, defaults={"data": installed_apps_list}
+        )
+
+        response_data = {
+            "status": "success",
+            "message": "Installed apps data stored successfully",
+        }
+
+        print("\nSending success response...")
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        print("Invalid JSON data. Sending error response...")
+        response_data = {
+            "status": "error",
+            "message": "Invalid JSON data",
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        print(f"An error occurred: {str(e)}. Sending error response...")
+        response_data = {
+            "status": "error",
+            "message": f"An error occurred: {str(e)}",
+        }
+        return JsonResponse(response_data, status=500)
 
 
 def login_view(request):
@@ -201,23 +251,26 @@ def update_token_status(token):
     except Exception as e:
         print(f"Error updating status for token: {token}: {e}")
 
+@csrf_exempt
+def set_status_offline(request):
+    if request.method == "POST":
+        try:
+            json_data = json.loads(request.body)
+            token = json_data.get("token")
+            token_entry = APIToken.objects.filter(token=token).first()
+            if token_entry:
+                token_entry.status = "offline"
+                token_entry.save()
+                print(f"\nStatus updated to 'offline' for token: {token}")
+                return JsonResponse({"success": True})
+            else:
+                print(f"\nNo matching token found for status update: {token}")
+                return JsonResponse({"success": False, "message": "Token not found"})
+        except Exception as e:
+            print(f"\nError updating status for token: {token}: {e}")
+            return JsonResponse({"success": False, "message": str(e)})
 
-def set_status_offline(token, delay=30):
-    try:
-        # Find the APIToken entry for the given token
-        token_entry = APIToken.objects.filter(token=token).first()
-
-        # Update the status to 'offline' if a matching token is found
-        if token_entry:
-            time.sleep(delay)
-            token_entry.status = "offline"
-            token_entry.save()
-            print(f"Status updated to 'offline' for token: {token}")
-        else:
-            print(f"No matching token found for status update: {token}")
-
-    except Exception as e:
-        print(f"Error updating status for token: {token}: {e}")
+    return JsonResponse({"success": False, "message": "Invalid request method"})
 
 
 @api_view(["DELETE"])
@@ -390,7 +443,7 @@ def cpu_info_page(request, token):
 @csrf_exempt
 def store_network_data(request):
     try:
-        print("Received request to store network data...")
+        print("\nReceived request to store network data...")
         data = json.loads(request.body)
         token_value = data.get("token")
 
@@ -440,7 +493,7 @@ def store_network_data(request):
             "message": "Network data stored successfully",
         }
 
-        print("Sending success response...")
+        print("\nSending success response...")
         return JsonResponse(response_data)
 
     except json.JSONDecodeError:

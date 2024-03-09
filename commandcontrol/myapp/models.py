@@ -34,9 +34,8 @@ class NetworkStats(models.Model):
 
 
 class InstalledApp(models.Model):
-    name = models.CharField(max_length=255)
-    version = models.CharField(max_length=50)
-    installation_date = models.DateTimeField(auto_now_add=True)
+    token = models.ForeignKey(APIToken, on_delete=models.CASCADE)
+    data = models.JSONField()
 
     def __str__(self):
-        return self.name
+        return f"Installed Apps - Token: {self.token}"
