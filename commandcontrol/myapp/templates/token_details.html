@@ -1,66 +1,74 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
+{% block content %}
 <style>
-	table {
-		border-collapse: collapse;
-		width: 100%;
-		background-color: #ffffff; /* Light background color */
-		color: #000000; /* Dark text color */
-		border-radius: 6px; /* Rounded corners */
-		overflow: hidden; /* Ensure rounded corners are visible */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        background-color: #ffffff; /* Light background color */
+        color: #000000; /* Dark text color */
+        border-radius: 6px; /* Rounded corners */
+        overflow: hidden; /* Ensure rounded corners are visible */
+    }
 
-}
+    th,
+    td {
+        border: 1px solid #dddddd; /* Light border color */
+        text-align: left;
+        padding: 12px;
+    }
 
-th,
-td {
-		border: 1px solid #dddddd; /* Light border color */
-		text-align: left;
-		padding: 12px;
-}
+    th {
+        background-color: #f2f2f2; /* Light background color for header */
+        color: #000000; /* Dark text color for header */
+    }
 
-th {
-		background-color: #f2f2f2; /* Light background color for header */
-		color: #000000; /* Dark text color for header */
-}
-
-	tr:hover {
-		background-color: #17a2b8;
-	}
+    tr:hover {
+        background-color: #17a2b8;
+    }
 </style>
 
 <div class="container mt-4">
-	<div class="">
-		<h1>Apps Installed in the last 12 hours</h1>
-		<nav>
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-				<li class="breadcrumb-item"><a href="">Installed Apps</a></li>
-			</ol>
-		</nav>
-</div>
+    <div class="">
+        <h1>Apps Installed for Token: {{ token }}</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="">Installed Apps</a></li>
+            </ol>
+        </nav>
+    </div>
 
-<div class="card mt-4">
-	<div class="card-body">
-		
-		<p class="card-title">Username: {{ username }}</p>
-		<table>
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>Info</th>
-					<!-- Add other table headers as needed -->
-				</tr>
-			</thead>
-			<tbody>
-				{% for app_data in installed_apps %}
-				<tr>
-					<td><strong>{{ app_data.name }}</strong></td>
-					<td>{{ app_data.info }}</td>
-					<!-- Add other table cells as needed -->
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	</div>
-</div>
+    <div class="card mt-4">
+        <div class="card-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Architecture</th>
+                        <th>Last Modified</th>
+                        <th>Obtained From</th>
+                        <th>Path</th>
+                        <th>Signed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app_data in installed_apps_data %}
+                        {% for app in app_data %}
+                            <tr>
+                                <td><strong>{{ app.name }}</strong></td>
+                                <td>{{ app.version }}</td>
+                                <td>{{ app.arch_kind }}</td>
+                                <td>{{ app.lastModified }}</td>
+                                <td>{{ app.obtained_from }}</td>
+                                <td>{{ app.path }}</td>
+                                <td>{{ app.signed_by|join:", " }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

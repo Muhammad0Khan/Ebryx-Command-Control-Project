@@ -1,134 +1,136 @@
-{% extends 'base.html' %} {% block content %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+{% extends 'base.html' %}
+{% block content %}
 {% if error_message %}
 <p>{{ error_message }}</p>
 {% else %}
-
 <div class="container mt-4">
-	<div class="">
-		<h1>Cpu Stats</h1>
-		<nav>
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item">
-					<a href="{% url 'dashboard' %}">Dashboard</a>
-				</li>
-				<li class="breadcrumb-item"><a href=""> Cpu Stats</a></li>
-			</ol>
-		</nav>
-	</div>
+    <div class="">
+        <h1>CPU Stats</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item"><a href="">CPU Stats</a></li>
+            </ol>
+        </nav>
+    </div>
 
-	<div class="">
-		<div class="card">
-			<div class="card-body mt-4">
-				<h5>Timestamp: {{ timestamp }}</h5>
-				<h5>System Name: {{ system_name }}</h5>
-				<h5>Hostname: {{ hostname }}</h5>
-				<h5>User Name: {{ username }}</h5>
-			</div>
-		</div>
-	</div>
+    <div class="">
+        <div class="card">
+            <div class="card-body mt-4">
+                <h5>Timestamp: {{ timestamp }}</h5>
+                <h5>Threads: {{ threads }}</h5>
+                <h5>CPU Count: {{ cpu_count }}</h5>
+                <h5>CPU Percent: {{ cpu_percent }}</h5>
+				<h5>CPU Frequency: {{ cpu_freq_value }}</h5>
+                <h5>Percent Per CPU: {{ percent_per_cpu }}</h5>
+            </div>
+        </div>
+    </div>
 
-	<div class="row">
-		<div class="col-lg-8">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Average Over 12 Hours</h5>
-					<div id="barChart">
-						<canvas id="perCpuChart" width="400" height="200"></canvas>
-					</div>
-				</div>
-			</div>
-		</div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Average Over 12 Hours</h5>
+                    <div id="barChart">
+                        <canvas id="perCpuChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<div class="col-lg-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Current Cpu Utilization</h5>
-					<div>
-						<canvas id="TotalDonut" width="335" height="335"></canvas>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script>
-		   // Extract per_cpu_percent array from the context
-		   var perCpuPercent = {{ per_cpu_percent|safe }};
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Current CPU Utilization</h5>
+                    <div>
+                        <canvas id="TotalDonut" width="335" height="335"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-		   // Get the canvas element
-		   var ctx = document.getElementById('perCpuChart').getContext('2d');
+    <script>
+        // Extract per_cpu_percent array from the context
+        var perCpuPercent = {{ percent_per_cpu|safe }};
 
-		   // Create a bar chart with lighter colors
-		   var myChart = new Chart(ctx, {
-		       type: 'bar',
-		       data: {
-		           labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
-		           datasets: [{
-		               label: 'Per CPU Usage (%)',
-		               data: perCpuPercent,
-		               backgroundColor: 'rgba(173, 216, 230, 0.7)', // Lighter turquoise
-		               borderColor: 'rgba(255, 255, 255, 0.8)',
-		               borderWidth: 1,
-		           }]
-		       },
-		       options: {
-				scales: {
-						y: {
-								beginAtZero: true,
-								max: 100,
-								ticks: {
-										color: 'rgba(173, 216, 230, 0.7)' // Lighter text color
-								},
-								gridLines:{
-									color: "rgba(173, 216, 230, 0.7)",
-									lineWidth:2,
-									zeroLineColor :"rgba(173, 216, 230, 0.7)",
-									zeroLineWidth : 2
-								},
-						},
-						x: {
-								ticks: {
-										color: 'rgba(255, 255, 255, 0.8)' // Lighter text color
-								},
-								gridLines:{
-									color: "rgba(173, 216, 230, 0.7)",
-									lineWidth:2,
-									zeroLineColor :"rgba(173, 216, 230, 0.7)",
-									zeroLineWidth : 2
-								},
-						}
-				},
-		}
-		   });
-	</script>
+        // Get the canvas element
+        var ctx = document.getElementById('perCpuChart').getContext('2d');
 
-	<script>
+        // Create a bar chart with lighter colors
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
+                datasets: [{
+                    label: 'Per CPU Usage (%)',
+                    data: perCpuPercent,
+                    backgroundColor: 'rgba(173, 216, 230, 0.7)', // Lighter turquoise
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            color: 'rgba(173, 216, 230, 0.7)' // Lighter text color
+                        },
+                        gridLines:{
+                            color: "rgba(173, 216, 230, 0.7)",
+                            lineWidth:2,
+                            zeroLineColor :"rgba(173, 216, 230, 0.7)",
+                            zeroLineWidth : 2
+                        },
+                    },
+                    x: {
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.8)' // Lighter text color
+                        },
+                        gridLines:{
+                            color: "rgba(173, 216, 230, 0.7)",
+                            lineWidth:2,
+                            zeroLineColor :"rgba(173, 216, 230, 0.7)",
+                            zeroLineWidth : 2
+                        },
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
 		document.addEventListener('DOMContentLoaded', function () {
-				var cpuUsage = {{ cpu_usage }};
+    var cpuPercent = {{ cpu_percent }};
 
-				var data = {
-						labels: ["CPU Usage", "Unused"],
-						datasets: [{
-								data: [cpuUsage, 100 - cpuUsage],
-								backgroundColor: ["#36a2eb", "#f87979"]
-						}]
-				};
+    var data = {
+        labels: ["CPU Usage", "Unused"],
+        datasets: [{
+            data: [cpuPercent, 100 - cpuPercent],
+            backgroundColor: ["#36a2eb", "#f87979"]
+        }]
+    };
 
-				var ctx = document.getElementById('TotalDonut').getContext('2d');
-				var myChart = new Chart(ctx, {
-						type: 'doughnut',
-						data: data,
-						options: {
-								cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-								responsive: true,
-								maintainAspectRatio: false,
-								legend: {
-										display: false
-								}
-						}
-				});
-		});
-	</script>
+    var ctx = document.getElementById('TotalDonut').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: data,
+        options: {
+            cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                display: false
+            }
+        }
+    });
+});
+    </script>
 </div>
-{% endif %} {% endblock %}
+{% endif %}
+{% endblock %}

@@ -173,42 +173,25 @@ def login_view(request):
 
 @login_required
 def dashboard_view(request):
-    # Assuming you have a Firebase Admin instance initialized
+    # Retrieve token data from MongoDB
+    tokens_data = APIToken.objects.all()
 
-    # Reference to the 'tokens' collection
-    tokens_ref = db.reference("tokens")
-    # Reference to the 'status' collection
-    status_ref = db.reference("status")
-
-    # Retrieve token data
-    tokens_data = tokens_ref.order_by_child("token").get()
-
-    # Retrieve status data
-    status_data = status_ref.order_by_child("token").get()
-    # print(status_data)
-
-    # Create a list of tokens with details, including matching status
+    # Create a list of tokens with details
     tokens = []
-    for token_key, token in tokens_data.items():
-        # Check if there is a corresponding status for the token
-        status_key = next(
-            (
-                key
-                for key, value in status_data.items()
-                if value["token"] == token["token"]
-            ),
-            None,
-        )
-        status = status_data.get(status_key, {}) if status_key else {}
-
-        # Create a dictionary with token details and status
+    for token in tokens_data:
+        # Get the status of the token
+        status = token.status
+        # Get the last active time of the token
+        last_active = token.last_active
+        # Create a dictionary with token details, status and last active
         token_details = {
-            "token": token["token"],
-            "details_url": f'/token-details/{token["token"]}/',
-            "cpu_info": f'/api/cpu_info/{token["token"]}/',
-            "status": status.get("status", "N/A"),  # Use 'N/A' if no status found
+            "token": token.token,
+            "details_url": f"/token-details/{token.token}/",
+            "cpu_info": f"/api/cpu_info/{token.token}/",
+            "network_info": f"/api/network_info/{token.token}/",
+            "status": status if status else "offline",
+            "last_active": last_active.strftime("%Y-%m-%d %H:%M:%S"),
         }
-        print(token_details)
 
         tokens.append(token_details)
 
@@ -216,21 +199,19 @@ def dashboard_view(request):
 
 
 def token_details_view(request, token):
-    # Fetch data from the installed_apps collection for the specific token
-    apps_ref = db.reference("installed_apps").child(token)
-    cpu_data_ref = db.reference("cpu_data").child(token)
-    username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
-    token_data = apps_ref.get()
+    # fetch installed apps data for the specific token
+    installed_apps_data = InstalledApp.objects.filter(token=token).values_list(
+        "data", flat=True
+    )
 
-    if token_data:
-        installed_apps_data = token_data.get("data", [])
-    else:
-        installed_apps_data = []
+    # Convert the QuerySet to a list
+    installed_apps_data = list(installed_apps_data)
+    print(installed_apps_data)
 
     return render(
         request,
         "token_details.html",
-        {"username": username, "installed_apps": installed_apps_data},
+        {"token": token, "installed_apps_data": installed_apps_data},
     )
 
 
@@ -250,6 +231,7 @@ def update_token_status(token):
 
     except Exception as e:
         print(f"Error updating status for token: {token}: {e}")
+
 
 @csrf_exempt
 def set_status_offline(request):
@@ -400,31 +382,23 @@ def store_cpu_data(request):
 
 def cpu_info_page(request, token):
     try:
-        cpu_data_ref = db.reference(f"cpu_data/{token}")
+        # Connect to MongoDB
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["commandcontrol"]
+        collection = db["myapp_cpuinfo"]
 
-        # Fetch the CPU data for the specified token
-        cpu_data = cpu_data_ref.get()
+        # Fetch all CPU data for the specified token
+        cpu_data = collection.find_one({"token_id": token}, sort=[("_id", -1)])
 
         if cpu_data:
-            # Get the last data section (assuming it's a list of dictionaries)
-            last_data_section = cpu_data.get("data", [])[-1]
-
             context = {
-                "system_name": last_data_section.get("system_name", ""),
-                "hostname": last_data_section.get("hostname", ""),
-                "username": last_data_section.get("username", ""),
-                "threads": last_data_section.get("threads", ""),
-                "cpu_count": last_data_section.get("cpu_count", ""),
-                "cpu_usage": last_data_section.get("data", {}).get("cpu_usage", ""),
-                "cpu_frequency": last_data_section.get("data", {}).get(
-                    "cpu_frequency", ""
-                ),
-                "per_cpu_percent": last_data_section.get("data", {}).get(
-                    "per_cpu_percent", ""
-                ),
-                "timestamp": last_data_section.get("data", {}).get("timestamp", ""),
+                "timestamp": cpu_data.get("timestamp"),
+                "cpu_count": cpu_data.get("cpu_count"),
+                "threads": cpu_data.get("threads"),
+                "cpu_percent": cpu_data.get("cpu_percent"),
+                "cpu_freq_value": cpu_data.get("cpu_freq_value"),
+                "percent_per_cpu": cpu_data.get("percent_per_cpu"),
             }
-
             print(context)
             return render(request, "cpu_info.html", context)
         else:
@@ -435,7 +409,9 @@ def cpu_info_page(request, token):
             )
     except Exception as e:
         return render(
-            request, "cpu_info.html", {"error_message": f"An error occurred: {str(e)}"}
+            request,
+            "cpu_info.html",
+            {"error_message": f"An error occurred: {str(e)}"},
         )
 
 
