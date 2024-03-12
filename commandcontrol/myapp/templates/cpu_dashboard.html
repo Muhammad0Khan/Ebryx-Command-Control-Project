@@ -1,85 +1,87 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'dashboard_base.html' %} {% block content %}
 <style>
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        background-color: #ffffff; /* Light background color */
-        color: #000000; /* Dark text color */
-        border-radius: 6px; /* Rounded corners */
-        overflow: hidden; /* Ensure rounded corners are visible */
-    }
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		background-color: #ffffff; /* Light background color */
+		color: #000000; /* Dark text color */
+		border-radius: 6px; /* Rounded corners */
+		overflow: hidden; /* Ensure rounded corners are visible */
+	}
 
-    th,
-    td {
-        border: 1px solid #dddddd; /* Light border color */
-        text-align: left;
-        padding: 12px;
-    }
+	th,
+	td {
+		border: 1px solid #dddddd; /* Light border color */
+		text-align: left;
+		padding: 12px;
+	}
 
-    th {
-        background-color: #f2f2f2; /* Light background color for header */
-        color: #000000; /* Dark text color for header */
-    }
+	th {
+		background-color: #f2f2f2; /* Light background color for header */
+		color: #000000; /* Dark text color for header */
+	}
 
-    .status {
-        font-weight: bold;
-    }
+	.status {
+		font-weight: bold;
+	}
 </style>
 
-<div class="container mt-4">
-    <div class="">
-        <h1>CPU Information Dashboard</h1>
-        <nav>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            </ol>
-        </nav>
-    </div>
+<div class="mt-4">
+	<div class="">
+		<h1>CPU Information Dashboard</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item">
+					<a href="{% url 'dashboard' %}">Dashboard</a>
+				</li>
+			</ol>
+		</nav>
+	</div>
 
-    <div class="card">
-        <div class="card-body">
-            <table class="mt-4">
-                <thead>
-                    <tr>
-                        <th>Token</th>
-                        <th>Status</th>
-                        <th>CPU Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tokenTableBody">
-                    {% for token in tokens %}
-                    <tr>
-                        <td>{{ token.token }}</td>
-                        <td class="status" style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
-                            {% if token.status == 'online' %}Online{% else %}Offline{% endif %}
-                        </td>
-                        <td>
-                            <a href="{{ token.cpu_info }}">
-                                <button class="btn btn-primary w-96">CPU Stats</button>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <script>
-        // Reload data every 5 seconds
-        setInterval(function () {
-            fetch("/cpu_dashboard/") // Replace with the actual URL of your dashboard view
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const newDoc = parser.parseFromString(html, "text/html");
-                    const newTableBody = newDoc.getElementById("tokenTableBody");
-                    document.getElementById("tokenTableBody").innerHTML =
-                        newTableBody.innerHTML;
-                })
-                .catch(error => console.error("Error fetching data:", error));
-        }, 5000);
-    </script>
+	<div class="card">
+		<div class="card-body">
+			<table class="mt-4">
+				<thead>
+					<tr>
+						<th>Token</th>
+						<th>Status</th>
+						<th>CPU Status</th>
+					</tr>
+				</thead>
+				<tbody id="tokenTableBody">
+					{% for token in tokens %}
+					<tr>
+						<td>{{ token.token }}</td>
+						<td
+							class="status"
+							style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
+							{% if token.status == 'online' %}Online{% else %}Offline{% endif%}
+						</td>
+						<td>
+							<a href="{{ token.cpu_info }}">
+								<button class="btn btn-primary w-96">CPU Stats</button>
+							</a>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script>
+		// Reload data every 5 seconds
+		setInterval(function () {
+			fetch("/cpu_dashboard/") // Replace with the actual URL of your dashboard view
+				.then(response => response.text())
+				.then(html => {
+					const parser = new DOMParser();
+					const newDoc = parser.parseFromString(html, "text/html");
+					const newTableBody = newDoc.getElementById("tokenTableBody");
+					document.getElementById("tokenTableBody").innerHTML =
+						newTableBody.innerHTML;
+				})
+				.catch(error => console.error("Error fetching data:", error));
+		}, 5000);
+	</script>
 </div>
 {% endblock %}

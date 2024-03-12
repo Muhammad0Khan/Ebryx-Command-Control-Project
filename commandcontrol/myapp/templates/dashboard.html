@@ -28,7 +28,7 @@
 
 <div class=" mt-4">
 	<div class="">
-		<h1>System Dashboard</h1>
+		<h1>System Overview</h1>
 		<nav>
 			<ol class="breadcrumb">
 				<li class="breadcrumb-item">
@@ -43,20 +43,34 @@
 			<table class="mt-4">
 				<thead>
 					<tr>
-						<th>Token</th>
+						<th>System Name</th>
+						<th>Type</th>
 						<th>Status</th>
+						<th>Manage</th>
 						<th>Delete</th>
 					</tr>
 				</thead>
 				<tbody id="tokenTableBody">
-					{% for token in tokens %}
-					<tr>
-						<td>{{ token.token }}</td>
-						<td
-							class="status"
-							style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
-							{% if token.status == 'online' %}Online{% else %}Offline
-                            {% endif %}
+					
+    {% for token in tokens %}
+        <tr>
+            <td>{{ token.token }}</td>
+            <td>MACOS</td>
+            <td
+                class="status"
+                style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
+                {% if token.status == 'online' %}
+                    Online
+
+                {% else %}
+                    Offline
+                {% endif %}
+            </td>
+
+						<td>
+							<button class="btn btn-primary delete-btn w-96">
+								Delete
+							</button>
 						</td>
 						<td>
 							<button
@@ -67,10 +81,61 @@
 						</td>
 					</tr>
 					{% endfor %}
+
 				</tbody>
 			</table>
 		</div>
 	</div>
+
+	
+
+
+	<div class="row">
+		<!-- Left side columns -->
+		<div class="col-lg-8">
+			<div class="row">
+				<!-- Online Systems Card -->
+				<div class="col-xxl-4 col-md-6">
+					<div class="card info-card sales-card">
+
+						<div class="card-body">
+							<h5 class="card-title">Total Systems </h5>
+
+							<div class="d-flex align-items-center">
+								<div
+									class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+									<i class="bi bi-people"></i>
+								</div>
+								<div class="ps-3">
+									<h6>{{ tokens|length }}</h6>
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xxl-4 col-md-6">
+					<div class="card info-card revenue-card">
+
+						<div class="card-body">
+							<h5 class="card-title">Online Systems <span>| Today</span></h5>
+
+							<div class="d-flex align-items-center">
+								<div
+									class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+									<i class="bi bi-people"></i>
+								</div>
+								<div class="ps-3">
+									<h6>{{ online_count }}</h6>
+									<span class="text-success small pt-1 fw-bold">{{ tokens|length }}%</span>
+									<span class="text-muted small pt-2 ps-1">increase</span> 
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	<script>
 		// Reload data every 5 seconds
 		setInterval(function () {

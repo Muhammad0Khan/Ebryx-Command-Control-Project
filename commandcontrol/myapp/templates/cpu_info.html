@@ -1,11 +1,14 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'dashboard_base.html' %}
+{%load static%}
+
+{% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {% if error_message %}
 <p>{{ error_message }}</p>
 {% else %}
 
-<div class="container mt-4">
+<div class="mt-4">
 	<div class="">
 		<h1>Cpu Stats</h1>
 		<nav>
@@ -52,6 +55,7 @@
 			</div>
 		</div>
 	</div>
+	
 	<script>
 		   // Extract per_cpu_percent array from the context
 		   var perCpuPercent = {{ per_cpu_percent|safe }};
@@ -129,6 +133,50 @@
 						}
 				});
 		});
+
+
+
+		var options = {
+			series: [{
+				name: "Desktops",
+				data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
+		}],
+			chart: {
+			height: 350,
+			type: 'line',
+			zoom: {
+				enabled: false
+			}
+		},
+		dataLabels: {
+			enabled: false
+		},
+		stroke: {
+			curve: 'straight'
+		},
+		title: {
+			text: 'Product Trends by Month',
+			align: 'left'
+		},
+		grid: {
+			row: {
+				colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+				opacity: 0.5
+			},
+		},
+		xaxis: {
+			categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+		}
+		};
+
+		var chart = new ApexCharts(document.querySelector("#chart"), options);
+		chart.render();
+
+
 	</script>
+	
+	
+	<script src="{% static "assets/vendor/apexcharts/apexcharts.min.js" %}"></script>
+
 </div>
 {% endif %} {% endblock %}

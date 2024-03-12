@@ -195,6 +195,8 @@ def dashboard_view(request):
     # print(status_data)
     # Create a list of tokens with details, including matching status
     tokens = []
+    systems_online = 0
+
     for token_key, token in tokens_data.items():
         # Check if there is a corresponding status for the token
         status_key = next(
@@ -206,6 +208,8 @@ def dashboard_view(request):
             None,
         )
         status = status_data.get(status_key, {}) if status_key else {}
+        if status['status']=='online':
+            systems_online+=1
 
         # Create a dictionary with token details and status
         token_details = {
@@ -213,12 +217,16 @@ def dashboard_view(request):
             "details_url": f'/token-details/{token["token"]}/',
             "cpu_info": f'/api/cpu_info/{token["token"]}/',
             "status": status.get("status", "N/A"),  # Use 'N/A' if no status found
-        }
-        print(token_details)
+        }        
 
         tokens.append(token_details)
-
-    return render(request, "dashboard.html", {"tokens": tokens})
+    print (tokens)
+    
+    dashboard_data = {
+        "tokens": tokens,
+        "online_count": systems_online
+    }
+    return render(request, "dashboard.html", dashboard_data)
 
 
 @firebase_auth_required
@@ -640,3 +648,6 @@ def installed_apps_dashboard_view(request):
 
 def index_view(request):
     return render(request, 'index.html')
+
+def blank_view(request):
+    return render(request, 'blank.html')
