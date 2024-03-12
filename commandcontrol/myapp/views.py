@@ -4,50 +4,18 @@ from django.http import JsonResponse
 from myapp.models import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, authenticate, login
-import json, time
-from firebase_admin import db
+import json
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from django.utils.crypto import get_random_string
 from .models import *
 from django.shortcuts import render, redirect
-from .serializers import InstalledAppSerializer
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from .forms import LoginForm
 from django.views.decorators.http import require_POST
-import pyrebase
-from .firebase_init import initialize_firebase
 from pymongo import MongoClient
 from datetime import datetime
 
-try:
-    firebase_admin = initialize_firebase()
-except ValueError:
-    pass
 
-config = {
-    "apiKey": "AIzaSyCBID8mb8ppM61RFU9pgah5J20VzwOiHbo",
-    "authDomain": "command-and-control-9c601.firebaseapp.com",
-    "databaseURL": "https://command-and-control-9c601-default-rtdb.firebaseio.com",
-    "storageBucket": "command-and-control-9c601.appspot.com",
-    "messagingSenderId": "595205364194",
-    "appId": "1:595205364194:web:7d77ff7d256f2526db81bb",
-}
-
-firebase = pyrebase.initialize_app(config)
-auth = firebase.auth()
-database = firebase.database()
-
-
-# @login_required
-def logout_view(request):
-    logout(request)
-    return redirect("login")
-
-
-# added apis here
+# Token Generation, Verification and Status Update
 @api_view(["GET"])
 @csrf_exempt
 def generate_token(request):
@@ -89,6 +57,74 @@ def check_token(request, token):
         )
 
 
+def update_token_status(token):
+    try:
+        # Find the APIToken entry for the given token
+        token_entry = APIToken.objects.filter(token=token).first()
+
+        # Update the status to 'online' if a matching token is found
+        if token_entry:
+            token_entry.status = "online"
+            token_entry.last_active = timezone.now()
+            token_entry.save()
+            print(f"Status updated to 'online' for token: {token}")
+        else:
+            print(f"No matching token found for status update: {token}")
+
+    except Exception as e:
+        print(f"Error updating status for token: {token}: {e}")
+
+
+@csrf_exempt
+def set_status_offline(request):
+    if request.method == "POST":
+        try:
+            json_data = json.loads(request.body)
+            token = json_data.get("token")
+            token_entry = APIToken.objects.filter(token=token).first()
+            if token_entry:
+                token_entry.status = "offline"
+                token_entry.save()
+                print(f"\nStatus updated to 'offline' for token: {token}")
+                return JsonResponse({"success": True})
+            else:
+                print(f"\nNo matching token found for status update: {token}")
+                return JsonResponse({"success": False, "message": "Token not found"})
+        except Exception as e:
+            print(f"\nError updating status for token: {token}: {e}")
+            return JsonResponse({"success": False, "message": str(e)})
+
+    return JsonResponse({"success": False, "message": "Invalid request method"})
+
+
+# Login and Logout
+def login_view(request):
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect("dashboard")
+            else:
+                return render(
+                    request,
+                    "registration/login.html",
+                    {"form": form, "error": "Invalid username or password"},
+                )
+    else:
+        form = LoginForm()
+    return render(request, "registration/login.html", {"form": form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
+
+# Installed Apps Storage and Viewing
 @csrf_exempt
 @require_POST
 def store_installed_apps(request):
@@ -150,27 +186,23 @@ def store_installed_apps(request):
         return JsonResponse(response_data, status=500)
 
 
-def login_view(request):
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect("dashboard")
-            else:
-                return render(
-                    request,
-                    "registration/login.html",
-                    {"form": form, "error": "Invalid username or password"},
-                )
-    else:
-        form = LoginForm()
-    return render(request, "registration/login.html", {"form": form})
+def token_details_view(request, token):
+    # fetch installed apps data for the specific token
+    installed_apps_data = InstalledApp.objects.filter(token=token).values_list(
+        "data", flat=True
+    )
+
+    # Convert the QuerySet to a list
+    installed_apps_data = list(installed_apps_data)
+
+    return render(
+        request,
+        "token_details.html",
+        {"token": token, "installed_apps_data": installed_apps_data},
+    )
 
 
+# Dashboard View and Delete Button
 @login_required
 def dashboard_view(request):
     # Retrieve token data from MongoDB
@@ -198,100 +230,33 @@ def dashboard_view(request):
     return render(request, "dashboard.html", {"tokens": tokens})
 
 
-def token_details_view(request, token):
-    # fetch installed apps data for the specific token
-    installed_apps_data = InstalledApp.objects.filter(token=token).values_list(
-        "data", flat=True
-    )
-
-    # Convert the QuerySet to a list
-    installed_apps_data = list(installed_apps_data)
-    print(installed_apps_data)
-
-    return render(
-        request,
-        "token_details.html",
-        {"token": token, "installed_apps_data": installed_apps_data},
-    )
-
-
-def update_token_status(token):
-    try:
-        # Find the APIToken entry for the given token
-        token_entry = APIToken.objects.filter(token=token).first()
-
-        # Update the status to 'online' if a matching token is found
-        if token_entry:
-            token_entry.status = "online"
-            token_entry.last_active = timezone.now()
-            token_entry.save()
-            print(f"Status updated to 'online' for token: {token}")
-        else:
-            print(f"No matching token found for status update: {token}")
-
-    except Exception as e:
-        print(f"Error updating status for token: {token}: {e}")
-
-
-@csrf_exempt
-def set_status_offline(request):
-    if request.method == "POST":
-        try:
-            json_data = json.loads(request.body)
-            token = json_data.get("token")
-            token_entry = APIToken.objects.filter(token=token).first()
-            if token_entry:
-                token_entry.status = "offline"
-                token_entry.save()
-                print(f"\nStatus updated to 'offline' for token: {token}")
-                return JsonResponse({"success": True})
-            else:
-                print(f"\nNo matching token found for status update: {token}")
-                return JsonResponse({"success": False, "message": "Token not found"})
-        except Exception as e:
-            print(f"\nError updating status for token: {token}: {e}")
-            return JsonResponse({"success": False, "message": str(e)})
-
-    return JsonResponse({"success": False, "message": "Invalid request method"})
-
-
 @api_view(["DELETE"])
 def delete_token(request, token):
     try:
-        # Reference to the 'status' collection
-        status_ref = db.reference("status")
-        status_data = status_ref.order_by_child("token").equal_to(token).get()
+        # connect to MongoDB
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["commandcontrol"]
 
-        user_token_ref = db.reference("tokens")
-        user_token_data = user_token_ref.order_by_child("token").equal_to(token).get()
+        # Delete data from network stats collection
+        db["myapp_networkstats"].delete_many({"token_id": token})
 
-        cpu_ref = db.reference("cpu_data")
-        cpu_data = cpu_ref.child(token).get()
+        # Delete data from CPU info collection
+        db["myapp_cpuinfo"].delete_many({"token_id": token})
 
-        network_ref = db.reference("network_data")
-        network_data = network_ref.child(token).get()
+        # Delete data from installed apps collection
+        db["myapp_installedapp"].delete_many({"token_id": token})
 
-        # Delete all matching token entries
-        if status_data:
-            for status_key in status_data.keys():
-                status_ref.child(status_key).delete()
+        # Delete token from APIToken collection
+        db["myapp_apitoken"].delete_one({"token": token})
 
-        if cpu_data:
-            cpu_ref.child(token).delete()
-
-        if network_data:
-            network_ref.child(token).delete()
-
-        if user_token_data:
-            for token_key in user_token_data.keys():
-                user_token_ref.child(token_key).delete()
-
-        return Response({"success": True, "message": "Token deleted successfully"})
-
+        return JsonResponse({"success": True, "message": "Token deleted successfully"})
     except Exception as e:
-        return Response({"success": False, "error": str(e)})
+        return JsonResponse(
+            {"success": False, "message": f"An error occurred: {str(e)}"}, status=500
+        )
 
 
+# CPU Stats Storage and Viewing
 @csrf_exempt
 def store_cpu_data(request):
     try:
@@ -336,33 +301,23 @@ def store_cpu_data(request):
             timestamp, timezone.get_current_timezone()
         )
 
-        # Create or update CPUInfo object
-        cpu_info, created = CPUInfo.objects.update_or_create(
+        # Create new CPUInfo object
+        cpu_info = CPUInfo.objects.create(
             token=token,
-            defaults={
-                "timestamp": timestamp_aware,
-                "cpu_count": cpu_count,
-                "threads": threads,
-                "cpu_percent": cpu_percent,
-                "cpu_freq_value": cpu_freq_value,
-                "percent_per_cpu": percent_per_cpu,
-            },
+            timestamp=timestamp_aware,
+            cpu_count=cpu_count,
+            threads=threads,
+            cpu_percent=cpu_percent,
+            cpu_freq_value=cpu_freq_value,
+            percent_per_cpu=percent_per_cpu,
         )
 
-        if created:
-            print("\nCreated new CPU data:", cpu_info)
-            response_data = {
-                "status": "success",
-                "message": "New CPU data stored successfully",
-                "data_id": cpu_info.id,
-            }
-        else:
-            print("\nUpdated existing CPU data:", cpu_info)
-            response_data = {
-                "status": "success",
-                "message": "CPU data updated successfully",
-                "data_id": cpu_info.id,
-            }
+        print("\nCreated new CPU data:", cpu_info)
+        response_data = {
+            "status": "success",
+            "message": "New CPU data stored successfully",
+            "data_id": cpu_info.id,
+        }
 
         print("\nSending success response...")
         return JsonResponse(response_data)
@@ -388,18 +343,30 @@ def cpu_info_page(request, token):
         collection = db["myapp_cpuinfo"]
 
         # Fetch all CPU data for the specified token
-        cpu_data = collection.find_one({"token_id": token}, sort=[("_id", -1)])
+        cpu_data = list(collection.find({"token_id": token}, sort=[("_id", -1)]))
 
         if cpu_data:
+            # Get the last fetched CPU data
+            last_cpu_data = cpu_data[0]
+            percent_per_cpu_values = last_cpu_data.get("percent_per_cpu", [])
+
+            labels = [f"CPU {i+1}" for i in range(len(percent_per_cpu_values))]
+            percent_per_cpu_values = [
+                value
+                for value in percent_per_cpu_values
+                if isinstance(value, (int, float))
+            ]
             context = {
-                "timestamp": cpu_data.get("timestamp"),
-                "cpu_count": cpu_data.get("cpu_count"),
-                "threads": cpu_data.get("threads"),
-                "cpu_percent": cpu_data.get("cpu_percent"),
-                "cpu_freq_value": cpu_data.get("cpu_freq_value"),
-                "percent_per_cpu": cpu_data.get("percent_per_cpu"),
+                "timestamp": last_cpu_data.get("timestamp"),
+                "cpu_count": last_cpu_data.get("cpu_count"),
+                "threads": last_cpu_data.get("threads"),
+                "cpu_percent": last_cpu_data.get("cpu_percent"),
+                "cpu_freq_value": last_cpu_data.get("cpu_freq_value"),
+                "percent_per_cpu": last_cpu_data.get("percent_per_cpu"),
+                "percent_per_cpu_labels": labels,
+                "percent_per_cpu_values": percent_per_cpu_values,
             }
-            print(context)
+
             return render(request, "cpu_info.html", context)
         else:
             return render(
@@ -415,7 +382,7 @@ def cpu_info_page(request, token):
         )
 
 
-# /api/network_data
+# Network Stats Storage and Viewing
 @csrf_exempt
 def store_network_data(request):
     try:
@@ -438,9 +405,7 @@ def store_network_data(request):
             }
             return JsonResponse(response_data, status=400)
 
-        network_data_list = data.get(
-            "data", []
-        )  # Fetch the 'data' key from the JSON payload
+        network_data_list = data.get("data", [])
         if not network_data_list:
             response_data = {
                 "status": "error",
@@ -448,20 +413,24 @@ def store_network_data(request):
             }
             return JsonResponse(response_data, status=400)
 
-        # Construct a dictionary to hold all interface data
+        # Combine all interface data into a single dictionary
         all_interface_data = {}
         for network_data in network_data_list:
+            timestamp_str = network_data.get("timestamp")
+            timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+            timestamp_aware = timezone.make_aware(
+                timestamp, timezone.get_current_timezone()
+            )
             iface = network_data.get("iface")
-            if not iface:
-                print("Interface name is missing. Skipping...")
+            if not iface or not timestamp_aware:
+                print("Interface name and Timestamp is missing. Skipping...")
                 continue
 
-            # Add interface data to the dictionary
             all_interface_data[iface] = network_data.get("data", {})
 
-        # Create or update the NetworkStats object with all interface data
-        network_stats, created = NetworkStats.objects.update_or_create(
-            token=token, defaults={"data": all_interface_data}
+        # Create a new NetworkStats object for each request
+        NetworkStats.objects.create(
+            token=token, timestamp=timestamp_aware, data=all_interface_data
         )
 
         response_data = {
@@ -491,74 +460,45 @@ def store_network_data(request):
 
 def network_info_page(request, token):
     try:
-        # Assuming 'network_data' is the reference to the desired location in your Firebase
-        network_data_ref = db.reference(f"network_data/{token}")
-        cpu_data_ref = db.reference(f"cpu_data/{token}")
+        # Connect to MongoDB
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["commandcontrol"]
+        collection = db["myapp_networkstats"]
 
         # Fetch all network data for the specified token
-        network_data = network_data_ref.get()
+        network_data = collection.find({"token_id": token})
 
         if network_data:
-            # Convert network_data to a format suitable for JSON serialization
-            network_info_serialized = []
+            network_info = []
 
-            for data_section in network_data.get("data", []):
-                for entry in data_section.get("data", []):
-                    network_info_serialized.append(
-                        {
-                            "iface": entry.get("iface", ""),
-                            "data": {
-                                "download": entry["data"].get("download", ""),
-                                "total_upload": entry["data"].get("total_upload", ""),
-                                "upload_speed": entry["data"].get("upload_speed", ""),
-                                "download_speed": entry["data"].get(
-                                    "download_speed", ""
-                                ),
-                            },
-                        }
-                    )
+            # Iterate over each network entity
+            for entity in network_data:
+                entity_data = {"timestamp": entity.get("timestamp"), "interfaces": []}
 
-            last_data_section = network_data.get("data", [])[-1]
-            last_data_serialized = [
-                {
-                    "iface": entry.get("iface", ""),
-                    "data": {
-                        "download": entry["data"].get("download", ""),
-                        "total_upload": entry["data"].get("total_upload", ""),
-                        "upload_speed": entry["data"].get("upload_speed", ""),
-                        "download_speed": entry["data"].get("download_speed", ""),
-                    },
-                }
-                for entry in last_data_section.get("data", [])
-            ]
+                # Iterate over each interface and its data
+                for iface, data in entity.get("data", {}).items():
+                    entity_data["interfaces"].append({"interface": iface, "data": data})
 
-            username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
+                network_info.append(entity_data)
 
             context = {
-                "username": username,
-                "network_info": network_info_serialized,
-                "all_data_sections": network_data.get("data", []),
-                "last_data_section": last_data_serialized,
+                "network_info": network_info,
             }
+            print(context)
 
             if request.headers.get("Content-Type") == "application/json":
                 # Return JSON response for API requests
                 response_data = {
-                    "success": True,
-                    "username": username,
-                    "network_info": network_info_serialized,
-                    "all_data_sections": network_data.get("data", []),
-                    "last_data_section": last_data_serialized,
+                    "status": True,
+                    "network_info": network_info,
                 }
                 return JsonResponse(response_data)
             else:
-                # Render HTML template for regular requests
                 return render(request, "network_info.html", context)
-
         else:
             response_data = {
                 "success": False,
-                "message": f"No data found for network with token: {token}",
+                "message": f"No data found for token: {token}",
             }
             if request.headers.get("Content-Type") == "application/json":
                 return JsonResponse(response_data, status=404)
@@ -566,9 +506,8 @@ def network_info_page(request, token):
                 return render(
                     request,
                     "network_info.html",
-                    {"error_message": f"No data found for network with token: {token}"},
+                    {"error_message": f"No data found for token: {token}"},
                 )
-
     except Exception as e:
         response_data = {
             "success": False,

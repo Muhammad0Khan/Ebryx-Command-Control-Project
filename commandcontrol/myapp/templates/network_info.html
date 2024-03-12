@@ -14,15 +14,13 @@
         </nav>
     </div>
 
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body">
-            <h2>Username: {{ username }}</h2>
-            <h3>WIFI (en0)</h3>
-            <canvas id="networkChart" width="400" height="200"></canvas>
-
+            <h3>Last Fetched Network Information</h3>
             <table class="table mt-4">
                 <thead>
                     <tr>
+                        <th>Timestamp</th>
                         <th>Interface</th>
                         <th>Download</th>
                         <th>Total Upload</th>
@@ -31,96 +29,103 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for entry in last_data_section %}
+                    {% if network_info %}
+                        {% with last_entry=network_info|last %}
+                            {% for interface_data in last_entry.interfaces %}
+                                <tr>
+                                    <td>{{ last_entry.timestamp }}</td>
+                                    <td>{{ interface_data.interface }}</td>
+                                    <td>{{ interface_data.data.download }}</td>
+                                    <td>{{ interface_data.data.total_upload }}</td>
+                                    <td>{{ interface_data.data.upload_speed }}</td>
+                                    <td>{{ interface_data.data.download_speed }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endwith %}
+                    {% else %}
                         <tr>
-                            <td>{{ entry.iface }}</td>
-                            <td>{{ entry.data.download }}</td>
-                            <td>{{ entry.data.total_upload }}</td>
-                            <td>{{ entry.data.upload_speed }}</td>
-                            <td>{{ entry.data.download_speed }}</td>
+                            <td colspan="6">No data available</td>
                         </tr>
-                    {% endfor %}
+                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
-</div>
 
-<script>
-    // Function to convert data to MB
-    function convertToMB(value) {
-        // Parse the value and extract the numeric part
-        var numericValue = parseFloat(value);
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3>Network Data over Time (en0)</h3>
+            <canvas id="networkChart" width="400" height="200"></canvas>
+        </div>
+    </div>
 
-        // Extract the unit part (assuming it's at the end of the string)
-        var unit = value.replace(numericValue, '').trim().toUpperCase();
+    <script>
+        function convertToMB(value) {
+            var numericValue = parseFloat(value);
+            var unit = value.replace(numericValue, '').trim().toUpperCase();
 
-        // Convert to MB based on the unit
-        if (unit === 'GB') {
-            return numericValue * 1024; // Convert GB to MB
+            if (unit === 'GB') {
+                return numericValue * 1024;
+            }
+            return numericValue;
         }
 
-        return numericValue;
-    }
+        document.addEventListener('DOMContentLoaded', function () {
+            var labels = [];
+            var uploadData = [];
+            var downloadData = [];
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var dataPoints = [];
-        var uploadData = [];
-        var downloadData = [];
+            {% for entry in network_info %}
+                {% if entry.interfaces %}
+                    {% for interface_data in entry.interfaces %}
+                        {% if interface_data.interface == 'en0' %}
+                            // Convert GB to MB if necessary
+                            labels.push("{{ entry.timestamp }}");
+                            uploadData.push(convertToMB("{{ interface_data.data.total_upload }}"));
+                            downloadData.push(convertToMB("{{ interface_data.data.download }}"));
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
 
-        {% for entry in network_info %}
-            {% if entry.iface == 'en0' %}
-                uploadData.push(convertToMB("{{ entry.data.total_upload }}"));
-                downloadData.push(convertToMB("{{ entry.data.download }}"));
-            {% endif %}
-        {% endfor %}
-
-        // Generate data points based on the number of entries
-        for (var i = 0; i < uploadData.length; i++) {
-            dataPoints.push(i * 30); // Assuming each data point corresponds to a 30-second interval
-        }
-
-        console.log(dataPoints, downloadData, uploadData);
-
-
-        var ctx = document.getElementById('networkChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dataPoints,
-                datasets: [{
-                    label: 'Upload (MB)',
-                    data: uploadData,
-                    borderColor: 'rgba(255, 0, 0, 1)', // Red
-                    borderWidth: 1,
-                    fill: false
-                }, {
-                    label: 'Download (MB)',
-                    data: downloadData,
-                    borderColor: 'rgba(0, 128, 0, 1)', // Green
-                    borderWidth: 1,
-                    fill: false
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        position: 'bottom',
-                        title: {
-                            display: true,
-                            text: 'Time (seconds)'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Data (MB)'
-                        }
+            var ctx = document.getElementById('networkChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Upload (MB)',
+                        data: uploadData,
+                        borderColor: 'rgba(255, 0, 0, 1)', // Red
+                        borderWidth: 1,
+                        fill: false
+                    }, {
+                        label: 'Download (MB)',
+                        data: downloadData,
+                        borderColor: 'rgba(0, 128, 0, 1)', // Green
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Timestamp'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Data (MB)'
+                            }
+                        }]
                     }
                 }
-            }
+            });
         });
-    });
-</script>
+    </script>
+</div>
 
 {% endblock %}

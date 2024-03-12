@@ -35,6 +35,8 @@ def save_network_stats(token):
 
     # get the network I/O stats again per interface
     io_2 = psutil.net_io_counters(pernic=True)
+
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     # initialize the data to gather (a list of dicts)
     data = {"token": token, "data": []}
     for iface, iface_io in io.items():
@@ -45,6 +47,7 @@ def save_network_stats(token):
         )
         data["data"].append(
             {
+                "timestamp": timestamp,
                 "iface": iface,
                 "data": {
                     "download": get_size(io_2[iface].bytes_recv),

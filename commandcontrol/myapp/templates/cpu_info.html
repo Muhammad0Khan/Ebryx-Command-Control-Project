@@ -23,114 +23,90 @@
                 <h5>Threads: {{ threads }}</h5>
                 <h5>CPU Count: {{ cpu_count }}</h5>
                 <h5>CPU Percent: {{ cpu_percent }}</h5>
-				<h5>CPU Frequency: {{ cpu_freq_value }}</h5>
+                <h5>CPU Frequency: {{ cpu_freq_value }}</h5>
                 <h5>Percent Per CPU: {{ percent_per_cpu }}</h5>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Average Over 12 Hours</h5>
-                    <div id="barChart">
-                        <canvas id="perCpuChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Current CPU Utilization</h5>
-                    <div>
-                        <canvas id="TotalDonut" width="335" height="335"></canvas>
-                    </div>
-                </div>
-            </div>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h3>CPU Percent</h3>
+            <canvas id="cpuPercentChart" width="400" height="200"></canvas>
         </div>
     </div>
 
-    <script>
-        // Extract per_cpu_percent array from the context
-        var perCpuPercent = {{ percent_per_cpu|safe }};
+    <div class="card mt-4">
+        <div class="card-body">
+            <h3>Percent Per CPU</h3>
+            <canvas id="percentPerCPUChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
 
-        // Get the canvas element
-        var ctx = document.getElementById('perCpuChart').getContext('2d');
-
-        // Create a bar chart with lighter colors
-        var myChart = new Chart(ctx, {
-            type: 'bar',
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // CPU Percent Chart
+        var cpuPercentValue = {{ cpu_percent|default:0 }};
+        var ctxCpuPercent = document.getElementById('cpuPercentChart').getContext('2d');
+        var cpuPercentChart = new Chart(ctxCpuPercent, {
+            type: 'doughnut',
             data: {
-                labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
+                labels: ['CPU Usage', 'Available'],
                 datasets: [{
-                    label: 'Per CPU Usage (%)',
-                    data: perCpuPercent,
-                    backgroundColor: 'rgba(173, 216, 230, 0.7)', // Lighter turquoise
-                    borderColor: 'rgba(255, 255, 255, 0.8)',
-                    borderWidth: 1,
+                    label: 'CPU Percent',
+                    data: [cpuPercentValue, 100 - cpuPercentValue],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)', // Red for CPU usage
+                        'rgba(54, 162, 235, 0.5)' // Blue for available
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
                 }]
             },
             options: {
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {
-                            color: 'rgba(173, 216, 230, 0.7)' // Lighter text color
-                        },
-                        gridLines:{
-                            color: "rgba(173, 216, 230, 0.7)",
-                            lineWidth:2,
-                            zeroLineColor :"rgba(173, 216, 230, 0.7)",
-                            zeroLineWidth : 2
-                        },
-                    },
-                    x: {
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.8)' // Lighter text color
-                        },
-                        gridLines:{
-                            color: "rgba(173, 216, 230, 0.7)",
-                            lineWidth:2,
-                            zeroLineColor :"rgba(173, 216, 230, 0.7)",
-                            zeroLineWidth : 2
-                        },
-                    }
+                    yAxes: [{
+                        display: false
+                    }],
+                    xAxes: [{
+                        display: false
+                    }]
                 }
             }
         });
-    </script>
 
-    <script>
-		document.addEventListener('DOMContentLoaded', function () {
-    var cpuPercent = {{ cpu_percent }};
-
-    var data = {
-        labels: ["CPU Usage", "Unused"],
-        datasets: [{
-            data: [cpuPercent, 100 - cpuPercent],
-            backgroundColor: ["#36a2eb", "#f87979"]
-        }]
-    };
-
-    var ctx = document.getElementById('TotalDonut').getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: data,
-        options: {
-            cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-            responsive: true,
-            maintainAspectRatio: false,
-            legend: {
-                display: false
+        // Percent Per CPU Chart
+        var percentPerCPUValues = {{ percent_per_cpu_values|safe }};
+        var percentPerCPULabels = {{ percent_per_cpu_labels|safe }};
+        var ctxPercentPerCPU = document.getElementById('percentPerCPUChart').getContext('2d');
+        var percentPerCPUChart = new Chart(ctxPercentPerCPU, {
+            type: 'bar',
+            data: {
+                labels: percentPerCPULabels,
+                datasets: [{
+                    label: 'Percent Per CPU',
+                    data: percentPerCPUValues,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)', // Blue
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
             }
-        }
+        });
     });
-});
-    </script>
-</div>
+</script>
+
 {% endif %}
 {% endblock %}

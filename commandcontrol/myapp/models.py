@@ -27,10 +27,11 @@ class CPUInfo(models.Model):
 
 class NetworkStats(models.Model):
     token = models.ForeignKey(APIToken, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField()
     data = models.JSONField()
 
     def __str__(self):
-        return f"Network Stats - Token: {self.token}"
+        return f"Network Stats - Token: {self.token}, Timestamp: {self.timestamp}"
 
 
 class InstalledApp(models.Model):
