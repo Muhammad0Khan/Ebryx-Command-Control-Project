@@ -3,12 +3,29 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponseServerError
 from myapp.models import *
+from django.http import JsonResponse, HttpResponseServerError
+from myapp.models import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth import logout, authenticate, login
 from datetime import datetime
 import subprocess, json, time, psutil
+import subprocess, json, time, psutil
 from firebase_admin import db
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.utils.crypto import get_random_string
+from .models import *
+from django.shortcuts import render, redirect
+from .serializers import InstalledAppSerializer
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .forms import SignupForm, LoginForm
+from django.views.decorators.http import require_POST
+import pyrebase
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -439,6 +456,41 @@ def cpu_info_page(request, token):
 # /api/network_data
 
 
+# added apis here
+@api_view(["GET"])
+def generate_token(request):
+    # Generate a unique token
+    token = get_random_string(length=40)
+
+    # Store the token in Firestore
+    ref = db.reference("tokens")
+    ref.push().set({"token": token})
+
+    ref_create_online_status = db.reference("status")
+    ref_create_online_status.push().set({"token": token, "status": "offline"})
+
+    # Return the token in the API response
+    return Response({"token": token})
+
+
+def check_token(request, token):
+    try:
+        # Reference to the Firebase Realtime Database node where you store tokens
+        tokens_ref = db.reference("/tokens")
+
+        # Query the database to check if the token exists
+        query = tokens_ref.order_by_child("token").equal_to(token).get()
+        update_token_status(token)
+        set_status_offline(token, delay=30)
+
+        if query:
+            return JsonResponse({"exists": True})
+        else:
+            return JsonResponse({"exists": False})
+    except Exception as e:
+        return JsonResponse({"error": str(e)})
+
+
 @csrf_exempt
 @require_POST
 def store_network_data(request):
@@ -614,6 +666,12 @@ def network_dashboard_view(request):
 
     return render(request, "network_dashboard.html", {"tokens": tokens})
 
+    except Exception as e:
+        response_data = {
+            "status": "error",
+            "message": f"An error occurred: {str(e)}",
+        }
+        return JsonResponse(response_data, status=500)
 
 @firebase_auth_required
 def installed_apps_dashboard_view(request):
@@ -645,6 +703,7 @@ def installed_apps_dashboard_view(request):
 
     return render(request, "installed_apps_dashboard.html", {"tokens": tokens})
 
+            username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
 
 def index_view(request):
     return render(request, 'index.html')

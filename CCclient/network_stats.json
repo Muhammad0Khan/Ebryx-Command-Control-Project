@@ -1,0 +1,248 @@
+{
+  "token": "K5SWoU2Hwc910yjwL8Wi4OBZh9xbE0eXXhmpMrok",
+  "data": [
+    {
+      "iface": "lo0",
+      "data": {
+        "download": "1.26GB",
+        "total_upload": "1.26GB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "gif0",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "stf0",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "anpi0",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "anpi1",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "en3",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "en4",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "en1",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "en2",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "bridge0",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "ap1",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "6.74MB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "en0",
+      "data": {
+        "download": "3.74GB",
+        "total_upload": "1.73GB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "awdl0",
+      "data": {
+        "download": "3.57GB",
+        "total_upload": "14.13MB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "llw0",
+      "data": {
+        "download": "4.86MB",
+        "total_upload": "1.21MB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun0",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun1",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun2",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun3",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun4",
+      "data": {
+        "download": "19.00KB",
+        "total_upload": "19.00KB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun5",
+      "data": {
+        "download": "18.00KB",
+        "total_upload": "25.00KB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun6",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun7",
+      "data": {
+        "download": "0.00B",
+        "total_upload": "0.00B",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "vmenet0",
+      "data": {
+        "download": "3.00KB",
+        "total_upload": "647.00KB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "bridge100",
+      "data": {
+        "download": "5.00KB",
+        "total_upload": "1.26MB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "vmenet1",
+      "data": {
+        "download": "3.00KB",
+        "total_upload": "648.00KB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "bridge101",
+      "data": {
+        "download": "5.00KB",
+        "total_upload": "1.27MB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    },
+    {
+      "iface": "utun8",
+      "data": {
+        "download": "171.00KB",
+        "total_upload": "73.00KB",
+        "upload_speed": "0.00B",
+        "download_speed": "0.00B"
+      }
+    }
+  ]
+}

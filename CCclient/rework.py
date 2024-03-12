@@ -2,10 +2,11 @@ import requests
 import json
 import os
 import time
-from process import *
-from cpu import *
-from installed_software import *
-from network import*
+
+from methods.process import *
+from methods.cpu import *
+from methods.installed_software import *
+from methods.network import*
 
 # Replace the URL with the actual URL of your Django API
 token_response_file = 'token_response.json'
@@ -44,7 +45,7 @@ while True:
                 # sending data here 
                 send_cpu_data(send_cpu_data_api)
                 send_network_stats(send_network_data_api)
-                # get_installed_software(send_installed_apps_api)
+                send_installed_software(send_installed_apps_api)
 
                 print("Monitoring logic executed")
             else:
