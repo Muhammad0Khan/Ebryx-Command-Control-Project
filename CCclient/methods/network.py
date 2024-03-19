@@ -38,22 +38,25 @@ def save_network_stats(token):
     # initialize the data to gather (a list of dicts)
     data = {"token": token, "data": []}
     for iface, iface_io in io.items():
-        # new - old stats gets us the speed
-        upload_speed, download_speed = (
-            io_2[iface].bytes_sent - iface_io.bytes_sent,
-            io_2[iface].bytes_recv - iface_io.bytes_recv,
-        )
-        data["data"].append(
-            {
-                "iface": iface,
-                "data": {
-                    "download": get_size(io_2[iface].bytes_recv),
-                    "total_upload": get_size(io_2[iface].bytes_sent),
-                    "upload_speed": f"{get_size(upload_speed / 1)}",
-                    "download_speed": f"{get_size(download_speed / 1)}",
-                },
-            }
-        )
+        # Check if the interface starts with 'en0' or is named 'lo0'
+        if iface.startswith('en') or iface == 'lo0':
+            # new - old stats gets us the speed
+            upload_speed, download_speed = (
+                io_2[iface].bytes_sent - iface_io.bytes_sent,
+                io_2[iface].bytes_recv - iface_io.bytes_recv,
+            )
+
+            data["data"].append(
+                {
+                    "iface": iface,
+                    "data": {
+                        "download": get_size(io_2[iface].bytes_recv),
+                        "total_upload": get_size(io_2[iface].bytes_sent),
+                        "upload_speed": f"{get_size(upload_speed / 1)}",
+                        "download_speed": f"{get_size(download_speed / 1)}",
+                    },
+                }
+            )
     # update the I/O stats for the next iteration
     io = io_2
     # construct a Pandas DataFrame to print stats in a cool tabular style

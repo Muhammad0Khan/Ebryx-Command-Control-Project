@@ -1,4 +1,5 @@
 {% extends 'dashboard_base.html' %} {% block content %}
+{%load static%}
 <style>
 	table {
 		border-collapse: collapse;
@@ -43,20 +44,37 @@
 			<table class="mt-4">
 				<thead>
 					<tr>
-						<th>Token</th>
+						<th>Host Name</th>
+						<th>User Name</th>
+						<th>Type</th>
 						<th>Status</th>
-						<th>Network Stats</th>
+						<th>Delete</th>
 					</tr>
 				</thead>
 				<tbody id="tokenTableBody">
-					{% for token in tokens %}
-					<tr>
-						<td>{{ token.token }}</td>
-						<td
-							class="status"
-							style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
-							{% if token.status == 'online' %}Online{% else %}Offline{% endif
-							%}
+					
+		{% for token in tokens %}
+				<tr>
+						<td>{{ token.system_data.hostname }}</td>
+						<td>{{ token.system_data.username }}</td>
+						<td style="max-width: 100px;">
+							
+							<span>
+									{% if token.system_data.operating_system == "MacOS" %}
+											<img src="{% static "assets/img/macOS.png" %}" style="max-width: 25%; height: auto;">
+									{% elif token.system_data.operating_system == "Windows" %}
+											<img src="{% static "assets/img/Windows.png" %}" style="max-width: 35%; height: auto;">
+									{% endif %}
+							</span>
+					</td>            <td
+								class="status"
+								style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
+								{% if token.status == 'online' %}
+										Online
+	
+								{% else %}
+										Offline
+								{% endif %}
 						</td>
 						<td>
 							<a

@@ -1,32 +1,11 @@
+import datetime
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from django.http import JsonResponse, HttpResponseServerError
+from django.http import JsonResponse
 from myapp.models import *
-from django.http import JsonResponse, HttpResponseServerError
-from myapp.models import *
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.contrib.auth import logout, authenticate, login
-from django.contrib.auth import logout, authenticate, login
-from datetime import datetime
-import subprocess, json, time, psutil
-import subprocess, json, time, psutil
+
+import json, time
 from firebase_admin import db
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.utils.crypto import get_random_string
-from .models import *
-from django.shortcuts import render, redirect
-from .serializers import InstalledAppSerializer
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .forms import SignupForm, LoginForm
-from django.views.decorators.http import require_POST
-import pyrebase
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.utils.crypto import get_random_string
@@ -42,6 +21,8 @@ import pyrebase
 from .firebase_init import initialize_firebase
 from django.urls import reverse
 from functools import wraps
+
+from myapp.methods import *
 
 try:
     firebase_admin = initialize_firebase()
@@ -75,16 +56,22 @@ def logout_view(request):
 def generate_token(request):
     # Generate a unique token
     token = get_random_string(length=40)
+    
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     # Store the token in Firestore
     ref = db.reference("tokens")
-    ref.push().set({"token": token})
+    ref.push().set({"token": token, "generation_timestamp" : timestamp })
 
     ref_create_online_status = db.reference("status")
     ref_create_online_status.push().set({"token": token, "status": "offline"})
 
+    message = "new system added"
+    type = "New System"
+    set_notification(message, type)
     # Return the token in the API response
     return Response({"token": token})
+
 
 
 def check_token(request, token):
@@ -200,17 +187,16 @@ def login_view(request):
 
 @firebase_auth_required
 def dashboard_view(request):
-    # Assuming you have a Firebase Admin instance initialized
-    # Reference to the 'tokens' collection
     tokens_ref = db.reference("tokens")
-    # Reference to the 'status' collection
     status_ref = db.reference("status")
-    # Retrieve token data
+    system_ref = db.reference("system_data")
+    notifications_ref= db.reference("notifications")
+    
     tokens_data = tokens_ref.order_by_child("token").get()
-    # Retrieve status data
     status_data = status_ref.order_by_child("token").get()
-    # print(status_data)
-    # Create a list of tokens with details, including matching status
+    system_data = system_ref.order_by_child("token").get()
+    notifications_data= notifications_ref.get()
+
     tokens = []
     systems_online = 0
 
@@ -225,26 +211,29 @@ def dashboard_view(request):
             None,
         )
         status = status_data.get(status_key, {}) if status_key else {}
-        if status['status']=='online':
-            systems_online+=1
+        if status.get('status') == 'online':
+            systems_online += 1
 
-        # Create a dictionary with token details and status
+        # Check if there is system data for the token
+        system_details = system_data.get(token["token"], {})  # Fetch system details based on token
+
+        # Create a dictionary with token details, status, and system data
         token_details = {
             "token": token["token"],
             "details_url": f'/token-details/{token["token"]}/',
             "cpu_info": f'/api/cpu_info/{token["token"]}/',
             "status": status.get("status", "N/A"),  # Use 'N/A' if no status found
-        }        
+            "system_data": system_details  # Include system data
+        }
 
         tokens.append(token_details)
-    print (tokens)
-    
+    print (notifications_data)
     dashboard_data = {
         "tokens": tokens,
-        "online_count": systems_online
+        "online_count": systems_online,
+        "notifications": notifications_data, 
     }
     return render(request, "dashboard.html", dashboard_data)
-
 
 @firebase_auth_required
 def cpu_dashboard_view(request):
@@ -341,27 +330,53 @@ def delete_token(request, token):
     try:
         # Reference to the 'status' collection
         status_ref = db.reference("status")
-
-        # Find the status entry for the given token
         status_data = status_ref.order_by_child("token").equal_to(token).get()
 
-        # Delete the token entry if a matching status is found
+        user_token_ref = db.reference("tokens")
+        user_token_data = user_token_ref.order_by_child("token").equal_to(token).get()
+
+        cpu_ref = db.reference("cpu_data")
+        cpu_data = cpu_ref.child(token).get()
+
+        network_ref = db.reference("network_data")
+        network_data = network_ref.child(token).get()
+
+        system_ref = db.reference("system_data")
+        system_data = system_ref.child(token).get()
+        hostname = system_data.get('hostname', None)
+
+        installed_apps_ref= db.reference("installed_apps")
+        installed_app_data= installed_apps_ref.chid(token).get()
+
+        # Delete all matching token entries
         if status_data:
-            status_key = list(status_data.keys())[0]
-            status_ref.child(status_key).delete()
-            return Response(
-                {"success": True, "message": f"Token {token} deleted successfully"}
-            )
-        else:
-            return Response(
-                {
-                    "success": False,
-                    "message": f"No matching status found for token: {token}",
-                }
-            )
+            for status_key in status_data.keys():
+                status_ref.child(status_key).delete()
+
+        if cpu_data:
+            cpu_ref.child(token).delete()
+
+        if network_data:
+            network_ref.child(token).delete()
+
+        if user_token_data:
+            for token_key in user_token_data.keys():
+                user_token_ref.child(token_key).delete()
+
+        if system_data:
+            system_ref.child(token).delete()
+
+        if installed_app_data:
+            installed_apps_ref.child(token).delete()     
+
+
+        message = "System " + hostname + " was deleted"
+        type = "delete"
+        set_notification(message, type)       
+        return Response({"success": True, "message": "Token deleted successfully"})
+
     except Exception as e:
         return Response({"success": False, "error": str(e)})
-
 
 @csrf_exempt
 @require_POST
@@ -456,40 +471,6 @@ def cpu_info_page(request, token):
 # /api/network_data
 
 
-# added apis here
-@api_view(["GET"])
-def generate_token(request):
-    # Generate a unique token
-    token = get_random_string(length=40)
-
-    # Store the token in Firestore
-    ref = db.reference("tokens")
-    ref.push().set({"token": token})
-
-    ref_create_online_status = db.reference("status")
-    ref_create_online_status.push().set({"token": token, "status": "offline"})
-
-    # Return the token in the API response
-    return Response({"token": token})
-
-
-def check_token(request, token):
-    try:
-        # Reference to the Firebase Realtime Database node where you store tokens
-        tokens_ref = db.reference("/tokens")
-
-        # Query the database to check if the token exists
-        query = tokens_ref.order_by_child("token").equal_to(token).get()
-        update_token_status(token)
-        set_status_offline(token, delay=30)
-
-        if query:
-            return JsonResponse({"exists": True})
-        else:
-            return JsonResponse({"exists": False})
-    except Exception as e:
-        return JsonResponse({"error": str(e)})
-
 
 @csrf_exempt
 @require_POST
@@ -545,67 +526,53 @@ def network_info_page(request, token):
     try:
         # Assuming 'network_data' is the reference to the desired location in your Firebase
         network_data_ref = db.reference(f"network_data/{token}")
-        cpu_data_ref = db.reference(f"cpu_data/{token}")
+        system_data_ref = db.reference(f"system_data/{token}")
 
         # Fetch all network data for the specified token
         network_data = network_data_ref.get()
+        system_data = system_data_ref.get()
+        hostname = system_data['hostname']
+
+        network_data = network_data_ref.get()
+        system_data = system_data_ref.get()
+
+        timestamp = []
+        download_data = []
+        upload_data = []
+
+        last_data_section = []  
+        if network_data['data']:
+            last_data_section = network_data['data'][-1]['data']            
 
         if network_data:
-            # Convert network_data to a format suitable for JSON serialization
-            network_info_serialized = []
+    
+            for entry in network_data['data']:
+                for iface_data in entry['data']:
+                    if iface_data['iface'] == 'en0':
+                        timestamp.append(entry['timestamp'])
+                        download_data.append(iface_data['data']['download'])
+                        upload_data.append(iface_data['data']['total_upload'])
+                        break  
 
-            for data_section in network_data.get("data", []):
-                for entry in data_section.get("data", []):
-                    network_info_serialized.append(
-                        {
-                            "iface": entry.get("iface", ""),
-                            "data": {
-                                "download": entry["data"].get("download", ""),
-                                "total_upload": entry["data"].get("total_upload", ""),
-                                "upload_speed": entry["data"].get("upload_speed", ""),
-                                "download_speed": entry["data"].get(
-                                    "download_speed", ""
-                                ),
-                            },
-                        }
-                    )
-
-            last_data_section = network_data.get("data", [])[-1]
-            last_data_serialized = [
-                {
-                    "iface": entry.get("iface", ""),
-                    "data": {
-                        "download": entry["data"].get("download", ""),
-                        "total_upload": entry["data"].get("total_upload", ""),
-                        "upload_speed": entry["data"].get("upload_speed", ""),
-                        "download_speed": entry["data"].get("download_speed", ""),
-                    },
-                }
-                for entry in last_data_section.get("data", [])
-            ]
-
-            username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
-
-            context = {
-                "username": username,
-                "network_info": network_info_serialized,
-                "all_data_sections": network_data.get("data", []),
-                "last_data_section": last_data_serialized,
+            graph_data = {
+                "timestamp": timestamp, 
+                "download_data" : download_data, 
+                "upload_data" : upload_data, 
+                "last_data_section" : last_data_section, 
             }
+            
 
             if request.headers.get("Content-Type") == "application/json":
                 # Return JSON response for API requests
                 response_data = {
                     "success": True,
-                    "username": username,
-                    "network_info": network_info_serialized,
+                    "hostname": hostname,
                     "all_data_sections": network_data.get("data", []),
-                    "last_data_section": last_data_serialized,
                 }
                 return JsonResponse(response_data)
             else:
                 # Render HTML template for regular requests
-                return render(request, "network_info.html", context)
+                return render(request, "network_info.html", graph_data)
 
         else:
             response_data = {
@@ -635,14 +602,16 @@ def network_info_page(request, token):
                 {"error_message": f"An error occurred: {str(e)}"},
             )
 
-
 @firebase_auth_required
 def network_dashboard_view(request):
     tokens_ref = db.reference("tokens")
-    status_ref = db.reference("status")
-
+    status_ref = db.reference("status")    
     tokens_data = tokens_ref.order_by_child("token").get()
     status_data = status_ref.order_by_child("token").get()
+
+    system_ref = db.reference("system_data")
+    system_data = system_ref.order_by_child("token").get()
+    
 
     tokens = []
     for token_key, token in tokens_data.items():
@@ -655,23 +624,20 @@ def network_dashboard_view(request):
             None,
         )
         status = status_data.get(status_key, {}) if status_key else {}
+        system_details = system_data.get(token["token"], {}) 
+
 
         token_details = {
             "token": token["token"],
             "network_info": f'/api/network_info/{token["token"]}/',
             "status": status.get("status", "N/A"),
+            "system_data": system_details
         }
-        print(token_details)
+        # print(token_details)
         tokens.append(token_details)
 
     return render(request, "network_dashboard.html", {"tokens": tokens})
 
-    except Exception as e:
-        response_data = {
-            "status": "error",
-            "message": f"An error occurred: {str(e)}",
-        }
-        return JsonResponse(response_data, status=500)
 
 @firebase_auth_required
 def installed_apps_dashboard_view(request):
@@ -703,10 +669,64 @@ def installed_apps_dashboard_view(request):
 
     return render(request, "installed_apps_dashboard.html", {"tokens": tokens})
 
-            username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
-
 def index_view(request):
     return render(request, 'index.html')
 
 def blank_view(request):
     return render(request, 'blank.html')
+
+@csrf_exempt
+@require_POST
+def store_system_data(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get("token")
+
+        if not token:
+            response_data = {
+                "status": "error",
+                "message": "Token is required in the JSON data.",
+            }
+            return JsonResponse(response_data, status=400)
+
+        system_data_ref = db.reference(f"system_data/{token}")
+
+        # Overwrite existing data with new data
+        system_data_ref.set(data)
+
+        response_data = {
+            "status": "success",
+            "message": "System data stored successfully",
+            "data_id": token  # Use token as data_id
+        }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        response_data = {
+            "status": "error",
+            "message": "Invalid JSON data",
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        response_data = {
+            "status": "error",
+            "message": f"An error occurred: {str(e)}",
+        }
+        return JsonResponse(response_data, status=500)
+
+
+def set_notification(message, type):
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    read = False
+    context = {
+        "timestamp": timestamp, 
+        "message": message, 
+        "type": type, 
+        "read": read
+    }
+
+    notification_ref = db.reference("notifications")
+    notification_ref.push(context)
+

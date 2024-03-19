@@ -3,9 +3,6 @@ import time
 import json
 import os
 import requests
-import platform
-import socket
-
 
 def send_cpu_data(api="http://127.0.0.1:8000/myapp/api/cpu_data/"):
     if os.path.exists("cpu_data.json"):
@@ -30,11 +27,8 @@ def send_cpu_data(api="http://127.0.0.1:8000/myapp/api/cpu_data/"):
 def get_cpu_data(token):
     try:
         # Get CPU Information
-        cpu_info = psutil.cpu_stats()
         cpu_count = psutil.cpu_count()
         cpu_percent = psutil.cpu_percent(interval=None)
-        system_name = platform.system()
-        hostname = socket.gethostname()
 
         try:
             cpu_freq = psutil.cpu_freq()
@@ -50,16 +44,12 @@ def get_cpu_data(token):
         # Get current Timestamp
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-        username = psutil.users()[0].name
 
         # Save CPU Information to a JSON file
         cpu_data = {
             "token": token,
             "cpu_count": cpu_count,
             "threads": threads,
-            "system_name": system_name,
-            "hostname": hostname,
-            "username": username,
             "data": {
                 "timestamp": timestamp,
                 "cpu_usage": cpu_percent,
@@ -73,6 +63,3 @@ def get_cpu_data(token):
     except KeyboardInterrupt:
         print("Data has been saved to cpu_info.json.")
 
-
-if __name__ == "__main__":
-    get_cpu_data()

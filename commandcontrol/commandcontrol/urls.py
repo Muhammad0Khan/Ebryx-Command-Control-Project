@@ -45,4 +45,6 @@ urlpatterns = [
     path("api/network_data/", store_network_data, name="network_data"),
     path("index/", index_view, name="index"),
     path("blank", blank_view, name="blank"),
+    path("api/system_data/", store_system_data, name="system_data" ), 
+
 ]

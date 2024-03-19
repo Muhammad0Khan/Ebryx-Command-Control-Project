@@ -74,7 +74,3 @@ def save_data_to_json(token, data, filename):
         json.dump({"token": token, "data": data}, json_file, indent=2)
         print(f"Token and data saved to {filename}.")
 
-
-if __name__ == "__main__":
-    # Get the list of installed software modified in the last 5 days
-    modified_installed_software = get_installed_software()

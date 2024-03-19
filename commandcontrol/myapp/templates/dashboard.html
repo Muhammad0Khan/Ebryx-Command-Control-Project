@@ -1,4 +1,5 @@
 {% extends 'dashboard_base.html' %} {% block content %}
+{%load static%}
 <style>
 	table {
 		border-collapse: collapse;
@@ -38,64 +39,13 @@
 		</nav>
 	</div>
 
-	<div class="card">
-		<div class="card-body">
-			<table class="mt-4">
-				<thead>
-					<tr>
-						<th>System Name</th>
-						<th>Type</th>
-						<th>Status</th>
-						<th>Manage</th>
-						<th>Delete</th>
-					</tr>
-				</thead>
-				<tbody id="tokenTableBody">
-					
-    {% for token in tokens %}
-        <tr>
-            <td>{{ token.token }}</td>
-            <td>MACOS</td>
-            <td
-                class="status"
-                style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
-                {% if token.status == 'online' %}
-                    Online
-
-                {% else %}
-                    Offline
-                {% endif %}
-            </td>
-
-						<td>
-							<button class="btn btn-primary delete-btn w-96">
-								Delete
-							</button>
-						</td>
-						<td>
-							<button
-								class="btn btn-primary delete-btn w-96"
-								onclick="deleteToken('{{ token.token }}')">
-								Delete
-							</button>
-						</td>
-					</tr>
-					{% endfor %}
-
-				</tbody>
-			</table>
-		</div>
-	</div>
-
-	
-
 
 	<div class="row">
 		<!-- Left side columns -->
 		<div class="col-lg-8">
 			<div class="row">
 				<!-- Online Systems Card -->
-				<div class="col-xxl-4 col-md-6">
+				<div class="col-xxl-6 col-md-6">
 					<div class="card info-card sales-card">
 
 						<div class="card-body">
@@ -114,7 +64,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-xxl-4 col-md-6">
+				<div class="col-xxl-6 col-md-6">
 					<div class="card info-card revenue-card">
 
 						<div class="card-body">
@@ -135,6 +85,33 @@
 					</div>
 				</div>
 			</div>
+		</div>
+		<div class="col-md-4 ">
+			
+				<div class="card " style="height: 160px; ">
+						<div class="card-body" style="overflow-y: auto;">
+								<h5 class="card-title">Recent Activity <span>| Today</span></h5>
+								<div></div>
+								<div class="activity" >
+										{% for key, notification in notifications.items %}
+										<div class="activity-item d-flex">
+												<div class="activite-label">{{ notification.timestamp }}</div>
+												{% if notification.type == 'delete' %}
+												<i class="bi bi-circle-fill activity-badge text-danger align-self-start"></i>
+												{% else %}
+												<i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
+												{% endif %}
+												<div class="activity-content">
+														{{ notification.message }}
+												</div>
+										</div>
+										<!-- End activity item-->
+										{% endfor %}
+								</div>
+						</div>
+				</div>
+		</div>
+		
 		</div>
 	<script>
 		// Reload data every 5 seconds
@@ -169,5 +146,57 @@
 				.catch(error => console.error("Error deleting token:", error));
 		}
 	</script>
+</div>
+
+<div class="card">
+	<div class="card-body">
+		<table class="mt-4">
+			<thead>
+				<tr>
+					<th>Host Name</th>
+					<th>User Name</th>
+					<th>Type</th>
+					<th>Status</th>
+					<th>Delete</th>
+				</tr>
+			</thead>
+			<tbody id="tokenTableBody">
+				
+	{% for token in tokens %}
+			<tr>
+					<td>{{ token.system_data.hostname }}</td>
+					<td>{{ token.system_data.username }}</td>
+					<td style="max-width: 100px;">
+						
+						<span>
+								{% if token.system_data.operating_system == "MacOS" %}
+										<img src="{% static "assets/img/macOS.png" %}" style="max-width: 25%; height: auto;">
+								{% elif token.system_data.operating_system == "Windows" %}
+										<img src="{% static "assets/img/Windows.png" %}" style="max-width: 35%; height: auto;">
+								{% endif %}
+						</span>
+				</td>            <td
+							class="status"
+							style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
+							{% if token.status == 'online' %}
+									Online
+
+							{% else %}
+									Offline
+							{% endif %}
+					</td>
+					<td>
+						<button
+							class="btn btn-primary delete-btn w-96"
+							onclick="deleteToken('{{ token.token }}')">
+							Delete
+						</button>
+					</td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+		</table>
+	</div>
 </div>
 {% endblock %}

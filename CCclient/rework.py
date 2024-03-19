@@ -2,7 +2,6 @@ import requests
 import json
 import os
 import time
-
 from methods.process import *
 from methods.cpu import *
 from methods.installed_software import *
