@@ -730,3 +730,47 @@ def set_notification(message, type):
     notification_ref = db.reference("notifications")
     notification_ref.push(context)
 
+
+def reports_view(request):
+    tokens_ref = db.reference("tokens")
+    tokens_data = tokens_ref.order_by_child("token").get()
+    system_ref = db.reference("system_data")
+    system_data = system_ref.order_by_child("token").get()
+
+    tokens = []
+    for token_key, token in tokens_data.items():
+        system_details = system_data.get(token["token"], {})  # Fetch system details based on token
+
+        # Create a dictionary with token details, status, and system data
+        token_details = {
+            "token": token["token"],
+            "generate_report": f'/api/generate_report/{token["token"]}/',
+            "system_data": system_details  # Include system data
+        }
+        tokens.append(token_details)
+
+    print(tokens)
+    return render(request, 'report.html', {'tokens': tokens})
+
+
+
+def generate_reports(request,token): 
+
+    tokens_ref = db.reference("tokens")
+    tokens_data = tokens_ref.order_by_child("token").get()
+    system_ref = db.reference("system_data")
+    system_data = system_ref.order_by_child("token").get()
+
+    tokens = []
+    for token_key, token in tokens_data.items():
+        system_details = system_data.get(token["token"], {})  # Fetch system details based on token
+
+        # Create a dictionary with token details, status, and system data
+        token_details = {
+            "token": token["token"],
+            "generate_report": f'/api/generate_report/{token["token"]}/',
+            "system_data": system_details  # Include system data
+        }
+        tokens.append(token_details)
+
+    return render (request, 'generate_report.html', {'tokens': tokens})

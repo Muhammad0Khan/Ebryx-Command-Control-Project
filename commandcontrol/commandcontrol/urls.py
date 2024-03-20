@@ -46,5 +46,6 @@ urlpatterns = [
     path("index/", index_view, name="index"),
     path("blank", blank_view, name="blank"),
     path("api/system_data/", store_system_data, name="system_data" ), 
-
+    path("report/", reports_view, name="report" ), 
+    path("api/generate_report/<str:token>/", generate_reports, name="generate_report" ), 
 ]

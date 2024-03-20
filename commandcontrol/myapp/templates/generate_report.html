@@ -1,0 +1,42 @@
+{% extends 'dashboard_base.html' %} {% block content %} {%load static%}
+
+<div class="mt-4">
+	<div class="">
+		<h1>Reports</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item">
+					<a href="{% url 'dashboard' %}">Dashboard</a>
+				</li>
+				<li class="breadcrumb-item">
+					<a href="#">Report</a>
+				</li>
+			</ol>
+		</nav>
+	</div>
+
+  <h1>System Reports</h1>
+        {% for token_data in tokens %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>{{ token_data.system_data.hostname }} - {{ token_data.system_data.username }}</h2>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Operating System Details</h5>
+                <p class="card-text">Operating System: {{ token_data.system_data.operating_system }}</p>
+                <p class="card-text">OS Version: {{ token_data.system_data.operating_system_version }}</p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Token: {{ token_data.token }}</li>
+                <li class="list-group-item">Data Upload: 1.03 GB</li>
+                <li class="list-group-item">Data Download: 705 MB</li>
+                <li class="list-group-item">Outages: </li>
+                <li class="list-group-item">Max Connected Time: </li>
+                <li class="list-group-item">Last Connected Time: </li>
+                <li class="list-group-item">Crashes: </li>
+                <li class="list-group-item">Applications Installed: 20</li>
+            </ul>
+        </div>
+        {% endfor %}
+
+{% endblock %}
