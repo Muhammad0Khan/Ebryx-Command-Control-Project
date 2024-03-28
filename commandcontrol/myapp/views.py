@@ -9,10 +9,11 @@ from rest_framework.decorators import api_view
 from django.utils.crypto import get_random_string
 from .models import *
 from django.shortcuts import render, redirect
-from .forms import LoginForm
+from .forms import LoginForm, SignUpForm
 from django.views.decorators.http import require_POST
 from pymongo import MongoClient
 from datetime import datetime
+from django.contrib.auth.models import User
 
 
 # Token Generation, Verification and Status Update
@@ -24,6 +25,7 @@ def generate_token(request):
         token = get_random_string(length=40)
 
         # Store the token in MongoDB
+
         APIToken.objects.create(token=token)
 
         # Update the token status to 'online'
@@ -53,6 +55,24 @@ def check_token(request, token):
     except Exception as e:
         return JsonResponse(
             {"error": f"An error occurred while checking the token: {str(e)}"},
+            status=500,
+        )
+
+
+@csrf_exempt
+def check_username(request, username):
+    try:
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["commandcontrol"]
+        collection = db["auth_user"]
+
+        # Check if the username exists in MongoDB
+        user_exists = collection.find_one({"username": username}) is not None
+        return JsonResponse({"exists": user_exists})
+
+    except Exception as e:
+        return JsonResponse(
+            {"error": f"An error occurred while checking the username: {str(e)}"},
             status=500,
         )
 
@@ -117,6 +137,22 @@ def login_view(request):
     else:
         form = LoginForm()
     return render(request, "registration/login.html", {"form": form})
+
+
+def signup_view(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect("dashboard")
+    else:
+        form = SignUpForm()
+    return render(request, "registration/signup.html", {"form": form})
 
 
 def logout_view(request):
@@ -484,7 +520,6 @@ def network_info_page(request, token):
             context = {
                 "network_info": network_info,
             }
-            print(context)
 
             if request.headers.get("Content-Type") == "application/json":
                 # Return JSON response for API requests
