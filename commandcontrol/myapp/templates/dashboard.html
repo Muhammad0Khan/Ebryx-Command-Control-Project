@@ -44,8 +44,8 @@
                 <thead>
                     <tr>
                         <th>Token</th>
+                        <th>Username</th>
                         <th>Status</th>
-                        <th>Last Active</th>
                         <th>Installed Apps</th>
                         <th>CPU Status</th>
                         <th>Network Stats</th>
@@ -56,10 +56,10 @@
                     {% for token in tokens %}
                     <tr>
                         <td>{{ token.token }}</td>
+                        <td>{{ token.username }}</td>
                         <td class="status" style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
                             {% if token.status == 'online' %}Online{% else %}Offline{% endif %}
                         </td>
-                        <td>{{ token.last_active }}</td>
                         <td>
                             <a href="{{ token.details_url }}">
                                 <button class="btn btn-primary w-96">Installed Apps</button>

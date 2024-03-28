@@ -9,7 +9,6 @@ urlpatterns = [
     path("signup/", signup_view, name="signup"),
     path("logout/", logout_view, name="logout"),
     path("admin/", admin.site.urls),
-    path("api/generate_token/", generate_token, name="generate_token"),
     path("api/set_status_offline/", set_status_offline, name="set_status_offline"),
     path("api/check_token/<str:token>/", check_token, name="check_token"),
     path("api/installed_apps/", store_installed_apps, name="installed_apps"),

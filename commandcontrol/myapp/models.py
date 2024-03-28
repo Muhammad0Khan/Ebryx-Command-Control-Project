@@ -4,12 +4,13 @@ from django.utils import timezone
 
 class APIToken(models.Model):
     token = models.CharField(max_length=40, primary_key=True)
+    username = models.CharField(max_length=150, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=20, default="offline")
 
     def __str__(self):
-        return self.token
+        return f"Token: {self.token}, Username: {self.username}"
 
 
 class CPUInfo(models.Model):

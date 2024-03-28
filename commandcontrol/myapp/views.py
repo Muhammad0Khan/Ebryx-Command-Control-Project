@@ -16,28 +16,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 
-# Token Generation, Verification and Status Update
-@api_view(["GET"])
-@csrf_exempt
-def generate_token(request):
-    try:
-        # Generate a random token
-        token = get_random_string(length=40)
-
-        # Store the token in MongoDB
-
-        APIToken.objects.create(token=token)
-
-        # Update the token status to 'online'
-        update_token_status(token)
-
-        # Return the token in the response
-        return JsonResponse({"token": token})
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
-
+# Token Verification and Status Update
 @csrf_exempt
 def check_token(request, token):
     try:
@@ -249,16 +228,16 @@ def dashboard_view(request):
     for token in tokens_data:
         # Get the status of the token
         status = token.status
-        # Get the last active time of the token
-        last_active = token.last_active
+        # Get the username of the token
+        username = token.username
         # Create a dictionary with token details, status and last active
         token_details = {
             "token": token.token,
+            "username": username,
             "details_url": f"/token-details/{token.token}/",
             "cpu_info": f"/api/cpu_info/{token.token}/",
             "network_info": f"/api/network_info/{token.token}/",
             "status": status if status else "offline",
-            "last_active": last_active.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
         tokens.append(token_details)

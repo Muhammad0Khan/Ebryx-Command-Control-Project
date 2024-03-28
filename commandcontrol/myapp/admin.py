@@ -9,6 +9,7 @@ from myapp.models import *
 class YourModelAdmin(admin.ModelAdmin):
     list_display = (
         "token",
+        "username",
         "created_at",
         "last_active",
         "status",
