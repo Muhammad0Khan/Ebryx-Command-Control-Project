@@ -2,7 +2,7 @@ import requests
 import json
 import os
 import time
-import hashlib
+import signal
 
 from methods.process import *
 from methods.cpu import *
@@ -15,18 +15,23 @@ check_token_api_url = base_url + "/api/check_token/"
 send_installed_apps_api = base_url + "/api/installed_apps/"
 send_cpu_data_api = base_url + "/api/cpu_data/"
 send_network_data_api = base_url + "/api/network_data/"
+set_status_online_api = base_url + "/api/set_status_online/"
 set_status_offline_api = base_url + "/api/set_status_offline/"
 token_response_file = "token_response.json"
 
+client_status = "online"
 
-def notify_server_of_offline_status(token):
-    payload = {"token": token}
-    print(f"Token: {token}")
-    response = requests.post(set_status_offline_api, json=payload)
+
+def notify_server_of_client_status(token, status):
+    payload = {"token": token, "status": status}
+    response = requests.post(
+        set_status_online_api if status == "online" else set_status_offline_api,
+        json=payload,
+    )
     if response.status_code == 200:
-        print("Server notified of offline status")
+        print(f"Server notified of client status: {status}")
     else:
-        print("Error notifying server of offline status")
+        print(f"Error notifying server of client status: {status}")
 
 
 def check_username(username):
@@ -44,12 +49,32 @@ def generate_token(username):
     print("Token Saved.")
 
 
+def update_client_status_to_online(token):
+    notify_server_of_client_status(token, "online")
+
+
+def update_client_status_to_offline(token):
+    notify_server_of_client_status(token, "offline")
+
+
+def handle_keyboard_interrupt(signal, frame):
+    global client_status
+    if client_status == "online":
+        client_status = "offline"
+        update_client_status_to_offline(token)
+        print("Client status set to Offline.")
+    exit(0)
+
+
+# Register the signal handler for keyboard interrupt
+signal.signal(signal.SIGINT, handle_keyboard_interrupt)
+
 while True:
     if os.path.exists(token_response_file):
         with open(token_response_file, "r") as json_file:
             json_response = json.load(json_file)
             token = json_response.get("token")
-        print("Token: ", token)
+            username = json_response.get("username")
     else:
         token = None
 
@@ -61,27 +86,18 @@ while True:
             print("Username does not exist. Please create your account.")
             continue
 
-    if token:
-        check_token_response = requests.get(check_token_api_url + token)
-        get_cpu_data(token)
-        get_installed_software(token)
-        save_network_stats(token)
+    update_client_status_to_online(token)
 
-        if check_token_response.status_code == 200:
-            check_token_json_response = check_token_response.json()
-            if check_token_json_response.get("exists"):
-                send_cpu_data(send_cpu_data_api)
-                send_installed_software(send_installed_apps_api)
-                send_network_stats(send_network_data_api)
+    # Add your data sending logic here
+    get_cpu_data(token)
+    get_installed_software(token)
+    save_network_stats(token)
 
-                print("Data sent to server.")
-            else:
-                print("Token does not exist.")
-        else:
-            print("Error checking token.")
-    else:
-        print("Token not found.")
+    # Send data to the server
+    send_cpu_data(send_cpu_data_api)
+    send_installed_software(send_installed_apps_api)
+    send_network_stats(send_network_data_api)
+    print("Data sent to server.")
 
-    notify_server_of_offline_status(token)
-
+    # Sleep for 30 seconds before sending data again
     time.sleep(30)

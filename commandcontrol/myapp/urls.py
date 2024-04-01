@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout/", logout_view, name="logout"),
     path("admin/", admin.site.urls),
     path("api/set_status_offline/", set_status_offline, name="set_status_offline"),
+    path("api/set_status_online/", update_token_status, name="set_status_online"),
     path("api/check_token/<str:token>/", check_token, name="check_token"),
     path("api/installed_apps/", store_installed_apps, name="installed_apps"),
     path("api/check_username/<str:username>/", check_username, name="check_username"),

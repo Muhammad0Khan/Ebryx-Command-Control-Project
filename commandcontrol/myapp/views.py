@@ -56,22 +56,36 @@ def check_username(request, username):
         )
 
 
-def update_token_status(token):
+@csrf_exempt
+def update_token_status(request):
     try:
-        # Find the APIToken entry for the given token
-        token_entry = APIToken.objects.filter(token=token).first()
+        if request.method == "POST":
+            data = json.loads(request.body)
+            token = data.get("token")
 
-        # Update the status to 'online' if a matching token is found
-        if token_entry:
-            token_entry.status = "online"
-            token_entry.last_active = timezone.now()
-            token_entry.save()
-            print(f"Status updated to 'online' for token: {token}")
+            client = MongoClient("mongodb://localhost:27017/")
+            db = client["commandcontrol"]
+            collection = db["myapp_apitoken"]
+
+            # Find the APIToken entry for the given token
+            token_entry = collection.find_one({"token": token})
+
+            # Update the status to 'online' if a matching token is found
+            if token_entry:
+                collection.update_one(
+                    {"_id": token_entry["_id"]},
+                    {"$set": {"status": "online", "last_active": timezone.now()}},
+                )
+                print(f"Status updated to 'online' for token: {token}")
+            else:
+                print(f"No matching token found for status update: {token}")
+
+            return JsonResponse({"success": True})
         else:
-            print(f"No matching token found for status update: {token}")
-
+            return JsonResponse({"success": False, "message": "Invalid request method"})
     except Exception as e:
         print(f"Error updating status for token: {token}: {e}")
+        return JsonResponse({"success": False, "message": str(e)})
 
 
 @csrf_exempt
