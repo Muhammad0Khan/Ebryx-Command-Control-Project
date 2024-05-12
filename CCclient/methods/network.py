@@ -36,7 +36,17 @@ def save_network_stats(token):
     # get the network I/O stats again per interface
     io_2 = psutil.net_io_counters(pernic=True)
     # initialize the data to gather (a list of dicts)
-    data = {"token": token, "data": []}
+
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+    data = {
+        "token": token,
+        'timestamp': timestamp, 
+        "data": [],
+        
+        }
+    
+
     for iface, iface_io in io.items():
         # Check if the interface starts with 'en0' or is named 'lo0'
         if iface.startswith('en') or iface == 'lo0':

@@ -21,4 +21,6 @@ urlpatterns = [
     path("api/network_info/<str:token>/", network_info_page, name="network_info"),
     path("api/network_data/", store_network_data, name="network_data"),
     path("api/system_data/", store_system_data, name="system_data" ), 
+    path("terminal/", terminal_view, name="terminal" ), 
+    
 ]

@@ -1,4 +1,6 @@
-{% extends 'dashboard_base.html' %} {% block content %} {% comment %}
+{% extends 'dashboard_base.html' %} {% load static %} {% block content %} 
+{%comment %}
+
 <script>
 	var options = {
 		series: [
@@ -52,65 +54,67 @@
 
 <div class="card col-lg-6">
 	<div class="card-body">
-		<h5 class="card-title">Looking here</h5>
+		<h5
+			class="card-title">
+			Looking here
+		</h5>
 
 		<!-- Line Chart -->
 		<div id="reportsChart1"></div>
 
-		<script> 
-			document.addEventListener("DOMContentLoaded", () => {
-				new ApexCharts(document.querySelector("#reportsChart1"), {
-						series: [
-								{
-										name: "Download Data",
-										data: {{ download_data | safe }},
-								},
-								{
-										name: "Upload Data",
-										data: {{ upload_data | safe }},
-								},
-						],
-						chart: {
-								height: 350,
-								type: "area",
-								toolbar: {
-										show: false,
-								},
-						},
-						markers: {
-								size: 4,
-						},
-						colors: ["#4154f1", "#2eca6a"],
-						fill: {
-								type: "gradient",
-								gradient: {
-										shadeIntensity: 1,
-										opacityFrom: 0.3,
-										opacityTo: 0.4,
-										stops: [0, 90, 100],
-								},
-						},
-						dataLabels: {
-								enabled: false,
-						},
-						stroke: {
-								curve: "smooth",
-								width: 2,
-						},
-						xaxis: {
-								type: "datetime",
-								categories: {{ timestamp | safe }},
-						},
-						tooltip: {
-								x: {
-										format: "dd/MM/yy HH:mm",
-								},
-						},
-				}).render();
-		});
-		
-	</script>
-		
+		<script>
+				document.addEventListener("DOMContentLoaded", () => {
+					new ApexCharts(document.querySelector("#reportsChart1"), {
+							series: [
+									{
+											name: "Download Data",
+											data: {{ download_data | safe }},
+									},
+									{
+											name: "Upload Data",
+											data: {{ upload_data | safe }},
+									},
+							],
+							chart: {
+									height: 350,
+									type: "area",
+									toolbar: {
+											show: false,
+									},
+							},
+							markers: {
+									size: 4,
+							},
+							colors: ["#4154f1", "#2eca6a"],
+							fill: {
+									type: "gradient",
+									gradient: {
+											shadeIntensity: 1,
+											opacityFrom: 0.3,
+											opacityTo: 0.4,
+											stops: [0, 90, 100],
+									},
+							},
+							dataLabels: {
+									enabled: false,
+							},
+							stroke: {
+									curve: "smooth",
+									width: 2,
+							},
+							xaxis: {
+									type: "datetime",
+									categories: {{ timestamp | safe }},
+							},
+							tooltip: {
+									x: {
+											format: "dd/MM/yy HH:mm",
+									},
+							},
+					}).render();
+			});
+		</script>
+
 		<!-- End Line Chart -->
 	</div>
 </div>

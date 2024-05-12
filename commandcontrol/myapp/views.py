@@ -774,3 +774,77 @@ def generate_reports(request,token):
         tokens.append(token_details)
 
     return render (request, 'generate_report.html', {'tokens': tokens})
+
+
+ 
+def terminal_view(request): 
+
+    tokens_ref = db.reference("tokens")
+    tokens_data = tokens_ref.order_by_child("token").get()
+    system_ref = db.reference("system_data")
+    system_data = system_ref.order_by_child("token").get()
+
+    tokens = []
+    for token_key, token in tokens_data.items():
+        system_details = system_data.get(token["token"], {})  # Fetch system details based on token
+
+        # Create a dictionary with token details, status, and system data
+        token_details = {
+            "token": token["token"],
+            "generate_terminal": f'/api/generate_terminal/{token["token"]}/',
+            "system_data": system_details  # Include system data
+        }
+        tokens.append(token_details)
+    
+
+    return render (request, 'terminal.html',  {'tokens': tokens})
+
+@csrf_exempt
+def generate_terminal(request, token):
+    if request.method == "POST":
+        # Retrieve command from POST data
+        command = request.POST.get('inputField', '')  # Assuming input field name is 'inputField'
+
+        token_ref = db.reference(f"commands/{token}")
+        command_count = len(token_ref.get() or {})
+
+        # Construct a numbered command entry
+        command_entry = {
+            str(command_count + 1): {
+                "command": command,
+                "response": "" , # Assuming you want an empty response initially
+                "executed": False,  # will help keep track of whats been executed or seen by monitoring app
+            }
+        }
+
+        # Save the numbered command to Firebase Realtime Database under the token
+        token_ref.update(command_entry)
+       
+        print("Received command:", command)
+
+    # If request method is not POST, render the page again with an error message
+    return render(request, 'generate_terminal.html', {'error': 'Invalid request method'})
+
+
+def check_issued_commands(request, token):
+    # Reference to the Firebase Realtime Database node where you store commands
+    command_ref = db.reference("/commands")
+    
+    # Get a snapshot of the commands node
+    commands_snapshot = command_ref.get()
+    
+    # List to store commands matching the token ID
+    matched_commands = []
+    
+    # Iterate through each command in the snapshot
+    for key, value in commands_snapshot.items():
+        if key == token:  # Check if the key matches the token ID
+            # Append the command to the list if it matches
+            matched_commands.append(value[1])
+    
+    return JsonResponse(matched_commands, safe=False)
+
+
+
+
+        

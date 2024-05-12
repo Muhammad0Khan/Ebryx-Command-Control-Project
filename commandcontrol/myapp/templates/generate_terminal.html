@@ -1,0 +1,61 @@
+{% extends 'dashboard_base.html' %} {% block content %} {%load static%}
+
+<div class="mt-4">
+	<div class="">
+		<h1>Terminal</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item">
+					<a href="{% url 'dashboard' %}">Dashboard</a>
+				</li>
+				<li class="breadcrumb-item">
+					<a href="#">Terminal</a>
+				</li>
+				<li class="breadcrumb-item">
+					<a href="#">Connected</a>
+				</li>
+			</ol>
+		</nav>
+	</div>
+
+	<div class="card">
+		<div class="card-body">
+			<div class="row mb-3"></div>
+			<div class="row mb-3">
+				<label class="col-sm-2 col-form-label">Command Line</label>
+				<div class="col-sm-10">
+					<form id="InputForm" method="post">
+						<textarea
+							class="form-control"
+							id="na"
+							name="na"
+							placeholder=""
+							style="height: 200px"
+              readonly
+              ></textarea>
+						<input
+							type="text"
+							class="form-control"
+							id="inputField"
+							name="inputField"
+							placeholder="Single Command Only" />
+						<button type="submit" class="btn btn-primary mt-3">Execute</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document
+			.getElementById("TerminalForm")
+			.addEventListener("submit", function (event) {
+				event.preventDefault(); // Prevent default form submission
+				var selectedToken = document.getElementById("tokenSelect").value;
+				var formAction = "/api/generate_terminal/" + selectedToken + "/";
+				window.location.href = formAction; // Redirect to the constructed URL
+			});
+	</script>
+
+	{% endblock %}
+</div>

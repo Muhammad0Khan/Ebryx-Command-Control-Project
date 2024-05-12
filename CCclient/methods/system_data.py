@@ -29,8 +29,8 @@ def save_system_information(token):
 
 def send_system_data(api="http://127.0.0.1:8000/myapp/api/system_data/"):
     if os.path.exists("system_data.json"):
-        with open("system_data.json", "r") as cpu_data_file:
-            system_data = json.load(system_data)
+        with open("system_data.json", "r") as system_data_file:
+            system_data = json.load(system_data_file)
 
             # Assuming `api` is the endpoint URL where you want to send the JSON data
             try:
