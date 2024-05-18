@@ -21,8 +21,8 @@ import pyrebase
 from .firebase_init import initialize_firebase
 from django.urls import reverse
 from functools import wraps
-
 from myapp.methods import *
+from .functions import *
 
 try:
     firebase_admin = initialize_firebase()
@@ -434,6 +434,10 @@ def cpu_info_page(request, token):
 
         # Fetch the CPU data for the specified token
         cpu_data = cpu_data_ref.get()
+        process_data=  cpu_data
+        timestamps, cpu_usages = get_cpu_12_hours(process_data.get("data", []))
+        print ("looking here",timestamps)
+        print ("looking here",cpu_usages)
 
         if cpu_data:
             # Get the last data section (assuming it's a list of dictionaries)
@@ -452,6 +456,9 @@ def cpu_info_page(request, token):
                     "per_cpu_percent", ""
                 ),
                 "timestamp": last_data_section.get("data", {}).get("timestamp", ""),
+                "CPUtimestamps": timestamps, 
+                "cpu_usages" : cpu_usages, 
+
             }
 
             print(context)
@@ -561,6 +568,7 @@ def network_info_page(request, token):
                 "last_data_section" : last_data_section, 
             }
             
+            print ("looking here",download_data)
 
             if request.headers.get("Content-Type") == "application/json":
                 # Return JSON response for API requests
@@ -845,6 +853,203 @@ def check_issued_commands(request, token):
     return JsonResponse(matched_commands, safe=False)
 
 
+@csrf_exempt
+@require_POST
+def store_ram_data(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get("token")
+
+        if not token:
+            response_data = {
+                "status": "error",
+                "message": "Token is required in the JSON data.",
+            }
+            return JsonResponse(response_data, status=400)
+
+        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
+        cpu_data_ref = db.reference(f"ram_data/{token}")
+
+        # Fetch the existing data array or initialize an empty array
+        existing_data = cpu_data_ref.child("data").get() or []
+
+        # Append the new data section to the array
+        existing_data.append(data)
+
+        # Update the RTDB with the new data array
+        cpu_data_ref.update({"data": existing_data})
+
+        response_data = {
+            "status": "success",
+            "message": "RAM data stored successfully",
+            "data_id": len(existing_data)
+            - 1,  # Index of the last appended data section
+        }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        response_data = {
+            "status": "error",
+            "message": "Invalid JSON data",
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        response_data = {
+            "status": "error",
+            "message": f"An error occurred: {str(e)}",
+        }
+        return JsonResponse(response_data, status=500)
+    
+
+@csrf_exempt
+@require_POST
+def store_disk_data(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get("token")
+
+        if not token:
+            response_data = {
+                "status": "error",
+                "message": "Token is required in the JSON data.",
+            }
+            return JsonResponse(response_data, status=400)
+
+        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
+        cpu_data_ref = db.reference(f"disk_data/{token}")
+
+        # Fetch the existing data array or initialize an empty array
+        existing_data = cpu_data_ref.child("data").get() or []
+
+        # Append the new data section to the array
+        existing_data.append(data)
+
+        # Update the RTDB with the new data array
+        cpu_data_ref.update({"data": existing_data})
+
+        response_data = {
+            "status": "success",
+            "message": "DISK data stored successfully",
+            "data_id": len(existing_data)
+            - 1,  # Index of the last appended data section
+        }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        response_data = {
+            "status": "error",
+            "message": "Invalid JSON data",
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        response_data = {
+            "status": "error",
+            "message": f"An error occurred: {str(e)}",
+        }
+        return JsonResponse(response_data, status=500)    
+    
 
 
-        
+@csrf_exempt
+@require_POST
+def store_ram_data(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get("token")
+
+        if not token:
+            response_data = {
+                "status": "error",
+                "message": "Token is required in the JSON data.",
+            }
+            return JsonResponse(response_data, status=400)
+
+        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
+        cpu_data_ref = db.reference(f"cpu_data/{token}")
+
+        # Fetch the existing data array or initialize an empty array
+        existing_data = cpu_data_ref.child("data").get() or []
+
+        # Append the new data section to the array
+        existing_data.append(data)
+
+        # Update the RTDB with the new data array
+        cpu_data_ref.update({"data": existing_data})
+
+        response_data = {
+            "status": "success",
+            "message": "CPU data stored successfully",
+            "data_id": len(existing_data)
+            - 1,  # Index of the last appended data section
+        }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        response_data = {
+            "status": "error",
+            "message": "Invalid JSON data",
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        response_data = {
+            "status": "error",
+            "message": f"An error occurred: {str(e)}",
+        }
+        return JsonResponse(response_data, status=500)
+    
+
+
+@csrf_exempt
+@require_POST
+def store_disk_data(request):
+    try:
+        data = json.loads(request.body)
+        token = data.get("token")
+
+        if not token:
+            response_data = {
+                "status": "error",
+                "message": "Token is required in the JSON data.",
+            }
+            return JsonResponse(response_data, status=400)
+
+        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
+        cpu_data_ref = db.reference(f"cpu_data/{token}")
+
+        # Fetch the existing data array or initialize an empty array
+        existing_data = cpu_data_ref.child("data").get() or []
+
+        # Append the new data section to the array
+        existing_data.append(data)
+
+        # Update the RTDB with the new data array
+        cpu_data_ref.update({"data": existing_data})
+
+        response_data = {
+            "status": "success",
+            "message": "CPU data stored successfully",
+            "data_id": len(existing_data)
+            - 1,  # Index of the last appended data section
+        }
+
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        response_data = {
+            "status": "error",
+            "message": "Invalid JSON data",
+        }
+        return JsonResponse(response_data, status=400)
+
+    except Exception as e:
+        response_data = {
+            "status": "error",
+            "message": f"An error occurred: {str(e)}",
+        }
+        return JsonResponse(response_data, status=500)    

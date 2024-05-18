@@ -1,56 +1,116 @@
-{% extends 'dashboard_base.html' %}
-{%load static%}
-
-{% block content %}
+{% extends 'dashboard_base.html' %} {%load static%} {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {% if error_message %}
 <p>{{ error_message }}</p>
 {% else %}
 
-<div class="mt-4">
+<div class="">
 	<div class="">
-		<h1>Cpu Stats</h1>
+		<h1>System Performance</h1>
 		<nav>
 			<ol class="breadcrumb">
 				<li class="breadcrumb-item">
 					<a href="{% url 'dashboard' %}">Dashboard</a>
 				</li>
-				<li class="breadcrumb-item"><a href=""> Cpu Stats</a></li>
+				<li class="breadcrumb-item"><a href="">Hardware Status</a></li>
 			</ol>
 		</nav>
 	</div>
 
-	<div class="">
-		<div class="card">
-			<div class="card-body mt-4">
-				<h5>Timestamp: {{ timestamp }}</h5>
-				<h5>System Name: {{ system_name }}</h5>
-				<h5>Hostname: {{ hostname }}</h5>
-				<h5>User Name: {{ username }}</h5>
+	<div class="row">
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title text-center">CPU LOAD</h5>
+					<div>
+						<canvas id="TD1" width="400" height="150"></canvas>
+					</div>
+					<div class="text-center" style="margin-top: -60px">{{cpu_usage}}%</div>
+				</div>
 			</div>
 		</div>
+
+		<div class="col-lg-4">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">CORE PERFORMANCE</h5>
+					<div id="ct2">
+						{% comment %} <canvas id="perCpuChart" width="400" height="200"></canvas> {% endcomment %}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">12 HOUR </h5>
+					<div id="reportsChart1"></div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+	{% comment %} ram section {% endcomment %}
+	<div class="row">
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title text-center">RAM</h5>
+					<div>
+						<canvas id="TD2" width="400" height="150"></canvas>
+					</div>
+					<div class="text-center" style="margin-top: -60px">{{cpu_usage}}%</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title text-center">INFO</h5>
+		
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title text-center">INFO</h5>
+		
+				</div>
+			</div>
+		</div>
+
+		
+
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">READ/WRITE</h5>
+					<div id="reportsChart2">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		
+
+		
 	</div>
 
 	<div class="row">
 		<div class="col-lg-2">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">CPU USAGE</h5>
+					<h5 class="card-title text-center">DISK</h5>
 					<div>
-						<canvas id="TotalDonut" width="335"height="150"></canvas>
+						<canvas id="TD3" width="400" height="150"></canvas>
 					</div>
-				</div>
-			</div>
-		</div> 
-
-		<div class="col-lg-2">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">RAM Usage</h5>
-					<div>
-						<canvas id="TD1" width="335" height="150"></canvas>
-					</div>
+					<div class="text-center" style="margin-top: -60px">{{cpu_usage}}%</div>
 				</div>
 			</div>
 		</div>
@@ -58,72 +118,28 @@
 		<div class="col-lg-2">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">System Utilization</h5>
-					<div>
-						<canvas id="TD2" width="335"height="150"></canvas>
-					</div>
-				</div>
-			</div>
-		</div> 
-		<div class="col-lg-2">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">SWAP Usage</h5>
-					<div>
-						<canvas id="TD3" width="335"height="150"></canvas>
-					</div>
-				</div>
-			</div>
-		</div> 
-		<div class="col-lg-2">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Disk Utilization</h5>
-					<div>
-						<canvas id="TD4" width="335" height="150"></canvas>
-					</div>
-				</div>
-			</div>
-		</div> 
-		<div class="col-lg-2">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">RAM Usage (100ms)</h5>
-					<div>
-						<canvas id="TD5" width="335" height="150"></canvas>
-					</div>
+					<h5 class="card-title text-center">INFO</h5>
+		
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="row">
 		<div class="col-lg-8">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">Average Over 12 Hours</h5>
-					<div id="barChart">
-						<canvas id="perCpuChart" width="400" height="200"></canvas>
+					<h5 class="card-title">READ/WRITE</h5>
+					<div id="reportsChart3">
+						
 					</div>
 				</div>
 			</div>
 		</div>
+
 	</div>
 
-	<div class="row">
-		<div class="col-lg-8">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Something </h5>
-					<div id="barChart">
-						<canvas id="C1" width="400" height="200"></canvas>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	
+
 	<script>
+		// cpu core percentage old 
 		   // Extract per_cpu_percent array from the context
 		   var perCpuPercent = {{ per_cpu_percent|safe }};
 
@@ -138,8 +154,8 @@
 		           datasets: [{
 		               label: 'Per CPU Usage (%)',
 		               data: perCpuPercent,
-		               backgroundColor: 'rgba(173, 216, 230, 0.7)', // Lighter turquoise
-		               borderColor: 'rgba(255, 255, 255, 0.8)',
+		               backgroundColor: '#36a2eb', // Lighter turquoise
+
 		               borderWidth: 1,
 		           }]
 		       },
@@ -174,534 +190,441 @@
 		   });
 	</script>
 
-	<script>
-    var options = {
-        series: [
-            {
-                name: "High - 2013",
-                data: [28, 29, 33, 36, 32, 32, 33]
-            },
-            {
-                name: "Low - 2013",
-                data: [12, 11, 14, 18, 17, 13, 13]
-            }
-        ],
-        chart: {
-            height: 350,
-            type: 'line',
-            dropShadow: {
-                enabled: true,
-                color: '#000',
-                top: 18,
-                left: 7,
-                blur: 10,
-                opacity: 0.2
-            },
-            toolbar: {
-                show: false
-            }
-        },
-        colors: ['#77B6EA', '#545454'],
-        dataLabels: {
-            enabled: true,
-        },
-        stroke: {
-            curve: 'smooth'
-        },
-        title: {
-            text: 'Average High & Low CPU IO',
-            align: 'left'
-        },
-        grid: {
-            borderColor: '#e7e7e7',
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5
-            },
-        },
-        markers: {
-            size: 1
-        },
-        xaxis: {
-            categories: ['0', '1', '2', '3', '4', '5', '6'],
-            title: {
-                text: 'Hour'
-            }
-        },
-        yaxis: {
-            title: {
-                text: 'CPU IO'
-            },
-            min: 5,
-            max: 40
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'right',
-            floating: true,
-            offsetY: -25,
-            offsetX: -5
-        }
-    };
-
-    var chart = new ApexCharts(document.querySelector("#C1"), options); // changed selector to #c1
-    chart.render();
-</script>
-
-
-
-
+	{% comment %} half donut cpu {% endcomment %}
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
-				var cpuUsage = {{ cpu_usage }};
-
-				var data = {
-						labels: ["CPU Usage", "Unused"],
-						datasets: [{
-								data: [cpuUsage, 100 - cpuUsage],
-								backgroundColor: ["#36a2eb", "#f87979"]
-						}]
-				};
-
-				var ctx = document.getElementById('TotalDonut').getContext('2d');
-				var myChart = new Chart(ctx, {
-						type: 'doughnut',
-						data: data,
-						options: {
-								cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-								responsive: true,
-								maintainAspectRatio: false,
-								legend: {
-										display: false
-								}
-						}
-				});
-		});
-
-
-
-		var options = {
-			series: [{
-				name: "Desktops",
-				data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
-		}],
-			chart: {
-			height: 350,
-			type: 'line',
-			zoom: {
-				enabled: false
-			}
-		},
-		dataLabels: {
-			enabled: false
-		},
-		stroke: {
-			curve: 'straight'
-		},
-		title: {
-			text: 'Product Trends by Month',
-			align: 'left'
-		},
-		grid: {
-			row: {
-				colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-				opacity: 0.5
-			},
-		},
-		xaxis: {
-			categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+		var cpuUsage = {{ cpu_usage }};
+		var backgroundColor;
+		if (cpuUsage <=100){
+			backgroundColor = "#f87979"; // Red for more than 66%
 		}
-		};
+		if (cpuUsage <=66) {
+		    backgroundColor = "#ffce56"; // Yellow for 33% to 66%
+		}
+		if (cpuUsage <= 33) {
+		    backgroundColor = "#36a2eb"; // Blue for less than 33%
+		}
 
-		var chart = new ApexCharts(document.querySelector("#chart"), options);
-		chart.render();
+		 var data = {
+			labels: ["Used", "Unused"],
 
+		        datasets: [{
+		            data: [cpuUsage, 100 - cpuUsage],
+		            backgroundColor: [backgroundColor, "#bdbdbd"],
+						borderWidth: 0,
+		        }]
+		    };
 
+		    var ctx = document.getElementById('TD1').getContext('2d');
+		    var myChart = new Chart(ctx, {
+		        type: 'doughnut',
+		        data: data,
+		        options: {
+		            cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+		        rotation: -Math.PI*35, // Start angle for the half donut
+		        circumference: Math.PI*69.9, // Sweep angle for the half donut
+		            responsive: true,
+		            maintainAspectRatio: false,
+						plugins:{
+							legend: {
+		                display: false
+		            }
+					}
+		        }
+		    });
+		});
 	</script>
-	
+
+{% comment %} ram donut {% endcomment %}
+	<script>
+		// half donut ram
+		document.addEventListener('DOMContentLoaded', function () {
+		var cpuUsage = {{ cpu_usage }};
+		var backgroundColor;
+		if (cpuUsage <=100){
+			backgroundColor = "#f87979"; // Red for more than 66%
+		}
+		if (cpuUsage <=66) {
+		    backgroundColor = "#ffce56"; // Yellow for 33% to 66%
+		}
+		if (cpuUsage <= 33) {
+		    backgroundColor = "#36a2eb"; // Blue for less than 33%
+		}
+
+		 var data = {
+			labels: ["Used", "Unused"],
+
+		        datasets: [{
+		            data: [cpuUsage, 100 - cpuUsage],
+		            backgroundColor: [backgroundColor, "#bdbdbd"],
+						borderWidth: 0,
+		        }]
+		    };
+
+		    var ctx = document.getElementById('TD2').getContext('2d');
+		    var myChart = new Chart(ctx, {
+		        type: 'doughnut',
+		        data: data,
+		        options: {
+		            cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+		        rotation: -Math.PI*35, // Start angle for the half donut
+		        circumference: Math.PI*69.9, // Sweep angle for the half donut
+		            responsive: true,
+		            maintainAspectRatio: false,
+						plugins:{
+							legend: {
+		                display: false
+		            }
+					}
+		        }
+		    });
+		});
+	</script>
+
+{% comment %} disk donut {% endcomment %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+		var cpuUsage = {{ cpu_usage }};
+		var backgroundColor;
+		if (cpuUsage <=100){
+			backgroundColor = "#f87979"; // Red for more than 66%
+		}
+		if (cpuUsage <=66) {
+		    backgroundColor = "#ffce56"; // Yellow for 33% to 66%
+		}
+		if (cpuUsage <= 33) {
+		    backgroundColor = "#36a2eb"; // Blue for less than 33%
+		}
+
+		 var data = {
+			labels: ["Used", "Unused"],
+
+		        datasets: [{
+		            data: [cpuUsage, 100 - cpuUsage],
+		            backgroundColor: [backgroundColor, "#bdbdbd"],
+						borderWidth: 0,
+		        }]
+		    };
+
+		    var ctx = document.getElementById('TD3').getContext('2d');
+		    var myChart = new Chart(ctx, {
+		        type: 'doughnut',
+		        data: data,
+		        options: {
+		            cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+		        rotation: -Math.PI*35, // Start angle for the half donut
+		        circumference: Math.PI*69.9, // Sweep angle for the half donut
+		            responsive: true,
+		            maintainAspectRatio: false,
+						plugins:{
+							legend: {
+		                display: false
+		            }
+					}
+		        }
+		    });
+		});
+	</script>
+
+	{% comment %} 12 hour cpu {% endcomment %}
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			new ApexCharts(document.querySelector("#reportsChart1"), {
+					series: [
+							{
+									name: "Download Data",
+									data: [10, 20, 30, 25, 15, 22, 35],
+							},
+							{
+									name: "Upload Data",
+									data: [5, 12, 18, 15, 10, 14, 20],
+							},
+					],
+					chart: {
+							height: 170,
+							type: "area",
+							toolbar: {
+									show: false,
+							},
+					},
+					markers: {
+							size: 4,
+					},
+					colors: ["#f87979", "#36a2eb"],
+					fill: {
+						type: "gradient",
+						gradient: {
+								shade: "light", // Change shade to "light" for a lighter gradient
+								type: "horizontal", // Change type to "vertical" for a vertical gradient
+								shadeIntensity: 0.5, // Adjust shade intensity
+								gradientToColors: ["#f87979", "#36a2eb"], // Define colors for the gradient
+								inverseColors: false,
+								opacityFrom: 0.5, // Adjust opacity
+								opacityTo: 0.8,
+								stops: [0, 50, 100],
+								colorStops: [],
+						},
+				},
+					dataLabels: {
+							enabled: false,
+					},
+					stroke: {
+							curve: "smooth",
+							width: 2,
+					},
+					xaxis: {
+							type: "datetime",
+							categories: ["2024-05-10", "2024-05-11", "2024-05-12", "2024-05-13", "2024-05-14", "2024-05-15", "2024-05-16"],
+					},
+					tooltip: {
+							x: {
+									format: "dd/MM/yy HH:mm",
+							},
+					},
+			}).render();
+	});
+	</script>
+
+{% comment %} 12 hour RAM READ WRITE {% endcomment %}
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			new ApexCharts(document.querySelector("#reportsChart2"), {
+					series: [
+							{
+									name: "Read",
+									data: [10, 20, 30, 25, 15, 22, 35],
+							},
+							{
+									name: "Write",
+									data: [5, 12, 18, 15, 10, 14, 20],
+							},
+					],
+					chart: {
+							height: 170,
+							type: "area",
+							toolbar: {
+									show: false,
+							},
+					},
+					markers: {
+							size: 4,
+					},
+					colors: ["#f87979", "#36a2eb"],
+					fill: {
+						type: "gradient",
+						gradient: {
+								shade: "light", // Change shade to "light" for a lighter gradient
+								type: "horizontal", // Change type to "vertical" for a vertical gradient
+								shadeIntensity: 0.5, // Adjust shade intensity
+								gradientToColors: ["#f87979", "#36a2eb"], // Define colors for the gradient
+								inverseColors: false,
+								opacityFrom: 0.5, // Adjust opacity
+								opacityTo: 0.8,
+								stops: [0, 50, 100],
+								colorStops: [],
+						},
+				},
+					dataLabels: {
+							enabled: false,
+					},
+					stroke: {
+							curve: "smooth",
+							width: 2,
+					},
+					xaxis: {
+							type: "datetime",
+							categories: ["2024-05-10", "2024-05-11", "2024-05-12", "2024-05-13", "2024-05-14", "2024-05-15", "2024-05-16"],
+					},
+					tooltip: {
+							x: {
+									format: "dd/MM/yy HH:mm",
+							},
+					},
+			}).render();
+	});
+	</script>
+
+	{% comment %} 12 hour DISK READ WRITE {% endcomment %}
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			new ApexCharts(document.querySelector("#reportsChart3"), {
+					series: [
+							{
+									name: "Read",
+									data: [10, 20, 30, 25, 15, 22, 35],
+							},
+							{
+									name: "Write",
+									data: [5, 12, 18, 15, 10, 14, 20],
+							},
+					],
+					chart: {
+							height: 170,
+							type: "area",
+							toolbar: {
+									show: false,
+							},
+					},
+					markers: {
+							size: 4,
+					},
+					colors: ["#f87979", "#36a2eb"],
+					fill: {
+						type: "gradient",
+						gradient: {
+								shade: "light", // Change shade to "light" for a lighter gradient
+								type: "horizontal", // Change type to "vertical" for a vertical gradient
+								shadeIntensity: 0.5, // Adjust shade intensity
+								gradientToColors: ["#f87979", "#36a2eb"], // Define colors for the gradient
+								inverseColors: false,
+								opacityFrom: 0.5, // Adjust opacity
+								opacityTo: 0.8,
+								stops: [0, 50, 100],
+								colorStops: [],
+						},
+				},
+					dataLabels: {
+							enabled: false,
+					},
+					stroke: {
+							curve: "smooth",
+							width: 2,
+					},
+					xaxis: {
+							type: "datetime",
+							categories: ["2024-05-10", "2024-05-11", "2024-05-12", "2024-05-13", "2024-05-14", "2024-05-15", "2024-05-16"],
+					},
+					tooltip: {
+							x: {
+									format: "dd/MM/yy HH:mm",
+							},
+					},
+			}).render();
+	});
+	</script>
 
 	<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var cpuUsage = {{ cpu_usage }};
+		var options = {
+				series: [
+						{
+								name: 'Actual',
+								data: [
+										{ x: 'CPU-1', y: 40, goals: [{ name: 'Peak', value: 46, strokeHeight: 5, strokeColor: '#f87979' }] },
+										{ x: 'CPU-2', y: 20, goals: [{ name: 'Peak', value: 20, strokeHeight: 5, strokeColor: '#f87979' }] },
+										{ x: 'CPU-3', y: 26, goals: [{ name: 'Peak', value: 55, strokeHeight: 5, strokeColor: '#f87979' }] },
+										{ x: 'CPU-4', y: 34, goals: [{ name: 'Peak', value: 44, strokeHeight: 5, strokeColor: '#f87979' }] },										
+								]
+						}
+				],
+				chart: {
+						height: 170,
+						type: 'bar'
+				},
+				plotOptions: {
+						bar: {
+								columnWidth: '60%'
+						}
+				},
+				colors: ['#ffce56'],
+				dataLabels: {
+						enabled: false
+				},
+				legend: {
+						show: true,
+						showForSingleSeries: true,
+						customLegendItems: ['Actual', 'Peak'],
+						markers: {
+								fillColors: ['#ffce56', '#f87979']
+						}
+				}
+		};
 
-        // Multiply cpuUsage with a random value between 0.5 and 1.5
-        var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
-        cpuUsage *= randomMultiplier;
-
-        var data = {
-            labels: ["CPU Usage", "Unused"],
-            datasets: [{
-                data: [cpuUsage, 100 - cpuUsage],
-                backgroundColor: ["#36a2eb", "#f87979"]
-            }]
-        };
-
-        var ctx = document.getElementById('TD1').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: data,
-            options: {
-                cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    display: false
-                }
-            }
-        });
-    });
-
-
-
-    var options = {
-        series: [{
-            name: "Desktops",
-            // Multiply data with random values between 0.5 and 1.5
-            data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
-                return value * (Math.random() * (1.5 - 0.5) + 0.5);
-            })
-        }],
-        chart: {
-            height: 350,
-            type: 'line',
-            zoom: {
-                enabled: false
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'straight'
-        },
-        title: {
-            text: 'Product Trends by Month',
-            align: 'left'
-        },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5
-            },
-        },
-        xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-        }
-    };
-
-    var chart = new ApexCharts(document.querySelector("#chart"), options);
-    chart.render();
-
-
+		var chart = new ApexCharts(document.querySelector("#ct2"), options);
+		chart.render();
 </script>
 
 
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
-			var cpuUsage = {{ cpu_usage }};
-
-			// Multiply cpuUsage with a random value between 0.5 and 1.5
-			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
-			cpuUsage *= randomMultiplier;
-
-			var data = {
-					labels: ["CPU Usage", "Unused"],
-					datasets: [{
-							data: [cpuUsage, 100 - cpuUsage],
-							backgroundColor: ["#36a2eb", "#f87979"]
-					}]
-			};
-
-			var ctx = document.getElementById('TD2').getContext('2d');
-			var myChart = new Chart(ctx, {
-					type: 'doughnut',
-					data: data,
-					options: {
-							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-							responsive: true,
-							maintainAspectRatio: false,
-							legend: {
-									display: false
-							}
-					}
-			});
-	});
-
-
-
 	var options = {
-			series: [{
-					name: "Desktops",
-					// Multiply data with random values between 0.5 and 1.5
-					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
-							return value * (Math.random() * (1.5 - 0.5) + 0.5);
-					})
-			}],
+			series: [
+					{
+							name: 'Actual',
+							data: [
+									{ x: 'CPU-1', y: 40, goals: [{ name: 'Peak', value: 46, strokeHeight: 5, strokeColor: '#f87979' }] },
+									{ x: 'CPU-2', y: 20, goals: [{ name: 'Peak', value: 20, strokeHeight: 5, strokeColor: '#f87979' }] },
+									{ x: 'CPU-3', y: 26, goals: [{ name: 'Peak', value: 55, strokeHeight: 5, strokeColor: '#f87979' }] },
+									{ x: 'CPU-4', y: 34, goals: [{ name: 'Peak', value: 44, strokeHeight: 5, strokeColor: '#f87979' }] },										
+							]
+					}
+			],
 			chart: {
-					height: 350,
-					type: 'line',
-					zoom: {
-							enabled: false
+					height: 170,
+					type: 'bar'
+			},
+			plotOptions: {
+					bar: {
+							columnWidth: '60%'
 					}
 			},
+			colors: ['#ffce56'],
 			dataLabels: {
 					enabled: false
 			},
-			stroke: {
-					curve: 'straight'
-			},
-			title: {
-					text: 'Product Trends by Month',
-					align: 'left'
-			},
-			grid: {
-					row: {
-							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-							opacity: 0.5
-					},
-			},
-			xaxis: {
-					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+			legend: {
+					show: true,
+					showForSingleSeries: true,
+					customLegendItems: ['Actual', 'Peak'],
+					markers: {
+							fillColors: ['#ffce56', '#f87979']
+					}
 			}
 	};
 
-	var chart = new ApexCharts(document.querySelector("#chart"), options);
+	var chart = new ApexCharts(document.querySelector("#ct3"), options);
 	chart.render();
-
-
 </script>
 
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
-			var cpuUsage = {{ cpu_usage }};
-
-			// Multiply cpuUsage with a random value between 0.5 and 1.5
-			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
-			cpuUsage *= randomMultiplier;
-
-			var data = {
-					labels: ["CPU Usage", "Unused"],
-					datasets: [{
-							data: [cpuUsage, 100 - cpuUsage],
-							backgroundColor: ["#36a2eb", "#f87979"]
-					}]
-			};
-
-			var ctx = document.getElementById('TD3').getContext('2d');
-			var myChart = new Chart(ctx, {
-					type: 'doughnut',
-					data: data,
-					options: {
-							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-							responsive: true,
-							maintainAspectRatio: false,
-							legend: {
-									display: false
-							}
-					}
-			});
-	});
-
-
-
 	var options = {
-			series: [{
-					name: "Desktops",
-					// Multiply data with random values between 0.5 and 1.5
-					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
-							return value * (Math.random() * (1.5 - 0.5) + 0.5);
-					})
-			}],
+			series: [
+					{
+							name: 'Actual',
+							data: [
+									{ x: 'CPU-1', y: 40, goals: [{ name: 'Peak', value: 46, strokeHeight: 5, strokeColor: '#f87979' }] },
+									{ x: 'CPU-2', y: 20, goals: [{ name: 'Peak', value: 20, strokeHeight: 5, strokeColor: '#f87979' }] },
+									{ x: 'CPU-3', y: 26, goals: [{ name: 'Peak', value: 55, strokeHeight: 5, strokeColor: '#f87979' }] },
+									{ x: 'CPU-4', y: 34, goals: [{ name: 'Peak', value: 44, strokeHeight: 5, strokeColor: '#f87979' }] },										
+							]
+					}
+			],
 			chart: {
-					height: 350,
-					type: 'line',
-					zoom: {
-							enabled: false
+					height: 170,
+					type: 'bar'
+			},
+			plotOptions: {
+					bar: {
+							columnWidth: '60%'
 					}
 			},
+			colors: ['#ffce56'],
 			dataLabels: {
 					enabled: false
 			},
-			stroke: {
-					curve: 'straight'
-			},
-			title: {
-					text: 'Product Trends by Month',
-					align: 'left'
-			},
-			grid: {
-					row: {
-							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-							opacity: 0.5
-					},
-			},
-			xaxis: {
-					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+			legend: {
+					show: true,
+					showForSingleSeries: true,
+					customLegendItems: ['Actual', 'Peak'],
+					markers: {
+							fillColors: ['#ffce56', '#f87979']
+					}
 			}
 	};
 
-	var chart = new ApexCharts(document.querySelector("#chart"), options);
+	var chart = new ApexCharts(document.querySelector("#ct4"), options);
 	chart.render();
-
-
 </script>
 
 
-
-
-<script>
-	document.addEventListener('DOMContentLoaded', function () {
-			var cpuUsage = {{ cpu_usage }};
-
-			// Multiply cpuUsage with a random value between 0.5 and 1.5
-			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
-			cpuUsage *= randomMultiplier;
-
-			var data = {
-					labels: ["CPU Usage", "Unused"],
-					datasets: [{
-							data: [cpuUsage, 100 - cpuUsage],
-							backgroundColor: ["#36a2eb", "#f87979"]
-					}]
-			};
-
-			var ctx = document.getElementById('TD4').getContext('2d');
-			var myChart = new Chart(ctx, {
-					type: 'doughnut',
-					data: data,
-					options: {
-							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-							responsive: true,
-							maintainAspectRatio: false,
-							legend: {
-									display: false
-							}
-					}
-			});
-	});
-
-
-
-	var options = {
-			series: [{
-					name: "Desktops",
-					// Multiply data with random values between 0.5 and 1.5
-					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
-							return value * (Math.random() * (1.5 - 0.5) + 0.5);
-					})
-			}],
-			chart: {
-					height: 350,
-					type: 'line',
-					zoom: {
-							enabled: false
-					}
-			},
-			dataLabels: {
-					enabled: false
-			},
-			stroke: {
-					curve: 'straight'
-			},
-			title: {
-					text: 'Product Trends by Month',
-					align: 'left'
-			},
-			grid: {
-					row: {
-							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-							opacity: 0.5
-					},
-			},
-			xaxis: {
-					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-			}
-	};
-
-	var chart = new ApexCharts(document.querySelector("#chart"), options);
-	chart.render();
-
-
-</script>
-
-
-<script>
-	document.addEventListener('DOMContentLoaded', function () {
-			var cpuUsage = {{ cpu_usage }};
-
-			// Multiply cpuUsage with a random value between 0.5 and 1.5
-			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
-			cpuUsage *= randomMultiplier;
-
-			var data = {
-					labels: ["CPU Usage", "Unused"],
-					datasets: [{
-							data: [cpuUsage, 100 - cpuUsage],
-							backgroundColor: ["#36a2eb", "#f87979"]
-					}]
-			};
-
-			var ctx = document.getElementById('TD5').getContext('2d');
-			var myChart = new Chart(ctx, {
-					type: 'doughnut',
-					data: data,
-					options: {
-							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
-							responsive: true,
-							maintainAspectRatio: false,
-							legend: {
-									display: false
-							}
-					}
-			});
-	});
-
-
-
-	var options = {
-			series: [{
-					name: "Desktops",
-					// Multiply data with random values between 0.5 and 1.5
-					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
-							return value * (Math.random() * (1.5 - 0.5) + 0.5);
-					})
-			}],
-			chart: {
-					height: 350,
-					type: 'line',
-					zoom: {
-							enabled: false
-					}
-			},
-			dataLabels: {
-					enabled: false
-			},
-			stroke: {
-					curve: 'straight'
-			},
-			title: {
-					text: 'Product Trends by Month',
-					align: 'left'
-			},
-			grid: {
-					row: {
-							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-							opacity: 0.5
-					},
-			},
-			xaxis: {
-					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-			}
-	};
-
-	var chart = new ApexCharts(document.querySelector("#chart"), options);
-	chart.render();
-
-
-</script>
-
-	
-	<script src="{% static "assets/vendor/apexcharts/apexcharts.min.js" %}"></script>
-
+	<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
 </div>
 {% endif %} {% endblock %}
