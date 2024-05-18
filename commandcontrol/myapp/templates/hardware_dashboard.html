@@ -58,7 +58,7 @@
 							{% if token.status == 'online' %}Online{% else %}Offline{% endif%}
 						</td>
 						<td>
-							<a href="{{ token.cpu_info }}">
+							<a href="{{ token.hardware_info }}">
 								<button class="btn btn-primary w-96">CPU Stats</button>
 							</a>
 						</td>
@@ -71,7 +71,7 @@
 	<script>
 		// Reload data every 5 seconds
 		setInterval(function () {
-			fetch("/cpu_dashboard/") // Replace with the actual URL of your dashboard view
+			fetch("/hardware_dashboard/") // Replace with the actual URL of your dashboard view
 				.then(response => response.text())
 				.then(html => {
 					const parser = new DOMParser();

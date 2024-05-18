@@ -32,17 +32,21 @@ def bytes_to_megabytes(bytes):
     """Convert bytes to megabytes."""
     return bytes / (1024 * 1024)
 
-def gather_ram_data():
-    """Gather RAM data using psutil."""
+def save_ram_data(token):
+    """Gather RAM data using psutil and save it to a JSON file."""
+    def bytes_to_megabytes(bytes_value):
+        """Convert bytes to megabytes."""
+        return bytes_value / (1024 ** 2)
+    
     try:
         virtual_memory = psutil.virtual_memory()
         swap_memory = psutil.swap_memory()
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
         ram_data = {
+            "total_memory": bytes_to_megabytes(virtual_memory.total),
             "data": {
                 "timestamp": timestamp,
-                "total_memory": bytes_to_megabytes(virtual_memory.total),
                 "available_memory": bytes_to_megabytes(virtual_memory.available),
                 "used_memory": bytes_to_megabytes(virtual_memory.used),
                 "free_memory": bytes_to_megabytes(virtual_memory.free),
@@ -53,28 +57,15 @@ def gather_ram_data():
                 "percent_swap": swap_memory.percent,
             },
         }
-        return ram_data
-    except Exception as e:
-        logging.error(f"Error gathering RAM data: {e}")
-        return None
-
-def save_ram_data(ram_data, token):
-    """Save gathered RAM data to a JSON file."""
-    if ram_data:
         ram_data["token"] = token
+
         try:
             with open("ram_data.json", "w") as file:
                 json.dump(ram_data, file, indent=2)
             logging.info("RAM data successfully saved to ram_data.json.")
         except IOError as e:
             logging.error(f"Error writing to JSON file: {e}")
+    except Exception as e:
+        logging.error(f"Error gathering RAM data: {e}")
 
-def main(token, api_url):
-    ram_data = gather_ram_data()
-    save_ram_data(ram_data, token)
-    # send_ram_data(api_url)
 
-if __name__ == "__main__":
-    TOKEN = "your_token_here"
-    API_URL = "http://127.0.0.1:8000/myapp/api/ram_data/"
-    main(TOKEN, API_URL)

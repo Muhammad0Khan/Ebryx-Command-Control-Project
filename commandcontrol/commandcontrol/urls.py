@@ -30,7 +30,7 @@ urlpatterns = [
     path("api/generate_token/", generate_token, name="generate_token"),
     path("api/check-token/<str:token>/", check_token, name="check_token"),
     path("dashboard/", dashboard_view, name="dashboard"),
-    path("cpu_dashboard/", cpu_dashboard_view, name="cpu_dashboard"),
+    path("hardware_dashboard/", hardware_dashboard_view, name="hardware_dashboard"),
     path("network_dashboard/", network_dashboard_view, name="network_dashboard"),
     path(
         "installed_apps_dashboard/",
@@ -40,7 +40,7 @@ urlpatterns = [
     path("token-details/<str:token>/", token_details_view, name="token_details"),
     path("api/delete_token/<str:token>/", delete_token, name="delete_token"),
     path("api/cpu_data/", store_cpu_data, name="cpu_data"),
-    path("api/cpu_info/<str:token>/", cpu_info_page, name="cpu_info"),
+    path("api/hardware_info/<str:token>/", hardware_info_page, name="hardware_info"),
     path("api/network_info/<str:token>/", network_info_page, name="network_info"),
     path("api/network_data/", store_network_data, name="network_data"),
     path("index/", index_view, name="index"),
@@ -51,4 +51,6 @@ urlpatterns = [
     path("terminal/", terminal_view, name="terminal" ), 
     path("api/generate_terminal/<str:token>/", generate_terminal, name="generate_terminal" ), 
     path("api/check-commands/<str:token>/", check_issued_commands, name="check-commands" ), 
+    path("api/ram_data/", store_ram_data, name="ram_data"),
+    path("api/disk_data/", store_disk_data, name="disk_data"),
 ]

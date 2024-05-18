@@ -221,7 +221,7 @@ def dashboard_view(request):
         token_details = {
             "token": token["token"],
             "details_url": f'/token-details/{token["token"]}/',
-            "cpu_info": f'/api/cpu_info/{token["token"]}/',
+            "hardware_info": f'/api/hardware_info/{token["token"]}/',
             "status": status.get("status", "N/A"),  # Use 'N/A' if no status found
             "system_data": system_details  # Include system data
         }
@@ -236,7 +236,7 @@ def dashboard_view(request):
     return render(request, "dashboard.html", dashboard_data)
 
 @firebase_auth_required
-def cpu_dashboard_view(request):
+def hardware_dashboard_view(request):
     tokens_ref = db.reference("tokens")
     status_ref = db.reference("status")
 
@@ -257,13 +257,13 @@ def cpu_dashboard_view(request):
 
         token_details = {
             "token": token["token"],
-            "cpu_info": f'/api/cpu_info/{token["token"]}/',
+            "hardware_info": f'/api/hardware_info/{token["token"]}/',
             "status": status.get("status", "N/A"),
         }
         print(token_details)
         tokens.append(token_details)
 
-    return render(request, "cpu_dashboard.html", {"tokens": tokens})
+    return render(request, "hardware_dashboard.html", {"tokens": tokens})
 
 
 def token_details_view(request, token):
@@ -428,7 +428,7 @@ def store_cpu_data(request):
         return JsonResponse(response_data, status=500)
 
 
-def cpu_info_page(request, token):
+def hardware_info_page(request, token):
     try:
         cpu_data_ref = db.reference(f"cpu_data/{token}")
 
@@ -471,7 +471,7 @@ def cpu_info_page(request, token):
             )
     except Exception as e:
         return render(
-            request, "cpu_info.html", {"error_message": f"An error occurred: {str(e)}"}
+            request, "hardware_info.html", {"error_message": f"An error occurred: {str(e)}"}
         )
 
 
@@ -969,20 +969,20 @@ def store_ram_data(request):
             return JsonResponse(response_data, status=400)
 
         # Assuming 'cpu_data' is the reference to the desired location in your RTDB
-        cpu_data_ref = db.reference(f"cpu_data/{token}")
+        ram_data_ref = db.reference(f"ram_data/{token}")
 
         # Fetch the existing data array or initialize an empty array
-        existing_data = cpu_data_ref.child("data").get() or []
+        existing_data = ram_data_ref.child("data").get() or []
 
         # Append the new data section to the array
         existing_data.append(data)
 
         # Update the RTDB with the new data array
-        cpu_data_ref.update({"data": existing_data})
+        ram_data_ref.update({"data": existing_data})
 
         response_data = {
             "status": "success",
-            "message": "CPU data stored successfully",
+            "message": "RAM data stored successfully",
             "data_id": len(existing_data)
             - 1,  # Index of the last appended data section
         }
@@ -1019,17 +1019,17 @@ def store_disk_data(request):
             }
             return JsonResponse(response_data, status=400)
 
-        # Assuming 'cpu_data' is the reference to the desired location in your RTDB
-        cpu_data_ref = db.reference(f"cpu_data/{token}")
+        # Assuming 'disk_data' is the reference to the desired location in your RTDB
+        disk_data_ref = db.reference(f"disk_data/{token}")
 
         # Fetch the existing data array or initialize an empty array
-        existing_data = cpu_data_ref.child("data").get() or []
+        existing_data = disk_data_ref.child("data").get() or []
 
         # Append the new data section to the array
         existing_data.append(data)
 
         # Update the RTDB with the new data array
-        cpu_data_ref.update({"data": existing_data})
+        disk_data_ref.update({"data": existing_data})
 
         response_data = {
             "status": "success",

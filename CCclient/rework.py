@@ -6,6 +6,12 @@ from methods.process import *
 from methods.cpu import *
 from methods.installed_software import *
 from methods.network import*
+from methods.disk import*
+from methods.ram import*
+from methods.system_data import*
+
+
+
 
 # Replace the URL with the actual URL of your Django API
 token_response_file = 'token_response.json'
@@ -16,7 +22,8 @@ check_token_api_url = base_url+'/api/check-token/'
 send_installed_apps_api = base_url+'/myapp/api/installed_apps/'
 send_cpu_data_api = base_url+'/myapp/api/cpu_data/'
 send_network_data_api= base_url+'/api/network_data/'
-
+send_ram_data_api= base_url+'/api/ram_data/'
+send_disk_data_api= base_url+'/api/disk_data/'
 
 while True:
 
@@ -34,9 +41,19 @@ while True:
         print('installed data stored')
 
         save_network_stats(token)
-        print ('network stats stored')
+        print ('network data stored')
 
+        save_ram_data(token)
+        print ('ram data stored')
         
+        save_disk_data(token)
+        print ('ram disk stored')
+
+        save_system_information(token)
+        print ("system data stored")
+
+        get_installed_software(token)
+        print('installed data stored')
 
         if check_token_response.status_code == 200:
             check_token_json_response = check_token_response.json()
@@ -45,6 +62,11 @@ while True:
                 send_cpu_data(send_cpu_data_api)
                 send_network_stats(send_network_data_api)
                 send_installed_software(send_installed_apps_api)
+                send_ram_data(send_ram_data_api)
+                print("try skipping this")
+                send_disk_data()
+                send_installed_software(send_installed_apps_api)
+                send_system_data()
 
                 print("Monitoring logic executed")
             else:
