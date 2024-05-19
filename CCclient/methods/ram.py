@@ -44,17 +44,17 @@ def save_ram_data(token):
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
         ram_data = {
-            "total_memory": bytes_to_megabytes(virtual_memory.total),
+            "total_memory": round(bytes_to_megabytes(virtual_memory.total), 2),
             "data": {
                 "timestamp": timestamp,
-                "available_memory": bytes_to_megabytes(virtual_memory.available),
-                "used_memory": bytes_to_megabytes(virtual_memory.used),
-                "free_memory": bytes_to_megabytes(virtual_memory.free),
-                "percent_memory": virtual_memory.percent,
-                "total_swap": bytes_to_megabytes(swap_memory.total),
-                "used_swap": bytes_to_megabytes(swap_memory.used),
-                "free_swap": bytes_to_megabytes(swap_memory.free),
-                "percent_swap": swap_memory.percent,
+                "available_memory": round(bytes_to_megabytes(virtual_memory.available), 2),
+                "used_memory": round(bytes_to_megabytes(virtual_memory.used), 2),
+                "free_memory": round(bytes_to_megabytes(virtual_memory.free), 2),
+                "percent_memory": round(virtual_memory.percent, 2),
+                "total_swap": round(bytes_to_megabytes(swap_memory.total), 2),
+                "used_swap": round(bytes_to_megabytes(swap_memory.used), 2),
+                "free_swap": round(bytes_to_megabytes(swap_memory.free), 2),
+                "percent_swap": round(swap_memory.percent, 2),
             },
         }
         ram_data["token"] = token

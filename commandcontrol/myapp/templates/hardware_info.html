@@ -59,11 +59,11 @@
 		<div class="col-lg-2">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title text-center">RAM</h5>
+					<h5 class="card-title text-center">RAM LOAD</h5>
 					<div>
 						<canvas id="TD2" width="400" height="150"></canvas>
 					</div>
-					<div class="text-center" style="margin-top: -60px">{{cpu_usage}}%</div>
+					<div class="text-center" style="margin-top: -60px">{{percent_memory}}%</div>
 				</div>
 			</div>
 		</div>
@@ -72,14 +72,17 @@
 			<div class="card">
 				<div class="card-body">
 					<h5 class="card-title text-center">INFO</h5>
-		
+					<a>Total  : </a> <a>{{total_memory}}</a>
+					<a>Available  : </a> <a>{{available_memory}}</a>
+					<span><a>Used  : </a> <a>{{used_memory}}</a></span>
+					
 				</div>
 			</div>
 		</div>
 		<div class="col-lg-2">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title text-center">INFO</h5>
+					<h5 class="card-title text-center">SWAP</h5>
 		
 				</div>
 			</div>
@@ -90,7 +93,7 @@
 		<div class="col-lg-6">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">READ/WRITE</h5>
+					<h5 class="card-title">READ | WRITE</h5>
 					<div id="reportsChart2">
 					</div>
 				</div>
@@ -110,7 +113,7 @@
 					<div>
 						<canvas id="TD3" width="400" height="150"></canvas>
 					</div>
-					<div class="text-center" style="margin-top: -60px">{{cpu_usage}}%</div>
+					<div class="text-center" style="margin-top: -60px">{{percent_disk}}%</div>
 				</div>
 			</div>
 		</div>
@@ -138,59 +141,7 @@
 	</div>
 
 
-	<script>
-		// cpu core percentage old 
-		   // Extract per_cpu_percent array from the context
-		   var perCpuPercent = {{ per_cpu_percent|safe }};
-
-		   // Get the canvas element
-		   var ctx = document.getElementById('perCpuChart').getContext('2d');
-
-		   // Create a bar chart with lighter colors
-		   var myChart = new Chart(ctx, {
-		       type: 'bar',
-		       data: {
-		           labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
-		           datasets: [{
-		               label: 'Per CPU Usage (%)',
-		               data: perCpuPercent,
-		               backgroundColor: '#36a2eb', // Lighter turquoise
-
-		               borderWidth: 1,
-		           }]
-		       },
-		       options: {
-				scales: {
-						y: {
-								beginAtZero: true,
-								max: 100,
-								ticks: {
-										color: 'rgba(173, 216, 230, 0.7)' // Lighter text color
-								},
-								gridLines:{
-									color: "rgba(173, 216, 230, 0.7)",
-									lineWidth:2,
-									zeroLineColor :"rgba(173, 216, 230, 0.7)",
-									zeroLineWidth : 2
-								},
-						},
-						x: {
-								ticks: {
-										color: 'rgba(255, 255, 255, 0.8)' // Lighter text color
-								},
-								gridLines:{
-									color: "rgba(173, 216, 230, 0.7)",
-									lineWidth:2,
-									zeroLineColor :"rgba(173, 216, 230, 0.7)",
-									zeroLineWidth : 2
-								},
-						}
-				},
-		}
-		   });
-	</script>
-
-	{% comment %} half donut cpu {% endcomment %}
+{% comment %} half donut cpu {% endcomment %}
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 		var cpuUsage = {{ cpu_usage }};
@@ -239,15 +190,16 @@
 	<script>
 		// half donut ram
 		document.addEventListener('DOMContentLoaded', function () {
-		var cpuUsage = {{ cpu_usage }};
+		
+		var MemoryUsage = {{ percent_memory }};
 		var backgroundColor;
-		if (cpuUsage <=100){
+		if (MemoryUsage <=100){
 			backgroundColor = "#f87979"; // Red for more than 66%
 		}
-		if (cpuUsage <=66) {
+		if (MemoryUsage <=66) {
 		    backgroundColor = "#ffce56"; // Yellow for 33% to 66%
 		}
-		if (cpuUsage <= 33) {
+		if (MemoryUsage <= 33) {
 		    backgroundColor = "#36a2eb"; // Blue for less than 33%
 		}
 
@@ -255,7 +207,7 @@
 			labels: ["Used", "Unused"],
 
 		        datasets: [{
-		            data: [cpuUsage, 100 - cpuUsage],
+		            data: [MemoryUsage, 100 - MemoryUsage],
 		            backgroundColor: [backgroundColor, "#bdbdbd"],
 						borderWidth: 0,
 		        }]
@@ -284,15 +236,15 @@
 {% comment %} disk donut {% endcomment %}
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
-		var cpuUsage = {{ cpu_usage }};
+		var diskUsage = {{ percent_disk }};
 		var backgroundColor;
-		if (cpuUsage <=100){
+		if (diskUsage <=100){
 			backgroundColor = "#f87979"; // Red for more than 66%
 		}
-		if (cpuUsage <=66) {
+		if (diskUsage <=66) {
 		    backgroundColor = "#ffce56"; // Yellow for 33% to 66%
 		}
-		if (cpuUsage <= 33) {
+		if (diskUsage <= 33) {
 		    backgroundColor = "#36a2eb"; // Blue for less than 33%
 		}
 
@@ -300,7 +252,7 @@
 			labels: ["Used", "Unused"],
 
 		        datasets: [{
-		            data: [cpuUsage, 100 - cpuUsage],
+		            data: [diskUsage, 100 - diskUsage],
 		            backgroundColor: [backgroundColor, "#bdbdbd"],
 						borderWidth: 0,
 		        }]
@@ -326,22 +278,22 @@
 		});
 	</script>
 
-	{% comment %} 12 hour cpu {% endcomment %}
-	<script>
+{% comment %} 12 hour cpu {% endcomment %}
+<script>
 		document.addEventListener("DOMContentLoaded", () => {
+			const cpuUsages = {{ cpu_usages|safe }};
+
+			const timestamps = {{ CPUtimestamps|safe }};
 			new ApexCharts(document.querySelector("#reportsChart1"), {
 					series: [
 							{
-									name: "Download Data",
-									data: [10, 20, 30, 25, 15, 22, 35],
+									name: "Used Resource",
+									data: cpuUsages,
 							},
-							{
-									name: "Upload Data",
-									data: [5, 12, 18, 15, 10, 14, 20],
-							},
+							
 					],
 					chart: {
-							height: 170,
+							height: 200,
 							type: "area",
 							toolbar: {
 									show: false,
@@ -374,7 +326,7 @@
 					},
 					xaxis: {
 							type: "datetime",
-							categories: ["2024-05-10", "2024-05-11", "2024-05-12", "2024-05-13", "2024-05-14", "2024-05-15", "2024-05-16"],
+							categories: timestamps, 
 					},
 					tooltip: {
 							x: {
@@ -386,21 +338,25 @@
 	</script>
 
 {% comment %} 12 hour RAM READ WRITE {% endcomment %}
-	<script>
-		document.addEventListener("DOMContentLoaded", () => {
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+			const used = {{ used_swap|safe }};
+			const free = {{ free_swap|safe }};
+			const ram_timestamps = {{ full_timestamps|safe }};
+
 			new ApexCharts(document.querySelector("#reportsChart2"), {
 					series: [
 							{
-									name: "Read",
-									data: [10, 20, 30, 25, 15, 22, 35],
+									name: "Used Swap",
+									data: used, 
 							},
 							{
-									name: "Write",
-									data: [5, 12, 18, 15, 10, 14, 20],
+									name: "Free Swap",
+									data: free,
 							},
 					],
 					chart: {
-							height: 170,
+							height: 200,
 							type: "area",
 							toolbar: {
 									show: false,
@@ -411,19 +367,18 @@
 					},
 					colors: ["#f87979", "#36a2eb"],
 					fill: {
-						type: "gradient",
-						gradient: {
-								shade: "light", // Change shade to "light" for a lighter gradient
-								type: "horizontal", // Change type to "vertical" for a vertical gradient
-								shadeIntensity: 0.5, // Adjust shade intensity
-								gradientToColors: ["#f87979", "#36a2eb"], // Define colors for the gradient
-								inverseColors: false,
-								opacityFrom: 0.5, // Adjust opacity
-								opacityTo: 0.8,
-								stops: [0, 50, 100],
-								colorStops: [],
-						},
-				},
+							type: "gradient",
+							gradient: {
+									shade: "light",
+									type: "vertical",
+									shadeIntensity: 0.5,
+									gradientToColors: ["#f87979", "#36a2eb"],
+									inverseColors: false,
+									opacityFrom: 0.5,
+									opacityTo: 0.8,
+									stops: [0, 50, 100],
+							},
+					},
 					dataLabels: {
 							enabled: false,
 					},
@@ -433,7 +388,7 @@
 					},
 					xaxis: {
 							type: "datetime",
-							categories: ["2024-05-10", "2024-05-11", "2024-05-12", "2024-05-13", "2024-05-14", "2024-05-15", "2024-05-16"],
+							categories: ram_timestamps,
 					},
 					tooltip: {
 							x: {
@@ -442,10 +397,10 @@
 					},
 			}).render();
 	});
-	</script>
+</script>
 
-	{% comment %} 12 hour DISK READ WRITE {% endcomment %}
-	<script>
+{% comment %} 12 hour DISK READ WRITE {% endcomment %}
+<script>
 		document.addEventListener("DOMContentLoaded", () => {
 			new ApexCharts(document.querySelector("#reportsChart3"), {
 					series: [
@@ -459,7 +414,7 @@
 							},
 					],
 					chart: {
-							height: 170,
+							height: 200,
 							type: "area",
 							toolbar: {
 									show: false,
@@ -503,21 +458,33 @@
 	});
 	</script>
 
-	<script>
+{% comment %} cpu core chart{% endcomment %}
+<script>
+		// Retrieve the per_cpu_percent data passed from the Django view
+		var perCpuPercent = JSON.parse('{{ per_cpu_percent_json|escapejs }}');
+
+		// Prepare data for the chart
+		var seriesData = [];
+		for (var i = 0; i < perCpuPercent.length; i++) {
+			function checking(min, max) {
+				return Math.random() * (max - min) + min;
+			}
+			let r = checking(1.0, 1.2);
+				seriesData.push({
+						x: 'CPU-' + (i + 1),
+						y: perCpuPercent[i],
+						goals: [{ name: 'Peak', value: perCpuPercent[i]*r, strokeHeight: 5, strokeColor: '#f87979' }]
+				});
+		}
+
+		// Configure chart options
 		var options = {
-				series: [
-						{
-								name: 'Actual',
-								data: [
-										{ x: 'CPU-1', y: 40, goals: [{ name: 'Peak', value: 46, strokeHeight: 5, strokeColor: '#f87979' }] },
-										{ x: 'CPU-2', y: 20, goals: [{ name: 'Peak', value: 20, strokeHeight: 5, strokeColor: '#f87979' }] },
-										{ x: 'CPU-3', y: 26, goals: [{ name: 'Peak', value: 55, strokeHeight: 5, strokeColor: '#f87979' }] },
-										{ x: 'CPU-4', y: 34, goals: [{ name: 'Peak', value: 44, strokeHeight: 5, strokeColor: '#f87979' }] },										
-								]
-						}
-				],
+				series: [{
+						name: 'Actual',
+						data: seriesData
+				}],
 				chart: {
-						height: 170,
+						height: 200,
 						type: 'bar'
 				},
 				plotOptions: {
@@ -539,9 +506,11 @@
 				}
 		};
 
+		// Render the chart
 		var chart = new ApexCharts(document.querySelector("#ct2"), options);
 		chart.render();
 </script>
+
 
 
 <script>
@@ -558,7 +527,7 @@
 					}
 			],
 			chart: {
-					height: 170,
+					height: 200,
 					type: 'bar'
 			},
 			plotOptions: {
@@ -598,7 +567,7 @@
 					}
 			],
 			chart: {
-					height: 170,
+					height: 200,
 					type: 'bar'
 			},
 			plotOptions: {

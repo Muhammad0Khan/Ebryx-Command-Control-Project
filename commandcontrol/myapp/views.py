@@ -431,42 +431,76 @@ def store_cpu_data(request):
 def hardware_info_page(request, token):
     try:
         cpu_data_ref = db.reference(f"cpu_data/{token}")
+        ram_data_ref = db.reference(f"ram_data/{token}")
+        disk_data_ref = db.reference(f"disk_data/{token}")
+        system_data_ref = db.reference(f"system_data/{token}")
 
-        # Fetch the CPU data for the specified token
+        ram_data = ram_data_ref.get()
+        disk_data = disk_data_ref.get()
+        system_data = system_data_ref.get()
         cpu_data = cpu_data_ref.get()
-        process_data=  cpu_data
-        timestamps, cpu_usages = get_cpu_12_hours(process_data.get("data", []))
-        print ("looking here",timestamps)
-        print ("looking here",cpu_usages)
+        process_data =  cpu_data
+        # print ("look here", cpu_data)
+        timestamps, cpu_usages = get_cpu_12_hours(process_data.get("data"))
+        print ("disk data ", disk_data.get("data", [])[-1])
+        # print ("cpu data", process_data.get("data"))
+
+        # print ("ram data", ram_data)
+        # print ("cpu_usages data", cpu_usages)
+
+        ram_timestamps, used_swap , free_swap = process_ram_data(ram_data.get("data"))
 
         if cpu_data:
             # Get the last data section (assuming it's a list of dictionaries)
-            last_data_section = cpu_data.get("data", [])[-1]
+            latest_cpu_data = cpu_data.get("data", [])[-1]
+            latest_ram_data = ram_data.get("data", [])[-1]
+            latest_disk_data = disk_data.get("data",[])[-1]
 
             context = {
-                "system_name": last_data_section.get("system_name", ""),
-                "hostname": last_data_section.get("hostname", ""),
-                "threads": last_data_section.get("threads", ""),
-                "cpu_count": last_data_section.get("cpu_count", ""),
-                "cpu_usage": last_data_section.get("data", {}).get("cpu_usage", ""),
-                "cpu_frequency": last_data_section.get("data", {}).get(
-                    "cpu_frequency", ""
-                ),
-                "per_cpu_percent": last_data_section.get("data", {}).get(
-                    "per_cpu_percent", ""
-                ),
-                "timestamp": last_data_section.get("data", {}).get("timestamp", ""),
-                "CPUtimestamps": timestamps, 
-                "cpu_usages" : cpu_usages, 
+                # system data
+                "system_name": system_data.get("username", ""),
+                "hostname": system_data.get("hostname", ""),
 
+                # cpu data
+                "threads": latest_cpu_data.get("threads", ""),
+                "cpu_count": latest_cpu_data.get("cpu_count", ""),
+                "cpu_usage": latest_cpu_data.get("data", {}).get("cpu_usage", ""),
+                "cpu_frequency": latest_cpu_data.get("data", {}).get("cpu_frequency", ""),
+                "per_cpu_percent": latest_cpu_data.get("data", {}).get(
+                    "per_cpu_percent", ""),
+                "timestamp": latest_cpu_data.get("data", {}).get("timestamp", ""),
+                "CPUtimestamps": timestamps, 
+                "cpu_usages" : cpu_usages,
+                "per_cpu_percent_json": json.dumps(latest_cpu_data.get("data", {}).get("per_cpu_percent", [])),
+
+                # ram data 
+                "available_memory": latest_ram_data["data"].get("available_memory"),
+                "free_memory": latest_ram_data["data"].get("free_memory", ""),
+                "free_swap": latest_ram_data["data"].get("free_swap", ""),
+                "percent_memory": latest_ram_data["data"].get("percent_memory", ""),
+                "percent_swap": latest_ram_data["data"].get("percent_swap", ""),
+                "timestamp_ram": latest_ram_data["data"].get("timestamp", ""),
+                "total_swap": latest_ram_data["data"].get("total_swap", ""),
+                "used_memory": latest_ram_data["data"].get("used_memory", ""),
+                "used_swap": latest_ram_data["data"].get("used_swap", ""),
+                "total_memory": latest_ram_data.get("total_memory", ""),
+                "full_timestamps": ram_timestamps, 
+                "used_swap" : used_swap, 
+                "free_swap" : free_swap, 
+
+                # disk data
+                "total_disk" : latest_disk_data.get("data", {}).get("total_disk", ""),
+                "free_disk" : latest_disk_data.get("data", {}).get("free_disk", ""),
+                "percent_disk" : latest_disk_data.get("data", {}).get("percent_disk", ""), 
             }
 
+            print()
             print(context)
-            return render(request, "cpu_info.html", context)
+            return render(request, "hardware_info.html", context)
         else:
             return render(
                 request,
-                "cpu_info.html",
+                "hardware_info.html",
                 {"error_message": f"No data found for token: {token}"},
             )
     except Exception as e:
