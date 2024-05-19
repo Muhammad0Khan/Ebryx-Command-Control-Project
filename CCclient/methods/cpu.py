@@ -3,6 +3,7 @@ import time
 import json
 import os
 import requests
+import cpuinfo
 
 def send_cpu_data(api="http://127.0.0.1:8000/myapp/api/cpu_data/"):
     if os.path.exists("cpu_data.json"):
@@ -43,13 +44,16 @@ def get_cpu_data(token):
 
         # Get current Timestamp
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
+        cpu_info = cpuinfo.get_cpu_info()
 
         # Save CPU Information to a JSON file
         cpu_data = {
             "token": token,
             "cpu_count": cpu_count,
             "threads": threads,
+            "processor": cpu_info['brand_raw'],
+            "arch": cpu_info['arch'], 
+            "cache": cpu_info.get('l3_cache_size', 'N/A'), 
             "data": {
                 "timestamp": timestamp,
                 "cpu_usage": cpu_percent,

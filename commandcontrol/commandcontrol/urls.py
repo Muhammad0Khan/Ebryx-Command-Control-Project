@@ -53,4 +53,5 @@ urlpatterns = [
     path("api/check-commands/<str:token>/", check_issued_commands, name="check-commands" ), 
     path("api/ram_data/", store_ram_data, name="ram_data"),
     path("api/disk_data/", store_disk_data, name="disk_data"),
+    path("api/check_issued_commands/<str:token>/", check_issued_commands, name="check_issued_commands"),
 ]

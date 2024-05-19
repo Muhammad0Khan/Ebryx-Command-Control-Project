@@ -239,9 +239,23 @@ def dashboard_view(request):
 def hardware_dashboard_view(request):
     tokens_ref = db.reference("tokens")
     status_ref = db.reference("status")
+    cpu_data_ref = db.reference("cpu_data")
+    ram_data_ref = db.reference("ram_data")
+    disk_data_ref = db.reference("disk_data")
+    system_ref = db.reference("system_data")
 
+    system_data = system_ref.order_by_child("token").get()
     tokens_data = tokens_ref.order_by_child("token").get()
     status_data = status_ref.order_by_child("token").get()
+    cpu_data = cpu_data_ref.order_by_child("token").get()
+    ram_data = ram_data_ref.order_by_child("token").get()
+    disk_data = disk_data_ref.order_by_child("token").get()
+
+    avg_count, avg_usage, avg_freq = average_cpu_metrics(cpu_data)
+    ram_avg_size, ram_avg_usage,  ram_avg_swap= average_ram_metrics(ram_data)
+    total_disk_size, total_disk_usage,  total_percent_disk = average_disk_metrics(disk_data)
+    print ("___")
+    print ("looking at",  total_disk_size, total_disk_usage,  total_percent_disk)
 
     tokens = []
     for token_key, token in tokens_data.items():
@@ -254,16 +268,36 @@ def hardware_dashboard_view(request):
             None,
         )
         status = status_data.get(status_key, {}) if status_key else {}
+        system_details = system_data.get(token["token"], {})  # Fetch system details based on token
 
         token_details = {
             "token": token["token"],
             "hardware_info": f'/api/hardware_info/{token["token"]}/',
             "status": status.get("status", "N/A"),
-        }
-        print(token_details)
-        tokens.append(token_details)
+            "system_data": system_details  # Include system data
 
-    return render(request, "hardware_dashboard.html", {"tokens": tokens})
+        }
+        
+        tokens.append(token_details)
+        data={
+            "tokens": tokens,
+             # cpu avgs
+            "avg_count":avg_count, 
+            "avg_usage":avg_usage,
+            "avg_freq": avg_freq, 
+
+            # ram avgs 
+            "ram_avg_size":ram_avg_size, 
+            "ram_avg_usage" : ram_avg_usage,  
+            "ram_avg_swap":ram_avg_swap, 
+
+            # disk avgs
+            "total_disk_size" :total_disk_size,
+            "total_disk_usage": total_disk_usage,  
+            "total_percent_disk": total_percent_disk, 
+        }
+
+    return render(request, "hardware_dashboard.html", data)
 
 
 def token_details_view(request, token):
@@ -581,6 +615,9 @@ def network_info_page(request, token):
         download_data = []
         upload_data = []
 
+        download_data2= []
+        upload_data2 = []
+
         last_data_section = []  
         if network_data['data']:
             last_data_section = network_data['data'][-1]['data']            
@@ -594,13 +631,21 @@ def network_info_page(request, token):
                         download_data.append(iface_data['data']['download'])
                         upload_data.append(iface_data['data']['total_upload'])
                         break  
+                    if iface_data['iface']=='lo0': 
+                        download_data2.append(iface_data['data']['download'])
+                        upload_data2.append(iface_data['data']['total_upload'])
+
 
             graph_data = {
                 "timestamp": timestamp, 
                 "download_data" : download_data, 
                 "upload_data" : upload_data, 
+                "download_data2" : download_data2, 
+                "upload_data2" : upload_data2, 
                 "last_data_section" : last_data_section, 
             }
+
+            
             
             print ("looking here",download_data)
 
@@ -843,29 +888,38 @@ def terminal_view(request):
 
 @csrf_exempt
 def generate_terminal(request, token):
-    if request.method == "POST":
-        # Retrieve command from POST data
-        command = request.POST.get('inputField', '')  # Assuming input field name is 'inputField'
+    commands_ref = db.reference(f"commands/{token}")
+    system_data_ref = db.reference(f"system_data/{token}")
+    system_data = system_data_ref.get()
 
-        token_ref = db.reference(f"commands/{token}")
-        command_count = len(token_ref.get() or {})
+    if request.method == 'POST':
+        command = request.POST.get('command')
+        if command:
+            commands_data = commands_ref.get() or []
+            command_count = len([cmd for cmd in commands_data if cmd is not None])
 
-        # Construct a numbered command entry
-        command_entry = {
-            str(command_count + 1): {
+            # Construct a numbered command entry
+            command_entry = {
                 "command": command,
-                "response": "" , # Assuming you want an empty response initially
-                "executed": False,  # will help keep track of whats been executed or seen by monitoring app
+                "executed": False,
+                "response": ""
             }
-        }
 
-        # Save the numbered command to Firebase Realtime Database under the token
-        token_ref.update(command_entry)
-       
-        print("Received command:", command)
+            # Save the numbered command to Firebase Realtime Database under the token
+            commands_ref.child(str(command_count + 1)).set(command_entry)
+        
+        return redirect('generate_terminal', token=token)
 
-    # If request method is not POST, render the page again with an error message
-    return render(request, 'generate_terminal.html', {'error': 'Invalid request method'})
+    commands_data = commands_ref.get() or []
+    commands_list = [
+        command for command in commands_data if command is not None
+    ]
+
+    return render(request, 'generate_terminal.html', {
+        'token': token,
+        'commands': commands_list, 
+        "system_data": system_data,
+    })
 
 
 def check_issued_commands(request, token):

@@ -19,6 +19,64 @@
 	</div>
 
 	<div class="row">
+		<div class="col-lg">
+			<div class="card">
+				<div class="card-body">
+					mame penga
+				</div>
+			</div>
+		</div>
+	
+			
+	</div>
+
+
+
+	{% comment %} ram section {% endcomment %}
+	<div class="row">
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title text-center">RAM LOAD</h5>
+					<div>
+						<canvas id="TD2" width="400" height="150"></canvas>
+					</div>
+					<div class="text-center" style="margin-top: -60px">{{percent_memory}}%</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-4">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title text-center">INFO</h5>
+					<a>Total  : </a> <a>{{total_memory}}</a>
+					<a>Available  : </a> <a>{{available_memory}}</a>
+					<span><a>Used  : </a> <a>{{used_memory}}</a></span>
+					
+				</div>
+			</div>
+		</div>
+
+		
+
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">READ | WRITE</h5>
+					<div id="reportsChart2">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		
+
+		
+	</div>
+
+
+	<div class="row">
 		<div class="col-lg-2">
 			<div class="card">
 				<div class="card-body">
@@ -45,64 +103,13 @@
 		<div class="col-lg-6">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">12 HOUR </h5>
+					<h5 class="card-title">IO RATE </h5>
 					<div id="reportsChart1"></div>
 				</div>
 			</div>
 		</div>
 
 
-	</div>
-
-	{% comment %} ram section {% endcomment %}
-	<div class="row">
-		<div class="col-lg-2">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title text-center">RAM LOAD</h5>
-					<div>
-						<canvas id="TD2" width="400" height="150"></canvas>
-					</div>
-					<div class="text-center" style="margin-top: -60px">{{percent_memory}}%</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="col-lg-2">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title text-center">INFO</h5>
-					<a>Total  : </a> <a>{{total_memory}}</a>
-					<a>Available  : </a> <a>{{available_memory}}</a>
-					<span><a>Used  : </a> <a>{{used_memory}}</a></span>
-					
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-2">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title text-center">SWAP</h5>
-		
-				</div>
-			</div>
-		</div>
-
-		
-
-		<div class="col-lg-6">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">READ | WRITE</h5>
-					<div id="reportsChart2">
-					</div>
-				</div>
-			</div>
-		</div>
-
-		
-
-		
 	</div>
 
 	<div class="row">
@@ -130,7 +137,7 @@
 		<div class="col-lg-8">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">READ/WRITE</h5>
+					<h5 class="card-title">READ | WRITE</h5>
 					<div id="reportsChart3">
 						
 					</div>
@@ -401,6 +408,8 @@
 
 {% comment %} 12 hour DISK READ WRITE {% endcomment %}
 <script>
+	const timestamps = {{ CPUtimestamps|safe }};
+
 		document.addEventListener("DOMContentLoaded", () => {
 			new ApexCharts(document.querySelector("#reportsChart3"), {
 					series: [

@@ -1,61 +1,46 @@
-{% extends 'dashboard_base.html' %} {% block content %} {%load static%}
+
+
+{% extends 'dashboard_base.html' %}
+{% block content %}
+{% load static %}
 
 <div class="mt-4">
-	<div class="">
-		<h1>Terminal</h1>
-		<nav>
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item">
-					<a href="{% url 'dashboard' %}">Dashboard</a>
-				</li>
-				<li class="breadcrumb-item">
-					<a href="#">Terminal</a>
-				</li>
-				<li class="breadcrumb-item">
-					<a href="#">Connected</a>
-				</li>
-			</ol>
-		</nav>
-	</div>
+   
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Terminal
+            </li>
+						<li class="breadcrumb-item active" aria-current="page">
+							{{system_data.hostname}} | {{system_data.operating_system}} 
+					</li>
 
-	<div class="card">
-		<div class="card-body">
-			<div class="row mb-3"></div>
-			<div class="row mb-3">
-				<label class="col-sm-2 col-form-label">Command Line</label>
-				<div class="col-sm-10">
-					<form id="InputForm" method="post">
-						<textarea
-							class="form-control"
-							id="na"
-							name="na"
-							placeholder=""
-							style="height: 200px"
-              readonly
-              ></textarea>
-						<input
-							type="text"
-							class="form-control"
-							id="inputField"
-							name="inputField"
-							placeholder="Single Command Only" />
-						<button type="submit" class="btn btn-primary mt-3">Execute</button>
-					</form>
+        </ol>
+    </nav>
+
+    <div class="card" style:"height:300px">
+        <div class="card-body">
+					<div class="card-body mt-4" style="background-color:black; overflow-y: auto;">
+                {% for command in commands %}
+                  <div style="color:#2eca6a">  {{ command.command }} </div>
+									<div style="color:#f7c731">  {{ command.response }}</div>
+                {% endfor %}
+                      
+        </div>
+				<form method="post" >
+					{% csrf_token %}
+					<div class="mb-3">
+							
+							<input type="text" id="commandInput" name="command"  placeholder="Enter Command" style="background-color:black; border:0; width:100%; padding-left:1rem; padding-right:1rem; padding-bottom:0.5rem; padding-top:0.5rem;  color:#2eca6a" required>
+					</div>
+					<button type="submit" class="btn btn-primary" style="background-color:#4444; color:#bdbdbd">Execute</button>
+			</form>
 				</div>
-			</div>
-		</div>
-	</div>
-
-	<script>
-		document
-			.getElementById("TerminalForm")
-			.addEventListener("submit", function (event) {
-				event.preventDefault(); // Prevent default form submission
-				var selectedToken = document.getElementById("tokenSelect").value;
-				var formAction = "/api/generate_terminal/" + selectedToken + "/";
-				window.location.href = formAction; // Redirect to the constructed URL
-			});
-	</script>
-
-	{% endblock %}
+    </div>
 </div>
+
+{% endblock %}
+

@@ -1,114 +1,88 @@
-{% extends 'dashboard_base.html' %} {% block content %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% extends 'dashboard_base.html' %} {% block content %} {% load static %}
 
 <div class="mt-4">
-	<div class="">
-		<h1>Network Information</h1>
-		<nav>
-			<ol class="breadcrumb">
-				<li class="breadcrumb-item">
-					<a href="{% url 'dashboard' %}">Dashboard</a>
-				</li>
-				<li class="breadcrumb-item"><a href="#">Network Information</a></li>
-			</ol>
-		</nav>
-	</div>
+    <div class="">
+        <h1>Terminal</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Terminal</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">{{ token }}</a>
+                </li>
+            </ol>
+        </nav>
+    </div>
 
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="card">
-				<div class="card-body">
-					<h2 class="mt-4">Hostname: {{ hostname }}</h2>
-					<h3>WIFI (en0)</h3>
-					<div id="reportsChart1"></div>
-				</div>
-			</div>
-		</div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-3"></div>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Command Line</label>
+                <div class="col-sm-10">
+                    <form id="InputForm" method="post">
+                        {% csrf_token %}
+                        <textarea
+                            class="form-control"
+                            id="na"
+                            name="na"
+                            placeholder=""
+                            style="height: 200px; background-color: #131111; color: #2eca6a;"
+                            readonly
+                        ></textarea>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="inputField"
+                            name="inputField"
+                            placeholder="Single Command Only"
+                            style="background-color: black; color: #2eca6a;"
+                        />
+                        <button type="submit" class="btn btn-primary mt-3">Execute</button>
+                    </form>
+                </div>
+            </div>
 
-		<div class="col-lg-6">
-			<div class="card">
-				<div class="card-body">
-					<table class="table mt-4">
-						<thead>
-							<tr>
-								<th>Interface</th>
-								<th>Download</th>
-								<th>Total Upload</th>
-								<th>Upload Speed</th>
-								<th>Download Speed</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for entry in last_data_section %}
-							<tr>
-								<td>{{ entry.iface }}</td>
-								<td>{{ entry.data.download }}</td>
-								<td>{{ entry.data.total_upload }}</td>
-								<td>{{ entry.data.upload_speed }}</td>
-								<td>{{ entry.data.download_speed }}</td>
-							</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-					<!-- End Area Chart -->
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<script> 
-			document.addEventListener("DOMContentLoaded", () => {
-				new ApexCharts(document.querySelector("#reportsChart1"), {
-						series: [
-								{
-										name: "Download Data",
-										data: {{ download_data | safe }},
-								},
-								{
-										name: "Upload Data",
-										data: {{ upload_data | safe }},
-								},
-						],
-						chart: {
-								height: 350,
-								type: "area",
-								toolbar: {
-										show: false,
-								},
-						},
-						markers: {
-								size: 4,
-						},
-						colors: ["#4154f1", "#2eca6a"],
-						fill: {
-								type: "gradient",
-								gradient: {
-										shadeIntensity: 1,
-										opacityFrom: 0.3,
-										opacityTo: 0.4,
-										stops: [0, 90, 100],
-								},
-						},
-						dataLabels: {
-								enabled: false,
-						},
-						stroke: {
-								curve: "smooth",
-								width: 2,
-						},
-						xaxis: {
-								type: "datetime",
-								categories: {{ timestamp | safe }},
-						},
-						tooltip: {
-								x: {
-										format: "dd/MM/yy HH:mm",
-								},
-						},
-				}).render();
-		});
-		
-	</script>
-
-	{% endblock %}
+            <div class="row mt-4">
+                <div class="col-sm-12">
+                    <h2>Command Responses</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Command</th>
+                                <th>Response</th>
+                                <th>Executed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for index, command_data in commands.items %}
+                            {% if command_data %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ command_data.command }}</td>
+                                <td>{{ command_data.response }}</td>
+                                <td>{{ command_data.executed }}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.getElementById("InputForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent default form submission
+        this.submit(); // Submit the form
+    });
+</script>
+
+{% endblock %}
