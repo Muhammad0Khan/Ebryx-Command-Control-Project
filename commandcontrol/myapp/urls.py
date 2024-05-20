@@ -25,4 +25,6 @@ urlpatterns = [
     path("api/disk_data/", store_disk_data, name="disk_data"),
     path("terminal/", terminal_view, name="terminal" ), 
     path("api/check_issued_commands/<str:token>/", check_issued_commands, name="check_issued_commands"),
+    path("api/send_executed_commands/<str:token>/", send_executed_commands, name="send_executed_commands"),
+
 ]

@@ -9,6 +9,7 @@ from methods.network import*
 from methods.disk import*
 from methods.ram import*
 from methods.system_data import*
+from methods.execution import*
 
 
 
@@ -24,6 +25,8 @@ send_cpu_data_api = base_url+'/myapp/api/cpu_data/'
 send_network_data_api= base_url+'/api/network_data/'
 send_ram_data_api= base_url+'/api/ram_data/'
 send_disk_data_api= base_url+'/api/disk_data/'
+check_existing_commands_api= base_url+ "/api/check_issued_commands/"
+send_execution_data_api= base_url+'/api/send_executed_commands/'
 
 while True:
 
@@ -58,6 +61,15 @@ while True:
         if check_token_response.status_code == 200:
             check_token_json_response = check_token_response.json()
             if check_token_json_response.get('exists'):
+
+                # fetch existing commands here
+                fetch_and_save_data(check_existing_commands_api+token)
+                print ("checked existing commands")
+                # executing commands here
+                print (send_execution_data_api+token+"/")
+                send_issued_commands(send_execution_data_api+token+"/")
+                print ("executed commands")
+
                 # sending data here 
                 send_cpu_data(send_cpu_data_api)
                 send_network_stats(send_network_data_api)

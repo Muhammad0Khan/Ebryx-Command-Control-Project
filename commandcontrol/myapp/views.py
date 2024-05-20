@@ -892,14 +892,29 @@ def generate_terminal(request, token):
     system_data_ref = db.reference(f"system_data/{token}")
     system_data = system_data_ref.get()
 
+    cpu_data_ref = db.reference(f"cpu_data/{token}")
+    ram_data_ref = db.reference(f"ram_data/{token}")
+    disk_data_ref = db.reference(f"disk_data/{token}")
+
+    cpu_data = cpu_data_ref.get()
+    ram_data = ram_data_ref.get()
+    disk_data = disk_data_ref.get()
+    system_data = system_data_ref.get()
+
+    latest_cpu_data = cpu_data.get("data", [])[-1]
+    latest_ram_data = ram_data.get("data", [])[-1]
+    latest_disk_data = disk_data.get("data",[])[-1]
+
+
     if request.method == 'POST':
         command = request.POST.get('command')
         if command:
             commands_data = commands_ref.get() or []
             command_count = len([cmd for cmd in commands_data if cmd is not None])
 
-            # Construct a numbered command entry
+            # Construct a numbered command entry with an ID
             command_entry = {
+                "id": command_count + 1,  # Assigning an ID
                 "command": command,
                 "executed": False,
                 "response": ""
@@ -919,8 +934,11 @@ def generate_terminal(request, token):
         'token': token,
         'commands': commands_list, 
         "system_data": system_data,
-    })
+        "cpu_usage": latest_cpu_data.get("data", {}).get("cpu_usage", ""),
+        "percent_memory": latest_ram_data["data"].get("percent_memory", ""),
+        "percent_disk" : latest_disk_data.get("data", {}).get("percent_disk", ""), 
 
+    })
 
 def check_issued_commands(request, token):
     # Reference to the Firebase Realtime Database node where you store commands
@@ -929,16 +947,71 @@ def check_issued_commands(request, token):
     # Get a snapshot of the commands node
     commands_snapshot = command_ref.get()
     
-    # List to store commands matching the token ID
-    matched_commands = []
+    # List to store unexecuted commands matching the token ID
+    unexecuted_commands = []
     
-    # Iterate through each command in the snapshot
-    for key, value in commands_snapshot.items():
-        if key == token:  # Check if the key matches the token ID
-            # Append the command to the list if it matches
-            matched_commands.append(value[1])
+    # Check if the snapshot is not None and if the token exists in the commands snapshot
+    if commands_snapshot and token in commands_snapshot:
+        # Iterate through each command in the token's list
+        for command_info in commands_snapshot[token][1:]:
+            if command_info and not command_info.get("executed", True):
+                # Append the unexecuted command to the list
+                unexecuted_commands.append(command_info)
     
-    return JsonResponse(matched_commands, safe=False)
+    return JsonResponse(unexecuted_commands, safe=False)
+
+
+@csrf_exempt
+@require_POST
+def send_executed_commands(request, token):
+    try:
+        # Parse the JSON data from the request body
+        data = json.loads(request.body)
+        
+        # Validate the data
+        if not isinstance(data, list):
+            return JsonResponse({"status": "error", "message": "Invalid data format. Expected a list."}, status=400)
+
+        # Reference to the Firebase Realtime Database node where commands are stored
+        command_ref = db.reference(f"/commands/{token}")
+
+        # Fetch the existing commands for the given token
+        existing_commands = command_ref.get()
+        if existing_commands is None:
+            return JsonResponse({"status": "error", "message": "No commands found for the given token."}, status=404)
+
+        # Check if the first element is None and exclude it from processing
+        if existing_commands and existing_commands[0] is None:
+            existing_commands = existing_commands[1:]
+
+        # Update the commands with the data provided
+        for command_update in data:
+            command_id = command_update.get("id")
+            if command_id is None:
+                continue
+
+            # Find the command with the given ID in the existing commands
+            for existing_command in existing_commands:
+                if existing_command and existing_command.get("id") == command_id:
+                    existing_command.update(command_update)
+                    break
+
+        # Prepend None if it was originally part of the data
+        if command_ref.get() and command_ref.get()[0] is None:
+            existing_commands.insert(0, None)
+
+        # Update the database with the modified commands
+        command_ref.set(existing_commands)
+
+        return JsonResponse({"status": "success", "message": "Commands updated successfully."})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "message": "Invalid JSON data."}, status=400)
+
+    except Exception as e:
+        # Log the error message
+        print(f"An error occurred: {str(e)}")
+        return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"}, status=500)
 
 
 @csrf_exempt
