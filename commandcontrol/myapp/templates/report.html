@@ -1,8 +1,8 @@
 {% extends 'dashboard_base.html' %} {% block content %} {%load static%}
 
 <div class="mt-4">
+	<h1>Reports</h1>
 	<div class="">
-		<h1>Reports</h1>
 		<nav>
 			<ol class="breadcrumb">
 				<li class="breadcrumb-item">
@@ -15,34 +15,85 @@
 		</nav>
 	</div>
 
-	<div class="card">
-    <div class="card-body">
-        <div class="row mb-3">
-            <h1>Generate</h1>
-            <label class="col-sm-2 col-form-label">Select Hostname</label>
+	<div class="row mb-3">
+		<div class="col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<h4 class="mt-4">Generate | Online</h4>
+					<form id="reportForm" method="GET">
+						<select
+							id="tokenSelect"
+							name="token"
+							class="form-select"
+							aria-label="Select Hostname">
+							<option value="" selected disabled>Select Host</option>
+							{% for token_info in tokens %}
+							<option value="{{ token_info.token }}">
+								{{ token_info.system_data.hostname }}
+							</option>
+							{% endfor %}
+						</select>
+						<button
+							type="submit"
+							class="btn btn-primary mt-3"
+							style="background-color: #4444">
+							Generate Report
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
 
-            <form id="reportForm" method="GET">
-                <select id="tokenSelect" name="token" class="form-select" aria-label="Select Hostname">
-                    {% for token_info in tokens %}
-                    <option value="{{ token_info.token }}">
-                        {{ token_info.system_data.hostname }}
-                    </option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-primary mt-3">Generate Report</button>
-            </form>
-        </div>
-    </div>
-</div>
+        <div class="col-lg-6">
+			<div class="card">
+				<div class="card-body">
+					<h4 class="mt-4">Generate | Download</h4>
+					<form id="DownloadForm" method="GET">
+						<select
+							id="tokenSelect2"
+							name="token"
+							class="form-select"
+							aria-label="Select Hostname">
+							<option value="" selected disabled>Select Host</option>
+							{% for token_info in tokens %}
+							<option value="{{ token_info.token }}">
+								{{ token_info.system_data.hostname }}
+							</option>
+							{% endfor %}
+						</select>
+						<button
+							type="submit"
+							class="btn btn-primary mt-3"
+							style="background-color: #4444">
+							Generate Report
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 
-<script>
-    document.getElementById("reportForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent default form submission
-        var selectedToken = document.getElementById("tokenSelect").value;
-        var formAction = "/api/generate_report/" + selectedToken + "/";
-        window.location.href = formAction; // Redirect to the constructed URL
-    });
-</script>
+	<script>
+		document
+			.getElementById("reportForm")
+			.addEventListener("submit", function (event) {
+				event.preventDefault(); // Prevent default form submission
+				var selectedToken = document.getElementById("tokenSelect").value;
+				var formAction = "/api/generate_report/" + selectedToken + "/";
+				window.location.href = formAction; // Redirect to the constructed URL
+			});
+	</script>
+
+    <script>
+		document
+			.getElementById("DownloadForm")
+			.addEventListener("submit", function (event) {
+				event.preventDefault(); // Prevent default form submission
+				var selectedToken = document.getElementById("tokenSelect2").value;
+				var formAction = "/api/generate_pdf_report/" + selectedToken + "/";
+				window.location.href = formAction; // Redirect to the constructed URL
+			});
+	</script>
 
 	{% endblock %}
 </div>

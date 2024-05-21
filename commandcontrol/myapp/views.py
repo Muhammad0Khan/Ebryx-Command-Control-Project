@@ -24,6 +24,12 @@ from functools import wraps
 from myapp.methods import *
 from .functions import *
 
+
+from django.shortcuts import render
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from io import BytesIO
+
 try:
     firebase_admin = initialize_firebase()
 except ValueError:
@@ -862,7 +868,7 @@ def reports_view(request):
         }
         tokens.append(token_details)
 
-    print(tokens)
+    
     return render(request, 'report.html', {'tokens': tokens})
 
 
@@ -886,6 +892,9 @@ def generate_reports(request,token):
         }
         tokens.append(token_details)
 
+    message =" report generated for :" + system_data.get("hostname") 
+    set_notification(message, "New_report")
+    
     return render (request, 'generate_report.html', {'tokens': tokens})
 
 
@@ -1240,3 +1249,62 @@ def store_disk_data(request):
             "message": f"An error occurred: {str(e)}",
         }
         return JsonResponse(response_data, status=500)    
+    
+
+def generate_pdf_report(request, token):    
+
+    cpu_data_ref = db.reference(f"cpu_data/{token}")
+    ram_data_ref = db.reference(f"ram_data/{token}")
+    disk_data_ref = db.reference(f"disk_data/{token}")        
+    system_data_ref = db.reference(f"system_data/{token}")
+    installed_apps_ref = db.reference(f"installed_apps/{token}")
+    ram_data = ram_data_ref.get()
+    disk_data = disk_data_ref.get()
+    system_data = system_data_ref.get()
+    cpu_data = cpu_data_ref.get() 
+    installed_app_data=  installed_apps_ref.get()
+
+    average_cpu_data = cpu_data.get("data", [])[-1]
+    average_ram_data = ram_data.get("data", [])[-1]
+    average_disk_data = disk_data.get("data",[])[-1]
+
+    tokens = []
+    token_details = {
+            "token": token,
+            "generate_report": f'/api/generate_pdf_report/{"token"}/',
+            "system_data": system_data , # Include system data,
+            "cpu_data" :average_cpu_data , 
+            "ram_data" :average_ram_data , 
+            "disk_data": average_disk_data, 
+            "installed_app_data": installed_app_data, 
+        }
+    
+    print(token_details)
+    
+    tokens.append(token_details)
+
+    # Render the HTML template to a string
+    html_string = render(request, 'report_template.html', {'tokens': tokens}).content.decode('utf-8')
+
+    # Create a BytesIO buffer to receive the PDF data
+    pdf_buffer = BytesIO()
+
+    # Convert HTML to PDF
+    pisa_status = pisa.CreatePDF(
+        src=html_string,
+        dest=pdf_buffer
+    )
+
+    # If there was an error during conversion, log it or handle it
+    if pisa_status.err:
+        return HttpResponse('We had some errors with your request')
+
+    # Return the generated PDF file
+    pdf_buffer.seek(0)
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+
+    message =" report generated for :" + "host"
+    set_notification(message, "New_report")
+    return response
+

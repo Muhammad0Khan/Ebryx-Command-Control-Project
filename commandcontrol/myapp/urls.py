@@ -26,5 +26,6 @@ urlpatterns = [
     path("terminal/", terminal_view, name="terminal" ), 
     path("api/check_issued_commands/<str:token>/", check_issued_commands, name="check_issued_commands"),
     path("api/send_executed_commands/<str:token>/", send_executed_commands, name="send_executed_commands"),
+    path("api/generate_pdf_report/<str:token>/", generate_pdf_report, name="generate_pdf_report"),
 
 ]
