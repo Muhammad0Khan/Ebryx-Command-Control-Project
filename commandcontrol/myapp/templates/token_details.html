@@ -1,4 +1,5 @@
-{% extends 'dashboard_base.html' %} {% block content %}
+{% extends 'dashboard_base.html' %}
+{% block content %}
 <style>
 	table {
 		border-collapse: collapse;
@@ -9,55 +10,106 @@
 
 	th,
 	td {
-		background-color: #252525; /* Light background color for header */
-		color: #bdbdbd; /* Dark text color for header */
-		
+		background-color: #252525; /* Background color for header and cells */
+		color: #bdbdbd; /* Text color for header and cells */
 		text-align: left;
 		padding: 12px;
 	}
 
 	tr {
-		border: 1px solid #444444; /* Light border color */
+		border: 1px solid #444444; /* Border color */
 	}
-	th {
-		background-color: #252525; /* Light background color for header */
-		color: #bdbdbd; /* Dark text color for header */
+
+	.card-body {
+		overflow-x: auto; /* Enable horizontal scrolling */
 	}
 
 	.status {
 		font-weight: bold;
 	}
+
+	.filter-form {
+		display: flex;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+	#appsTable th:nth-child(1),
+	#appsTable td:nth-child(1) {
+			width: 30%;
+	}
+
+	#appsTable th:nth-child(2),
+	#appsTable td:nth-child(2) {
+			width: 40%;
+	}
+
+	#appsTable th:nth-child(3),
+	#appsTable td:nth-child(3) {
+			width: 15%;
+	}
+
+	#appsTable th:nth-child(4),
+	#appsTable td:nth-child(4) {
+			width: 15%;
+	}
+
+	.sort-icon {
+		display: inline;
+		float: right;
+		margin-left: 5px;
+}
 </style>
 
 <div class="mt-4">
 	<div class="">
-		<h1>Apps Installed in the last 12 hours</h1>
 		<nav>
 			<ol class="breadcrumb">
 				<li class="breadcrumb-item">
 					<a href="{% url 'dashboard' %}">Dashboard</a>
 				</li>
-				<li class="breadcrumb-item"><a href="">Installed Apps</a></li>
+				<li class="breadcrumb-item">
+					<a href="#">Installed Apps</a> <!-- Add the correct URL here -->
+				</li>
 			</ol>
 		</nav>
 	</div>
 
 	<div class="card mt-4">
 		<div class="card-body">
-			<p class="card-title">Username: {{ username }}</p>
-			<table>
+			<p class="card-title">{{ system_data.hostname }} | {{system_data.operating_system}} | {{system.operating_system_version}} </p>
+			
+			<!-- Filter Form -->
+			<form method="get" class="filter-form">
+				<div class="row">
+						<div class="col-md-4">
+								<input type="text" class="form-control" id="name" name="name" onkeyup="filterTable()" placeholder="Search by name">
+						</div>
+						<div class="col-md-4">
+								<input type="text" class="form-control" id="version" name="version" onkeyup="filterTable()" placeholder="Search by version">
+						</div>
+						<div class="col-md-4">
+								<input type="date" class="form-control" id="last_modified" name="last_modified" onchange="filterTable()" placeholder="Search edit date">
+						</div>
+				</div>
+		</form>
+
+			<table id="appsTable">
 				<thead>
 					<tr>
-						<th>Name</th>
-						<th>Info</th>
+						<th onclick="sortTable(0)">Name <span id="nameSortIcon" class="sort-icon"></span></th>
+						<th onclick="sortTable(1)">Info <span id="infoSortIcon" class="sort-icon"></span></th>
+						<th onclick="sortTable(2)">Version <span id="versionSortIcon" class="sort-icon"></span></th>
+						<th onclick="sortTable(3)">Last Modified <span id="lastModifiedSortIcon" class="sort-icon"></span></th>
 						<!-- Add other table headers as needed -->
-					</tr>
-				</thead>
+				</tr>
+			</thead>
 				<tbody>
 					{% for app_data in installed_apps %}
 					<tr>
-						<td><strong>{{ app_data.name }}</strong></td>
-						<td>{{ app_data.info }}</td>
+						<td class="name"><strong>{{ app_data.name }}</strong></td>
+						<td class="info">{{ app_data.info |default:"Not Available" }}</td>
+						<td class="version">{{ app_data.version }}</td>
+						<td class="lastModified">{{ app_data.lastModified|slice:":10" }}</td> <!-- Display only the date part -->
 						<!-- Add other table cells as needed -->
 					</tr>
 					{% endfor %}
@@ -66,4 +118,80 @@
 		</div>
 	</div>
 </div>
+<script>
+	let sortDirection = 1;
+	let sortColumn = null;
+
+	function sortTable(columnIndex) {
+			let table = document.getElementById('appsTable');
+			let rows = Array.from(table.getElementsByTagName('tr')).slice(1);
+
+			if (sortColumn === columnIndex) {
+					sortDirection *= -1;
+			} else {
+					sortDirection = 1;
+					if (sortColumn !== null) {
+							document.getElementById(`${getColumnName(sortColumn)}SortIcon`).innerHTML = '&darr;';
+					}
+					sortColumn = columnIndex;
+			}
+
+			rows.sort((a, b) => {
+					let aValue = a.getElementsByTagName('td')[columnIndex].innerText;
+					let bValue = b.getElementsByTagName('td')[columnIndex].innerText;
+					return aValue.localeCompare(bValue) * sortDirection;
+			});
+
+			rows.forEach(row => table.appendChild(row));
+
+			document.getElementById(`${getColumnName(columnIndex)}SortIcon`).innerHTML =
+					sortDirection === 1 ? '&uarr;' : '&darr;';
+	}
+
+	function getColumnName(index) {
+			switch (index) {
+					case 0:
+							return 'name';
+					case 1:
+							return 'info';
+					case 2:
+							return 'version';
+					case 3:
+							return 'lastModified';
+					default:
+							return '';
+			}
+	}
+</script>
+
+<script>
+	function filterTable() {
+		let nameFilter = document.getElementById('name').value.toLowerCase();
+		let versionFilter = document.getElementById('version').value.toLowerCase();
+		let lastModifiedFilter = document.getElementById('last_modified').value;
+		
+		let table = document.getElementById('appsTable');
+		let rows = table.getElementsByTagName('tr');
+		
+		for (let i = 1; i < rows.length; i++) {
+			let nameCell = rows[i].getElementsByClassName('name')[0];
+			let versionCell = rows[i].getElementsByClassName('version')[0];
+			let lastModifiedCell = rows[i].getElementsByClassName('lastModified')[0];
+			
+			let nameText = nameCell ? nameCell.textContent.toLowerCase() : '';
+			let versionText = versionCell ? versionCell.textContent.toLowerCase() : '';
+			let lastModifiedText = lastModifiedCell ? lastModifiedCell.textContent : '';
+			
+			let nameMatch = nameText.indexOf(nameFilter) > -1;
+			let versionMatch = versionText.indexOf(versionFilter) > -1;
+			let lastModifiedMatch = lastModifiedText.startsWith(lastModifiedFilter);
+			
+			if (nameMatch && versionMatch && lastModifiedMatch) {
+				rows[i].style.display = '';
+			} else {
+				rows[i].style.display = 'none';
+			}
+		}
+	}
+</script>
 {% endblock %}

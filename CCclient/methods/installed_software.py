@@ -20,7 +20,7 @@ def get_installed_software(token):
         applications = software_info.get("SPApplicationsDataType", [])
 
         # Filter applications modified in the last 5 days
-        five_days_ago = datetime.now() - timedelta(days=5)
+        five_days_ago = datetime.now() - timedelta(days=365)
         modified_applications = [
             update_label(app)
             for app in applications
@@ -73,4 +73,6 @@ def save_data_to_json(token, data, filename):
     with open(filename, "w") as json_file:
         json.dump({"token": token, "data": data}, json_file, indent=2)
         print(f"Token and data saved to {filename}.")
+
+
 

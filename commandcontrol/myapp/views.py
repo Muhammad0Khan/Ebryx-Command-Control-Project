@@ -303,8 +303,8 @@ def hardware_dashboard_view(request):
 def token_details_view(request, token):
     # Fetch data from the installed_apps collection for the specific token
     apps_ref = db.reference("installed_apps").child(token)
-    cpu_data_ref = db.reference("cpu_data").child(token)
-    username = cpu_data_ref.get().get("data", [])[-1].get("username", "")
+    system_data_ref = db.reference("system_data").child(token)
+    system_data = system_data_ref.get()
     token_data = apps_ref.get()
 
     if token_data:
@@ -312,12 +312,38 @@ def token_details_view(request, token):
     else:
         installed_apps_data = []
 
+    # Get filter parameters from the request
+    name_filter = request.GET.get('name', '')
+    version_filter = request.GET.get('version', '')
+    last_modified_filter = request.GET.get('last_modified', '')
+
+    # Filter installed apps data
+    if name_filter:
+        installed_apps_data = [app for app in installed_apps_data if name_filter.lower() in app.get('name', '').lower()]
+
+    if version_filter:
+        installed_apps_data = [app for app in installed_apps_data if version_filter in app.get('version', '')]
+
+    if last_modified_filter:
+        try:
+            last_modified_date = datetime.strptime(last_modified_filter, '%Y-%m-%d')
+            installed_apps_data = [
+                app for app in installed_apps_data
+                if datetime.strptime(app.get('lastModified', ''), '%Y-%m-%dT%H:%M:%SZ').date() == last_modified_date.date()
+            ]
+        except ValueError:
+            # Handle the case where the date is not in the correct format
+            pass
+
     return render(
         request,
         "token_details.html",
-        {"username": username, "installed_apps": installed_apps_data},
+        {
+            "system_data": system_data,
+            "installed_apps": installed_apps_data,
+            "request": request,  # Pass the request object to access GET parameters in the template
+        },
     )
-
 
 def update_token_status(token):
     print("function called ")
