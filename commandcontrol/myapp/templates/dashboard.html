@@ -99,6 +99,7 @@
                 .catch(error => console.error("Error fetching data:", error));
         }, 5000);
 
+<<<<<<< Updated upstream
         // Function to delete a token
         function deleteToken(token) {
             fetch(`/api/delete_token/${token}/`, {
@@ -117,5 +118,165 @@
                 .catch(error => console.error("Error deleting token:", error));
         }
     </script>
+=======
+	<div class="row">
+		<!-- Left side columns -->
+		<div class="col-lg-8">
+			<div class="row">
+				<!-- Online Systems Card -->
+				<div class="col-xxl-6 col-md-6">
+					<div class="card info-card sales-card">
+
+						<div class="card-body">
+							<h5 class="card-title">Total Systems </h5>
+
+							<div class="d-flex align-items-center">
+								<div
+									class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+									<i class="bi bi-people"></i>
+								</div>
+								<div class="ps-3">
+									<h6>{{ tokens|length }}</h6>
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xxl-6 col-md-6">
+					<div class="card info-card revenue-card">
+
+						<div class="card-body">
+							<h5 class="card-title">Online Systems <span>| Today</span></h5>
+
+							<div class="d-flex align-items-center">
+								<div
+									class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+									<i class="bi bi-people"></i>
+								</div>
+								<div class="ps-3">
+									<h6>{{ online_count }}</h6>
+									<span class="text-success small pt-1 fw-bold">{{ tokens|length }}%</span>
+									<span class="text-muted small pt-2 ps-1">increase</span> 
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 ">
+			
+				<div class="card " style="height: 160px; ">
+						<div class="card-body" style="overflow-y: auto;">
+								<h5 class="card-title">Recent Activity <span>| Today</span></h5>
+								<div></div>
+								<div class="activity" >
+										{% for notification in notifications %}
+										<div class="activity-item d-flex">
+												<div class="activite-label">{{ notification.timestamp }}</div>
+												{% if notification.type == 'delete' %}
+												<i class="bi bi-circle-fill activity-badge text-danger align-self-start"></i>
+												{% else %}
+												<i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
+												{% endif %}
+												<div class="activity-content">
+														{{ notification.message }}
+												</div>
+										</div>
+										<!-- End activity item-->
+										{% endfor %}
+								</div>
+						</div>
+				</div>
+		</div>
+		
+		</div>
+	<script>
+		// Reload data every 5 seconds
+		setInterval(function () {
+			fetch("/dashboard/") // Replace with the actual URL of your dashboard view
+				.then(response => response.text())
+				.then(html => {
+					const parser = new DOMParser();
+					const newDoc = parser.parseFromString(html, "text/html");
+					const newTableBody = newDoc.getElementById("tokenTableBody");
+					document.getElementById("tokenTableBody").innerHTML =
+						newTableBody.innerHTML;
+				})
+				.catch(error => console.error("Error fetching data:", error));
+		}, 5000);
+
+		// Function to delete a token
+		function deleteToken(token) {
+			fetch(`/api/delete_token/${token}/`, {
+				method: "DELETE",
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						console.log(data.message);
+						// Optionally, update the UI or take additional actions upon successful deletion
+					} else {
+						console.error(data.message);
+						// Handle the case where deletion was not successful
+					}
+				})
+				.catch(error => console.error("Error deleting token:", error));
+		}
+	</script>
+</div>
+
+<div class="card">
+	<div class="card-body">
+		<table class="mt-4">
+			<thead>
+				<tr>
+					<th>Host Name</th>
+					<th>User Name</th>
+					<th>Type</th>
+					<th>Status</th>
+					<th>Delete</th>
+				</tr>
+			</thead>
+			<tbody id="tokenTableBody">
+				
+	{% for token in tokens %}
+			<tr>
+					<td>{{ token.hostname }}</td>
+					<td>{{ token.username }}</td>
+					<td style="max-width: 100px;">
+						
+						<span>
+								{% if token.operating_system == "MacOS" %}
+										<img src="{% static "assets/img/macOS.png" %}" style="max-width: 25%; height: auto;">
+								{% elif token.operating_system == "Windows" %}
+										<img src="{% static "assets/img/Windows.png" %}" style="max-width: 35%; height: auto;">
+								{% endif %}
+						</span>
+				</td>            <td
+							class="status"
+							style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
+							{% if token.status == 'online' %}
+									Online
+
+							{% else %}
+									Offline
+							{% endif %}
+					</td>
+					<td>
+						<button
+							class="btn btn-primary delete-btn w-96"
+							onclick="deleteToken('{{ token.token }}')">
+							Delete
+						</button>
+					</td>
+				</tr>
+				{% endfor %}
+
+			</tbody>
+		</table>
+	</div>
+>>>>>>> Stashed changes
 </div>
 {% endblock %}

@@ -44,7 +44,7 @@ def update_label(application):
     return application
 
 
-def send_installed_software(api="http://127.0.0.1:8000/myapp/api/installed_apps/"):
+def send_installed_software(api="http://127.0.0.1:8000/api/installed_apps/"):
     if os.path.exists("modified_installed.json"):
         with open("modified_installed.json", "r") as installed_data_file:
             installed_data = json.load(installed_data_file)

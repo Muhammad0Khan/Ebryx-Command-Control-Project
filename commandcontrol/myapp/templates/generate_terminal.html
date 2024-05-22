@@ -1,0 +1,119 @@
+
+
+{% extends 'dashboard_base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="mt-4">
+	<nav>
+			<ol class="breadcrumb">
+					<li class="breadcrumb-item">
+							<a href="{% url 'dashboard' %}">Dashboard</a>
+					</li>
+					<li class="breadcrumb-item active" aria-current="page">
+							Terminal
+					</li>
+					<li class="breadcrumb-item active" aria-current="page">
+							{{ system_data.hostname }} | {{ system_data.operating_system }}
+					</li>
+			</ol>
+	</nav>
+
+	<div class="row">
+			<div class="col-lg-8">
+					<div class="card" style="height:350px;">
+							<div class="card-body">
+									<div class="card-body mt-4" style="background-color:black; height: 200px; overflow-y: auto;">
+											{% for command in commands %}
+													<div style="color:#2eca6a">  {{ command.command }} </div>
+													<div style="color:#f7c731">  {{ command.response }} </div>
+											{% endfor %}
+									</div>
+									<form method="post">
+											{% csrf_token %}
+											<div class="mb-3">
+													<input type="text" id="commandInput" name="command" placeholder="Enter Command" style="background-color:black; border:0; width:100%; padding:0.5rem 1rem; color:#2eca6a" required>
+											</div>
+											<button type="submit" class="btn btn-primary" style="background-color:#444; color:#bdbdbd">Execute</button>
+									</form>
+							</div>
+					</div>
+			</div>
+
+			<div class="col-lg-4">
+					<div class="card" style="height:350px;">
+							<div class="card-body">
+									<h5 class="card-title text-center">SYSTEM</h5>
+									<div>
+										{% comment %} Radial Chart {% endcomment %}
+<div id="chart"></div>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+
+	const disk ={{percent_disk}}
+	const cpu ={{cpu_percent}}
+	const ram ={{percent_memory}}
+	
+	var options = {
+		series: [cpu,ram,disk],
+		chart: {
+				height: 300,
+				type: 'radialBar',
+		},
+		plotOptions: {
+				radialBar: {
+						offsetY: 0,
+						startAngle: 0,
+						endAngle: 270,
+						hollow: {
+								margin: 5,
+								size: '30%',
+								background: 'transparent',
+								image: undefined,
+						},
+						dataLabels: {
+								name: {
+										show: true,
+								},
+								value: {
+										show: true,
+								}
+						},
+						barLabels: {
+								enabled: true,
+								useSeriesColors: true,
+								margin: 8,
+								fontSize: '16px',
+								formatter: function (seriesName, opts) {
+										return seriesName + ":  " + opts.w.globals.series[opts.seriesIndex]
+								},
+						},
+				}
+		},
+		colors: ['#1ab7ea', '#0084ff', '#39539E',],
+		labels: ['CPU', 'RAM', 'DISK',],
+		responsive: [{
+				breakpoint: 25,
+				options: {
+						legend: {
+								show: true,
+						}
+				}
+		}]
+};
+
+var chart = new ApexCharts(document.querySelector("#chart"), options);
+chart.render();
+</script>
+									</div>
+
+							</div>
+					</div>
+			</div>
+	</div>
+</div>
+
+
+{% endblock %}
+

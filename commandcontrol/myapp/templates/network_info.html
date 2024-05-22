@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 {% extends 'base.html' %}
+=======
+{% extends 'dashboard_base.html' %}
+>>>>>>> Stashed changes
 
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -34,7 +38,11 @@
                             {% for interface_data in last_entry.interfaces %}
                                 <tr>
                                     <td>{{ last_entry.timestamp }}</td>
+<<<<<<< Updated upstream
                                     <td>{{ interface_data.interface }}</td>
+=======
+                                    <td>{{ interface_data.iface }}</td>
+>>>>>>> Stashed changes
                                     <td>{{ interface_data.data.download }}</td>
                                     <td>{{ interface_data.data.total_upload }}</td>
                                     <td>{{ interface_data.data.upload_speed }}</td>
@@ -55,6 +63,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <h3>Network Data over Time (en0)</h3>
+<<<<<<< Updated upstream
             <canvas id="networkChart" width="400" height="200"></canvas>
         </div>
     </div>
@@ -64,6 +73,24 @@
             var numericValue = parseFloat(value);
             var unit = value.replace(numericValue, '').trim().toUpperCase();
 
+=======
+            <canvas id="networkChartEn0" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3>Network Data over Time (lo0)</h3>
+            <canvas id="networkChartLo0" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function convertToMB(value) {
+            var numericValue = parseFloat(value);
+            var unit = value.replace(numericValue, '').trim().toUpperCase();
+
+>>>>>>> Stashed changes
             if (unit === 'GB') {
                 return numericValue * 1024;
             }
@@ -72,6 +99,7 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             var labels = [];
+<<<<<<< Updated upstream
             var uploadData = [];
             var downloadData = [];
 
@@ -90,18 +118,86 @@
 
             var ctx = document.getElementById('networkChart').getContext('2d');
             var myChart = new Chart(ctx, {
+=======
+            var uploadDataEn0 = [];
+            var downloadDataEn0 = [];
+            var uploadDataLo0 = [];
+            var downloadDataLo0 = [];
+
+            {% for entry in network_info %}
+                {% for interface_data in entry.interfaces %}
+                    {% if interface_data.iface == 'en0' %}
+                        labels.push("{{ entry.timestamp }}");
+                        uploadDataEn0.push(convertToMB("{{ interface_data.data.total_upload }}"));
+                        downloadDataEn0.push(convertToMB("{{ interface_data.data.download }}"));
+                    {% elif interface_data.iface == 'lo0' %}
+                        labels.push("{{ entry.timestamp }}");
+                        uploadDataLo0.push(convertToMB("{{ interface_data.data.total_upload }}"));
+                        downloadDataLo0.push(convertToMB("{{ interface_data.data.download }}"));
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+
+            var ctxEn0 = document.getElementById('networkChartEn0').getContext('2d');
+            var myChartEn0 = new Chart(ctxEn0, {
+>>>>>>> Stashed changes
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Upload (MB)',
+<<<<<<< Updated upstream
                         data: uploadData,
+=======
+                        data: uploadDataEn0,
+>>>>>>> Stashed changes
                         borderColor: 'rgba(255, 0, 0, 1)', // Red
                         borderWidth: 1,
                         fill: false
                     }, {
                         label: 'Download (MB)',
+<<<<<<< Updated upstream
                         data: downloadData,
+=======
+                        data: downloadDataEn0,
+                        borderColor: 'rgba(0, 128, 0, 1)', // Green
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Timestamp'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Data (MB)'
+                            }
+                        }]
+                    }
+                }
+            });
+
+            var ctxLo0 = document.getElementById('networkChartLo0').getContext('2d');
+            var myChartLo0 = new Chart(ctxLo0, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Upload (MB)',
+                        data: uploadDataLo0,
+                        borderColor: 'rgba(255, 0, 0, 1)', // Red
+                        borderWidth: 1,
+                        fill: false
+                    }, {
+                        label: 'Download (MB)',
+                        data: downloadDataLo0,
+>>>>>>> Stashed changes
                         borderColor: 'rgba(0, 128, 0, 1)', // Green
                         borderWidth: 1,
                         fill: false

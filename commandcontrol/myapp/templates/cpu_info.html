@@ -29,6 +29,7 @@
         </div>
     </div>
 
+<<<<<<< Updated upstream
     <div class="card mt-4">
         <div class="card-body">
             <h3>CPU Percent</h3>
@@ -50,6 +51,309 @@
         var cpuPercentValue = {{ cpu_percent|default:0 }};
         var ctxCpuPercent = document.getElementById('cpuPercentChart').getContext('2d');
         var cpuPercentChart = new Chart(ctxCpuPercent, {
+=======
+	<div class="">
+		<div class="card">
+			<div class="card-body mt-4">
+				<h5>Timestamp: {{ timestamp }}</h5>
+				<h5>System Name: {{ operating_system }}</h5>
+				<h5>Hostname: {{ hostname }}</h5>
+				<h5>User Name: {{ username }}</h5>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">CPU USAGE</h5>
+					<div>
+						<canvas id="TotalDonut" width="335"height="150"></canvas>
+					</div>
+				</div>
+			</div>
+		</div> 
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">RAM Usage</h5>
+					<div>
+						<canvas id="TD1" width="335" height="150"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">System Utilization</h5>
+					<div>
+						<canvas id="TD2" width="335"height="150"></canvas>
+					</div>
+				</div>
+			</div>
+		</div> 
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">SWAP Usage</h5>
+					<div>
+						<canvas id="TD3" width="335"height="150"></canvas>
+					</div>
+				</div>
+			</div>
+		</div> 
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">Disk Utilization</h5>
+					<div>
+						<canvas id="TD4" width="335" height="150"></canvas>
+					</div>
+				</div>
+			</div>
+		</div> 
+		<div class="col-lg-2">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">RAM Usage (100ms)</h5>
+					<div>
+						<canvas id="TD5" width="335" height="150"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-lg-8">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">Average Over 12 Hours</h5>
+					<div id="barChart">
+						<canvas id="perCpuChart" width="400" height="200"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-lg-8">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">Something </h5>
+					<div id="barChart">
+						<canvas id="C1" width="400" height="200"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		   // Extract per_cpu_percent array from the context
+		   var perCpuPercent = {{ percent_per_cpu|safe }};
+
+		   // Get the canvas element
+		   var ctx = document.getElementById('perCpuChart').getContext('2d');
+
+		   // Create a bar chart with lighter colors
+		   var myChart = new Chart(ctx, {
+		       type: 'bar',
+		       data: {
+		           labels: perCpuPercent.map((_, index) => `CPU ${index + 1}`),
+		           datasets: [{
+		               label: 'Per CPU Usage (%)',
+		               data: perCpuPercent,
+		               backgroundColor: 'rgba(173, 216, 230, 0.7)', // Lighter turquoise
+		               borderColor: 'rgba(255, 255, 255, 0.8)',
+		               borderWidth: 1,
+		           }]
+		       },
+		       options: {
+				scales: {
+						y: {
+								beginAtZero: true,
+								max: 100,
+								ticks: {
+										color: 'rgba(173, 216, 230, 0.7)' // Lighter text color
+								},
+								gridLines:{
+									color: "rgba(173, 216, 230, 0.7)",
+									lineWidth:2,
+									zeroLineColor :"rgba(173, 216, 230, 0.7)",
+									zeroLineWidth : 2
+								},
+						},
+						x: {
+								ticks: {
+										color: 'rgba(255, 255, 255, 0.8)' // Lighter text color
+								},
+								gridLines:{
+									color: "rgba(173, 216, 230, 0.7)",
+									lineWidth:2,
+									zeroLineColor :"rgba(173, 216, 230, 0.7)",
+									zeroLineWidth : 2
+								},
+						}
+				},
+		}
+		   });
+	</script>
+	<script>
+    var options = {
+        series: [
+            {
+                name: "High - 2013",
+                data: [28, 29, 33, 36, 32, 32, 33]
+            },
+            {
+                name: "Low - 2013",
+                data: [12, 11, 14, 18, 17, 13, 13]
+            }
+        ],
+        chart: {
+            height: 350,
+            type: 'line',
+            dropShadow: {
+                enabled: true,
+                color: '#000',
+                top: 18,
+                left: 7,
+                blur: 10,
+                opacity: 0.2
+            },
+            toolbar: {
+                show: false
+            }
+        },
+        colors: ['#77B6EA', '#545454'],
+        dataLabels: {
+            enabled: true,
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        title: {
+            text: 'Average High & Low CPU IO',
+            align: 'left'
+        },
+        grid: {
+            borderColor: '#e7e7e7',
+            row: {
+                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+                opacity: 0.5
+            },
+        },
+        markers: {
+            size: 1
+        },
+        xaxis: {
+            categories: ['0', '1', '2', '3', '4', '5', '6'],
+            title: {
+                text: 'Hour'
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'CPU IO'
+            },
+            min: 5,
+            max: 40
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'right',
+            floating: true,
+            offsetY: -25,
+            offsetX: -5
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#C1"), options); // changed selector to #c1
+    chart.render();
+</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+				var cpuUsage = {{ cpu_percent }};
+
+				var data = {
+						labels: ["CPU Usage", "Unused"],
+						datasets: [{
+								data: [cpuUsage, 100 - cpuUsage],
+								backgroundColor: ["#36a2eb", "#f87979"]
+						}]
+				};
+				var ctx = document.getElementById('TotalDonut').getContext('2d');
+				var myChart = new Chart(ctx, {
+						type: 'doughnut',
+						data: data,
+						options: {
+								cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+								responsive: true,
+								maintainAspectRatio: false,
+								legend: {
+										display: false
+								}
+						}
+				});
+		});
+		var options = {
+			series: [{
+				name: "Desktops",
+				data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
+		}],
+			chart: {
+			height: 350,
+			type: 'line',
+			zoom: {
+				enabled: false
+			}
+		},
+		dataLabels: {
+			enabled: false
+		},
+		stroke: {
+			curve: 'straight'
+		},
+		title: {
+			text: 'Product Trends by Month',
+			align: 'left'
+		},
+		grid: {
+			row: {
+				colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+				opacity: 0.5
+			},
+		},
+		xaxis: {
+			categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+		}
+		};
+
+		var chart = new ApexCharts(document.querySelector("#chart"), options);
+		chart.render();
+	</script>
+	<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var cpuUsage = {{ cpu_percent }};
+
+        // Multiply cpuUsage with a random value between 0.5 and 1.5
+        var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
+        cpuUsage *= randomMultiplier;
+
+        var data = {
+            labels: ["CPU Usage", "Unused"],
+            datasets: [{
+                data: [cpuUsage, 100 - cpuUsage],
+                backgroundColor: ["#36a2eb", "#f87979"]
+            }]
+        };
+
+        var ctx = document.getElementById('TD1').getContext('2d');
+        var myChart = new Chart(ctx, {
+>>>>>>> Stashed changes
             type: 'doughnut',
             data: {
                 labels: ['CPU Usage', 'Available'],
@@ -108,5 +412,318 @@
     });
 </script>
 
+<<<<<<< Updated upstream
 {% endif %}
 {% endblock %}
+=======
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+			var cpuUsage = {{ cpu_percent }};
+
+			// Multiply cpuUsage with a random value between 0.5 and 1.5
+			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
+			cpuUsage *= randomMultiplier;
+
+			var data = {
+					labels: ["CPU Usage", "Unused"],
+					datasets: [{
+							data: [cpuUsage, 100 - cpuUsage],
+							backgroundColor: ["#36a2eb", "#f87979"]
+					}]
+			};
+
+			var ctx = document.getElementById('TD2').getContext('2d');
+			var myChart = new Chart(ctx, {
+					type: 'doughnut',
+					data: data,
+					options: {
+							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+							responsive: true,
+							maintainAspectRatio: false,
+							legend: {
+									display: false
+							}
+					}
+			});
+	});
+
+
+
+	var options = {
+			series: [{
+					name: "Desktops",
+					// Multiply data with random values between 0.5 and 1.5
+					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
+							return value * (Math.random() * (1.5 - 0.5) + 0.5);
+					})
+			}],
+			chart: {
+					height: 350,
+					type: 'line',
+					zoom: {
+							enabled: false
+					}
+			},
+			dataLabels: {
+					enabled: false
+			},
+			stroke: {
+					curve: 'straight'
+			},
+			title: {
+					text: 'Product Trends by Month',
+					align: 'left'
+			},
+			grid: {
+					row: {
+							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+							opacity: 0.5
+					},
+			},
+			xaxis: {
+					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+			}
+	};
+
+	var chart = new ApexCharts(document.querySelector("#chart"), options);
+	chart.render();
+
+
+</script>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+			var cpuUsage = {{ cpu_percent }};
+
+			// Multiply cpuUsage with a random value between 0.5 and 1.5
+			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
+			cpuUsage *= randomMultiplier;
+
+			var data = {
+					labels: ["CPU Usage", "Unused"],
+					datasets: [{
+							data: [cpuUsage, 100 - cpuUsage],
+							backgroundColor: ["#36a2eb", "#f87979"]
+					}]
+			};
+
+			var ctx = document.getElementById('TD3').getContext('2d');
+			var myChart = new Chart(ctx, {
+					type: 'doughnut',
+					data: data,
+					options: {
+							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+							responsive: true,
+							maintainAspectRatio: false,
+							legend: {
+									display: false
+							}
+					}
+			});
+	});
+
+
+
+	var options = {
+			series: [{
+					name: "Desktops",
+					// Multiply data with random values between 0.5 and 1.5
+					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
+							return value * (Math.random() * (1.5 - 0.5) + 0.5);
+					})
+			}],
+			chart: {
+					height: 350,
+					type: 'line',
+					zoom: {
+							enabled: false
+					}
+			},
+			dataLabels: {
+					enabled: false
+			},
+			stroke: {
+					curve: 'straight'
+			},
+			title: {
+					text: 'Product Trends by Month',
+					align: 'left'
+			},
+			grid: {
+					row: {
+							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+							opacity: 0.5
+					},
+			},
+			xaxis: {
+					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+			}
+	};
+
+	var chart = new ApexCharts(document.querySelector("#chart"), options);
+	chart.render();
+
+
+</script>
+
+
+
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+			var cpuUsage = {{ cpu_percent }};
+
+			// Multiply cpuUsage with a random value between 0.5 and 1.5
+			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
+			cpuUsage *= randomMultiplier;
+
+			var data = {
+					labels: ["CPU Usage", "Unused"],
+					datasets: [{
+							data: [cpuUsage, 100 - cpuUsage],
+							backgroundColor: ["#36a2eb", "#f87979"]
+					}]
+			};
+
+			var ctx = document.getElementById('TD4').getContext('2d');
+			var myChart = new Chart(ctx, {
+					type: 'doughnut',
+					data: data,
+					options: {
+							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+							responsive: true,
+							maintainAspectRatio: false,
+							legend: {
+									display: false
+							}
+					}
+			});
+	});
+
+
+
+	var options = {
+			series: [{
+					name: "Desktops",
+					// Multiply data with random values between 0.5 and 1.5
+					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
+							return value * (Math.random() * (1.5 - 0.5) + 0.5);
+					})
+			}],
+			chart: {
+					height: 350,
+					type: 'line',
+					zoom: {
+							enabled: false
+					}
+			},
+			dataLabels: {
+					enabled: false
+			},
+			stroke: {
+					curve: 'straight'
+			},
+			title: {
+					text: 'Product Trends by Month',
+					align: 'left'
+			},
+			grid: {
+					row: {
+							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+							opacity: 0.5
+					},
+			},
+			xaxis: {
+					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+			}
+	};
+
+	var chart = new ApexCharts(document.querySelector("#chart"), options);
+	chart.render();
+
+
+</script>
+
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+			var cpuUsage = {{ cpu_percent }};
+
+			// Multiply cpuUsage with a random value between 0.5 and 1.5
+			var randomMultiplier = Math.random() * (1.5 - 0.5) + 0.5;
+			cpuUsage *= randomMultiplier;
+
+			var data = {
+					labels: ["CPU Usage", "Unused"],
+					datasets: [{
+							data: [cpuUsage, 100 - cpuUsage],
+							backgroundColor: ["#36a2eb", "#f87979"]
+					}]
+			};
+
+			var ctx = document.getElementById('TD5').getContext('2d');
+			var myChart = new Chart(ctx, {
+					type: 'doughnut',
+					data: data,
+					options: {
+							cutout: '80%', // Adjust the cutout percentage to control the thickness of the donut
+							responsive: true,
+							maintainAspectRatio: false,
+							legend: {
+									display: false
+							}
+					}
+			});
+	});
+
+
+
+	var options = {
+			series: [{
+					name: "Desktops",
+					// Multiply data with random values between 0.5 and 1.5
+					data: [10, 41, 35, 51, 49, 62, 69, 91, 148].map(function (value) {
+							return value * (Math.random() * (1.5 - 0.5) + 0.5);
+					})
+			}],
+			chart: {
+					height: 350,
+					type: 'line',
+					zoom: {
+							enabled: false
+					}
+			},
+			dataLabels: {
+					enabled: false
+			},
+			stroke: {
+					curve: 'straight'
+			},
+			title: {
+					text: 'Product Trends by Month',
+					align: 'left'
+			},
+			grid: {
+					row: {
+							colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+							opacity: 0.5
+					},
+			},
+			xaxis: {
+					categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+			}
+	};
+
+	var chart = new ApexCharts(document.querySelector("#chart"), options);
+	chart.render();
+
+
+</script>
+
+	
+	<script src="{% static "assets/vendor/apexcharts/apexcharts.min.js" %}"></script>
+
+</div>
+{% endif %} {% endblock %}
+>>>>>>> Stashed changes

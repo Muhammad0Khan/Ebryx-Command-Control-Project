@@ -1,0 +1,132 @@
+{% extends 'dashboard_base.html' %} {% block content %}
+{%load static%}
+<style>
+	table {
+		border-collapse: collapse;
+		width: 100%;
+		background-color: #ffffff; /* Light background color */
+		color: #000000; /* Dark text color */
+		border-radius: 6px; /* Rounded corners */
+		overflow: hidden; /* Ensure rounded corners are visible */
+	}
+
+	th,
+	td {
+		border: 1px solid #dddddd; /* Light border color */
+		text-align: left;
+		padding: 12px;
+	}
+
+	th {
+		background-color: #f2f2f2; /* Light background color for header */
+		color: #000000; /* Dark text color for header */
+	}
+
+	.status {
+		font-weight: bold;
+	}
+</style>
+
+<div class="mt-4">
+	<div class="">
+		<h1>Network Dashboard</h1>
+		<nav>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item">
+					<a href="{% url 'dashboard' %}">Dashboard</a>
+					<a href="#">Network</a>
+				</li>
+			</ol>
+		</nav>
+	</div>
+
+	<div class="card">
+		<div class="card-body">
+			<table class="mt-4">
+				<thead>
+					<tr>
+						<th>Host Name</th>
+						<th>User Name</th>
+						<th>Type</th>
+						<th>Status</th>
+						<th>Network Stats</th>
+					</tr>
+				</thead>
+				<tbody id="tokenTableBody">
+					
+		{% for token in tokens %}
+				<tr>
+						<td>{{ token.system_data.hostname }}</td>
+						<td>{{ token.system_data.username }}</td>
+						<td style="max-width: 100px;">
+							
+							<span>
+									{% if token.system_data.operating_system == "MacOS" %}
+											<img src="{% static "assets/img/macOS.png" %}" style="max-width: 25%; height: auto;">
+									{% elif token.system_data.operating_system == "Windows" %}
+											<img src="{% static "assets/img/Windows.png" %}" style="max-width: 35%; height: auto;">
+									{% endif %}
+							</span>
+					</td>            <td
+								class="status"
+								style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
+								{% if token.status == 'online' %}
+										Online
+	
+								{% else %}
+										Offline
+								{% endif %}
+						</td>
+						<td>
+							<a
+								href="{{ token.network_info }}">
+								<button class="btn btn-primary w-96">Network Stats</button>
+							</a>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script>
+		// Reload data every 5 seconds
+		setInterval(function () {
+			fetch("/network_dashboard/") // Replace with the actual URL of your dashboard view
+				.then(response => response.text())
+				.then(html => {
+					const parser = new DOMParser();
+					const newDoc = parser.parseFromString(html, "text/html");
+					const newTableBody = newDoc.getElementById("tokenTableBody");
+					document.getElementById("tokenTableBody").innerHTML =
+						newTableBody.innerHTML;
+				})
+				.catch(error => console.error("Error fetching data:", error));
+		}, 5000);
+		function loadNetworkStats(token) {
+			fetch(`/network_info/${token}/`, {
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+			})
+				.then(response => response.json())
+				.then(data => {
+					console.log("Data received from server:", data);
+
+					if (data.success) {
+						// Redirect to a new page with the network information
+						window.location.href = `/network_info/${token}/`;
+					} else {
+						console.error("Error: Data success is false");
+						console.error("Server response:", data);
+						// Handle the case where fetching network information was not successful
+					}
+				})
+				.catch(error =>
+					console.error("Error fetching network information:", error)
+				);
+		}
+	</script>
+</div>
+{% endblock %}

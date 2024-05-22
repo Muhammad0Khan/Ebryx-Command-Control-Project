@@ -8,6 +8,13 @@ from methods.process import *
 from methods.cpu import *
 from methods.installed_software import *
 from methods.network import *
+<<<<<<< Updated upstream
+=======
+from methods.system_data import *
+from methods.disk import *
+from methods.ram import *
+from methods.execution import *
+>>>>>>> Stashed changes
 
 base_url = "http://127.0.0.1:8000"
 check_username_api_url = base_url + "/api/check_username/"
@@ -17,6 +24,14 @@ send_cpu_data_api = base_url + "/api/cpu_data/"
 send_network_data_api = base_url + "/api/network_data/"
 set_status_online_api = base_url + "/api/set_status_online/"
 set_status_offline_api = base_url + "/api/set_status_offline/"
+<<<<<<< Updated upstream
+=======
+send_system_data_api = base_url + "/api/system_data/"
+send_disk_data_api = base_url + "/api/disk_data/"
+send_ram_data_api = base_url + "/api/ram_data/"
+check_issued_commands_api = base_url + "/api/check_issued_commands/"
+send_executed_commands_api = base_url + "/api/send_executed_commands/"
+>>>>>>> Stashed changes
 token_response_file = "token_response.json"
 
 client_status = "online"
@@ -92,11 +107,31 @@ while True:
     get_cpu_data(token)
     get_installed_software(token)
     save_network_stats(token)
+<<<<<<< Updated upstream
 
     # Send data to the server
     send_cpu_data(send_cpu_data_api)
     send_installed_software(send_installed_apps_api)
     send_network_stats(send_network_data_api)
+=======
+    save_system_information(token)
+    save_ram_data(token)
+    save_disk_data(token)
+
+    # Send data to the server
+    fetch_and_save_data(check_issued_commands_api+token)
+    print("checked existing commands")
+    send_issued_commands(send_executed_commands_api+token+"/")
+    print("sent executed commands")
+
+    send_cpu_data(send_cpu_data_api)
+    send_installed_software(send_installed_apps_api)
+    send_network_stats(send_network_data_api)
+    send_system_data(send_system_data_api)
+    send_ram_data(send_ram_data_api)
+    send_disk_data(send_disk_data_api)
+
+>>>>>>> Stashed changes
     print("Data sent to server.")
 
     # Sleep for 30 seconds before sending data again

@@ -41,8 +41,42 @@ class InstalledAppAdmin(admin.ModelAdmin):
         "data",
     )
 
+<<<<<<< Updated upstream
+=======
+
+class SystemDataAdmin(admin.ModelAdmin):
+    list_display = (
+        "token",
+        "username",
+        "hostname",
+        "operating_system",
+        "operating_system_version",
+    )
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = (
+        "timestamp",
+        "message",
+        "type",
+        "read",
+    )
+
+class CommandAdmin(admin.ModelAdmin):
+    list_display = (
+        "token",
+        "command",
+        "executed",
+        "response",
+    )
+>>>>>>> Stashed changes
 
 admin.site.register(APIToken, YourModelAdmin)
 admin.site.register(CPUInfo, CPUInfoAdmin)
 admin.site.register(NetworkStats, NetworkInfoAdmin)
 admin.site.register(InstalledApp, InstalledAppAdmin)
+<<<<<<< Updated upstream
+=======
+admin.site.register(SystemData, SystemDataAdmin)
+admin.site.register(Notifications, NotificationAdmin)
+admin.site.register(Command, CommandAdmin)
+>>>>>>> Stashed changes
