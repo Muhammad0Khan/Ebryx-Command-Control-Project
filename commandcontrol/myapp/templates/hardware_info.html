@@ -1,6 +1,12 @@
 {% extends 'dashboard_base.html' %} {%load static%} {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<style>
+	.custom-list-item {
+    background-color: #4444;
+    color: #bdbdbd;
+}
+</style>
 {% if error_message %}
 <p>{{ error_message }}</p>
 {% else %}
@@ -22,12 +28,10 @@
 		<div class="col-lg">
 			<div class="card">
 				<div class="card-body">
-					mame penga
+					<h3 class="mt-5"> {{operating_system}} | {{hostname}} | {{system_name}} </h3>
 				</div>
 			</div>
-		</div>
-	
-			
+		</div>			
 	</div>
 
 
@@ -47,16 +51,38 @@
 		</div>
 
 		<div class="col-lg-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title text-center">INFO</h5>
-					<a>Total  : </a> <a>{{total_memory}}</a>
-					<a>Available  : </a> <a>{{available_memory}}</a>
-					<span><a>Used  : </a> <a>{{used_memory}}</a></span>
-					
-				</div>
+			<div class="card shadow-sm">
+					<div class="card-body">
+							<h5 class="card-title text-center">INFO</h5>
+							<ul class="list-group list-group-flush">
+									<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item">
+											Total:
+											<span>{{total_memory}}</span>
+									</li>
+									<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item">
+											Available:
+											<span>{{available_memory}}</span>
+									</li>
+									<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item">
+											Used:
+											<span>{{used_memory}}</span>
+									</li>
+									<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item">
+										CPU Count:
+										<span>{{cpu_count}}</span>
+								</li>
+									<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item">
+											Threads:
+											<span>{{threads}}</span>
+									</li>
+									<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item">
+										CPU Frequency:
+										<span id="cpu-frequency">{{cpu_frequency}}</span>
+								</li>
+							</ul>
+					</div>
 			</div>
-		</div>
+	</div>
 
 		
 
@@ -128,8 +154,24 @@
 		<div class="col-lg-2">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title text-center">INFO</h5>
-		
+					<h5 class="card-title text-center">DISK INFO</h5>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item" id="total-size-list-item">
+							Total Size:
+							<span></span>
+					</li>
+							<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item" id="free-disk-list-item">
+								Available:
+								<span>{{free_disk}}</span>
+						</li>
+
+							<li class="list-group-item d-flex justify-content-between align-items-center custom-list-item" id="vendor-list-item">
+								Vendor
+								<span></span>
+						</li>
+							
+						</li>
+					</ul>
 				</div>
 			</div>
 		</div>
@@ -602,7 +644,66 @@
 	chart.render();
 </script>
 
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+    var cpuFrequencyElement = document.getElementById('cpu-frequency');
+    if (cpuFrequencyElement) {
+        var cpuFrequency = cpuFrequencyElement.textContent.trim();
+        if (cpuFrequency === '-1') {
+            cpuFrequencyElement.textContent = 'arm support soon!';
+        }
+    }
+});
+</script>
 
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+    var operatingSystem = "{{operating_system}}";
+    var vendorSpan = document.querySelector('#vendor-list-item span');
+    
+    if (operatingSystem === 'MacOS') {
+        vendorSpan.textContent = 'Apple';
+    } else {
+        vendorSpan.textContent = 'Generic';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+	var freeDiskValue = parseFloat("{{free_disk}}"); // Convert the string to a floating-point number
+	var roundedFreeDiskValue = Math.round(freeDiskValue * 100) / 100; // Round off to two decimal places
+	
+	// Update the text content of the span element
+	document.getElementById('free-disk-list-item').querySelector('span').textContent = roundedFreeDiskValue;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+	var percentDisk = parseFloat("{{percent_disk}}"); // Convert the string to a floating-point number
+	var freeDisk = parseFloat("{{free_disk}}"); // Convert the string to a floating-point number
+	
+	// Calculate total size
+	var totalSize = freeDisk / (1 - percentDisk / 100);
+	
+	// Update the text content of the span element with the calculated total size
+	document.getElementById('total-size-list-item').querySelector('span').textContent = totalSize.toFixed(2);
+});
+</script>
+
+
+<script>
+	// Reload data every 5 seconds
+	setInterval(function () {
+		fetch("/hardware_info/") // Replace with the actual URL of your dashboard view
+			.then(response => response.text())
+			.then(html => {
+				const parser = new DOMParser();
+				const newDoc = parser.parseFromString(html, "text/html");
+				const newTableBody = newDoc.getElementById("tokenTableBody");
+				document.getElementById("tokenTableBody").innerHTML =
+					newTableBody.innerHTML;
+			})
+			.catch(error => console.error("Error fetching data:", error));
+	}, 5000);
+</script>
 	<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
 </div>
 {% endif %} {% endblock %}

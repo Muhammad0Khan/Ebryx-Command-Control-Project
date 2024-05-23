@@ -1,192 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>System Reports</title>
-		<style>
-			body {
-				font-family: Arial, sans-serif;
-				margin: 20px;
-			}
-			.card {
-				border: 1px solid #ddd;
-				border-radius: 5px;
-				margin-bottom: 20px;
-				padding: 15px;
-				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-			}
-			.card-header {
-				background-color: #f8f9fa;
-				padding: 10px 15px;
-				border-bottom: 1px solid #ddd;
-			}
-			.card-body {
-				padding: 15px;
-			}
-			.list-group {
-				list-style: none;
-				padding: 0;
-			}
-			.list-group-item {
-				padding: 10px 15px;
-				border-bottom: 1px solid #ddd;
-			}
-			.list-group-item:last-child {
-				border-bottom: none;
-			}
-			h1,
-			h2,
-			h5 {
-				margin: 0 0 10px 0;
-			}
-			.mb-3 {
-				margin-bottom: 20px;
-			}
-		</style>
-	</head>
-	<body>
-		<h1>System Reports</h1>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Reports</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .list-group {
+            list-style: none;
+            padding: 0;
+        }
+        .list-group-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+        h1,
+        h2,
+        h5 {
+            margin: 0 0 10px 0;
+        }
+        .mb-3 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>System Reports</h1>
 
-		<div class="card mb-3">
-			<div class="card-header">
-				<h2>
-					{{ token_details.system_data.hostname }} - {{
-					token_details.system_data.username }}
-				</h2>
-			</div>
-			<div class="card-body">
-				<h5 class="card-title">Operating System Details</h5>
-				<p class="card-text">
-					Operating System: {{ token_details.system_data.operating_system }}
-				</p>
-				<p class="card-text">
-					OS Version: {{ token_details.system_data.operating_system_version }}
-				</p>
-			</div>
-			<ul class="list-group list-group-flush">
-				<li class="list-group-item">Token: {{ token_details.token }}</li>
-				<li class="list-group-item">Data Upload: 1.03 GB</li>
-				<li class="list-group-item">Data Download: 705 MB</li>
-				<li class="list-group-item">Outages:</li>
-				<li class="list-group-item">Max Connected Time:</li>
-				<li class="list-group-item">Last Connected Time:</li>
-				<li class="list-group-item">Crashes:</li>
-				<li class="list-group-item">
-					Applications Installed: {{
-					token_details.installed_app_data.data|length }}
-				</li>
-			</ul>
-		</div>
+    {% for token_details in tokens %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>
+                {{ token_details.system_data.hostname }} - {{ token_details.system_data.username }}
+            </h2>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Operating System Details</h5>
+            <p class="card-text">
+                Operating System: {{ token_details.system_data.operating_system }}
+            </p>
+            <p class="card-text">
+                OS Version: {{ token_details.system_data.operating_system_version }}
+            </p>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Token: {{ token_details.token }}</li>            
+            <li class="list-group-item">
+                Applications Installed: {{ token_details.installed_app_data.data|length }}
+            </li>
+        </ul>
+    </div>
+    {% endfor %}
 
-		<div class="card mb-3">
-			<div class="card-header">
-				<h2>CPU Data</h2>
-			</div>
-			<div class="card-body">
-				<p class="card-text">
-					Processor: {{ token_details.cpu_data.processor }}
-				</p>
-				<p class="card-text">Architecture: {{ token_details.cpu_data.arch }}</p>
-				<p class="card-text">
-					CPU Count: {{ token_details.cpu_data.cpu_count }}
-				</p>
-				<p class="card-text">Threads: {{ token_details.cpu_data.threads }}</p>
-				<p class="card-text">
-					CPU Frequency: {{ token_details.cpu_data.data.cpu_frequency }} MHz
-				</p>
-				<p class="card-text">
-					CPU Usage: {{ token_details.cpu_data.data.cpu_usage }}%
-				</p>
-				<p class="card-text">
-					Per CPU Percentages: {{ token_details.cpu_data.data.per_cpu_percent }}
-				</p>
-				<p class="card-text">
-					Timestamp: {{ token_details.cpu_data.data.timestamp }}
-				</p>
-			</div>
-		</div>
+    {% for token_details in tokens %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>CPU Data</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                Processor: {{ token_details.cpu_data.processor }}
+            </p>
+            <p class="card-text">Architecture: {{ token_details.cpu_data.arch }}</p>
+            <p class="card-text">
+                CPU Count: {{ token_details.cpu_data.cpu_count }}
+            </p>
+            <p class="card-text">Threads: {{ token_details.cpu_data.threads }}</p>
+            <p class="card-text">
+                CPU Frequency: {{ token_details.cpu_data.data.cpu_frequency }} MHz
+            </p>
+            <p class="card-text">
+                CPU Usage: {{ token_details.cpu_data.data.cpu_usage }}%
+            </p>
+            <p class="card-text">
+                Per CPU Percentages: {{ token_details.cpu_data.data.per_cpu_percent }}
+            </p>
+            <p class="card-text">
+                Timestamp: {{ token_details.cpu_data.data.timestamp }}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
 
-		<div class="card mb-3">
-			<div class="card-header">
-				<h2>RAM Data</h2>
-			</div>
-			<div class="card-body">
-				<p class="card-text">
-					Total Memory: {{ token_details.ram_data.total_memory }} MB
-				</p>
-				<p class="card-text">
-					Used Memory: {{ token_details.ram_data.data.used_memory }} MB
-				</p>
-				<p class="card-text">
-					Available Memory: {{ token_details.ram_data.data.available_memory }}
-					MB
-				</p>
-				<p class="card-text">
-					Free Memory: {{ token_details.ram_data.data.free_memory }} MB
-				</p>
-				<p class="card-text">
-					Memory Usage: {{ token_details.ram_data.data.percent_memory }}%
-				</p>
-				<p class="card-text">
-					Total Swap: {{ token_details.ram_data.data.total_swap }} MB
-				</p>
-				<p class="card-text">
-					Used Swap: {{ token_details.ram_data.data.used_swap }} MB
-				</p>
-				<p class="card-text">
-					Free Swap: {{ token_details.ram_data.data.free_swap }} MB
-				</p>
-				<p class="card-text">
-					Swap Usage: {{ token_details.ram_data.data.percent_swap }}%
-				</p>
-				<p class="card-text">
-					Timestamp: {{ token_details.ram_data.data.timestamp }}
-				</p>
-			</div>
-		</div>
+    {% for token_details in tokens %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>RAM Data</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                Total Memory: {{ token_details.ram_data.total_memory }} MB
+            </p>
+            <p class="card-text">
+                Used Memory: {{ token_details.ram_data.data.used_memory }} MB
+            </p>
+            <p class="card-text">
+                Available Memory: {{ token_details.ram_data.data.available_memory }} MB
+            </p>
+            <p class="card-text">
+                Free Memory: {{ token_details.ram_data.data.free_memory }} MB
+            </p>
+            <p class="card-text">
+                Memory Usage: {{ token_details.ram_data.data.percent_memory }}%
+            </p>
+            <p class="card-text">
+                Total Swap: {{ token_details.ram_data.data.total_swap }} MB
+            </p>
+            <p class="card-text">
+                Used Swap: {{ token_details.ram_data.data.used_swap }} MB
+            </p>
+            <p class="card-text">
+                Free Swap: {{ token_details.ram_data.data.free_swap }} MB
+            </p>
+            <p class="card-text">
+                Swap Usage: {{ token_details.ram_data.data.percent_swap }}%
+            </p>
+            <p class="card-text">
+                Timestamp: {{ token_details.ram_data.data.timestamp }}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
 
-		<div class="card mb-3">
-			<div class="card-header">
-				<h2>Disk Data</h2>
-			</div>
-			<div class="card-body">
-				<p class="card-text">
-					Total Disk Space: {{ token_details.disk_data.total_disk }} MB
-				</p>
-				<p class="card-text">
-					Used Disk Space: {{ token_details.disk_data.data.used_disk }} MB
-				</p>
-				<p class="card-text">
-					Free Disk Space: {{ token_details.disk_data.data.free_disk }} MB
-				</p>
-				<p class="card-text">
-					Disk Usage: {{ token_details.disk_data.data.percent_disk }}%
-				</p>
-				<p class="card-text">
-					Timestamp: {{ token_details.disk_data.data.timestamp }}
-				</p>
-			</div>
-		</div>
+    {% for token_details in tokens %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Disk Data</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                Total Disk Space: {{ token_details.disk_data.total_disk }} MB
+            </p>
+            <p class="card-text">
+                Used Disk Space: {{ token_details.disk_data.data.used_disk }} MB
+            </p>
+            <p class="card-text">
+                Free Disk Space: {{ token_details.disk_data.data.free_disk }} MB
+            </p>
+            <p class="card-text">
+                Disk Usage: {{ token_details.disk_data.data.percent_disk }}%
+            </p>
+            <p class="card-text">
+                Timestamp: {{ token_details.disk_data.data.timestamp }}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
 
-		<div class="card mb-3">
-			<div class="card-header">
-				<h2>Installed Applications</h2>
-			</div>
-			<div class="card-body">
-				<ul class="list-group list-group-flush">
-					{% for app in token_details.installed_app_data.data %}
-					<li class="list-group-item">
-						<p class="card-text">Name: {{ app.name }}</p>
-						<p class="card-text">Version: {{ app.version }}</p>
-						<p class="card-text">Path: {{ app.path }}</p>
-						<p class="card-text">Obtained From: {{ app.obtained_from }}</p>
-						<p class="card-text">Last Modified: {{ app.lastModified }}</p>
-						<p class="card-text">Signed By: {{ app.signed_by|join:", " }}</p>
-					</li>
-					{% endfor %}
-				</ul>
-			</div>
-		</div>
-	</body>
-</html>
+    {% for token_details in tokens %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Installed Applications</h2>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for app in token_details.installed_app_data.data %}
+                <li class="list-group-item">
+                    <p class="card-text">Name: {{ app.name }}</p>
+										<p class="card-text">Version: {{ app.version }}</p>
+										<p class="card-text">Path: {{ app.path }}</p>
+										<p class="card-text">Obtained From: {{ app.obtained_from }}</p>
+										<p class="card-text">Last Modified: {{ app.lastModified }}</p>
+										<p class="card-text">Signed By: {{ app.signed_by|join:", " }}</p>
+										</li>
+										{% endfor %}
+								</ul>
+						</div>
+				</div>
+				{% endfor %}
+		</body>
+		</html>
+		

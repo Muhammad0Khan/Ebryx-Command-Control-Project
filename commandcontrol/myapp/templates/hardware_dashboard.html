@@ -123,10 +123,10 @@
 				</div>
 				<div class= "mb-4">
 					<h4 class="text-center" style="color: #bdbdbd">
-						Average Disk Used : {{total_disk_size}}
+						Average Disk (GB) : {{total_disk_size}}
 					</h4>
 					<h4 class="text-center" style="color: #bdbdbd">
-						Average Disk Size (GB) : {{total_disk_usage}}
+						Average Disk Used : {{total_disk_usage}} %
 					</h4>
 				</div>
 			</div>
@@ -143,19 +143,19 @@
 					<div>
 						<canvas id="TD1" width="400" height="175"></canvas>
 					</div>
-					<h4 class="text-center" style="margin-top: -10px">{{avg_usage}}%</h4>
+					<h4 class="text-center" style="margin-top: -64px; font-size: 30px; font-weight: bold;">{{avg_usage}}%</h4>
 				</div>
 						</div>
 		</div>
 
 		<div class="col-lg-4">
 			<div class="card">
-				<div class="card-body">
+				<div class="card-body mb-4">
 					<h5 class="card-title text-center">AVG RAM LOAD</h5>
 					<div>
 						<canvas id="TD2" width="400" height="175"></canvas>
 					</div>
-					<h4 class="text-center" style="margin-top: -10px">{{ram_avg_usage}}%</h4>		
+					<h4 class="text-center" style="margin-top: -64px; font-size: 30px; font-weight: bold;">{{ram_avg_usage}}%</h4>		
 				</div>
 				
 			</div>
@@ -168,7 +168,7 @@
 					<div>
 						<canvas id="TD3" width="400" height="175"></canvas>
 					</div>
-					<h4 class="text-center" style="margin-top: -10px">{{total_disk_usage}}%</h4>		
+					<h4 class="text-center" style="margin-top: -64px; font-size: 30px; font-weight: bold;">{{total_disk_usage}}%</h4>		
 				</div>
 				
 			</div>

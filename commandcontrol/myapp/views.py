@@ -412,37 +412,49 @@ def delete_token(request, token):
         hostname = system_data.get('hostname', None)
 
         installed_apps_ref= db.reference("installed_apps")
-        installed_app_data= installed_apps_ref.chid(token).get()
+        installed_app_data= installed_apps_ref.child(token).get()
 
         # Delete all matching token entries
+        batch = db.batch()
+
         if status_data:
             for status_key in status_data.keys():
-                status_ref.child(status_key).delete()
+                batch.delete(status_ref.child(status_key))
 
         if cpu_data:
-            cpu_ref.child(token).delete()
+            batch.delete(cpu_ref.child(token))
 
         if network_data:
-            network_ref.child(token).delete()
+            batch.delete(network_ref.child(token))
 
         if user_token_data:
             for token_key in user_token_data.keys():
-                user_token_ref.child(token_key).delete()
+                batch.delete(user_token_ref.child(token_key))
 
         if system_data:
-            system_ref.child(token).delete()
+            # Extract the hostname before deletion
+            hostname = system_data.get('hostname', None)
+            batch.delete(system_ref.child(token))
 
         if installed_app_data:
-            installed_apps_ref.child(token).delete()     
+            batch.delete(installed_apps_ref.child(token))
 
+        # Commit the batch operation
+        batch.commit()
 
-        message = "System " + hostname + " was deleted"
+        if hostname:
+            message = "System " + hostname + " was deleted"
+        else:
+            message = "System was deleted"
+        
         type = "delete"
-        set_notification(message, type)       
+        set_notification(message, type)
+        
         return Response({"success": True, "message": "Token deleted successfully"})
 
     except Exception as e:
         return Response({"success": False, "error": str(e)})
+
 
 @csrf_exempt
 @require_POST
@@ -526,6 +538,8 @@ def hardware_info_page(request, token):
                 # system data
                 "system_name": system_data.get("username", ""),
                 "hostname": system_data.get("hostname", ""),
+                "operating_system": system_data.get("operating_system", ""),
+                
 
                 # cpu data
                 "threads": latest_cpu_data.get("threads", ""),
@@ -766,6 +780,10 @@ def installed_apps_dashboard_view(request):
     tokens_data = tokens_ref.order_by_child("token").get()
     status_data = status_ref.order_by_child("token").get()
 
+    system_ref = db.reference("system_data")
+    system_data = system_ref.order_by_child("token").get()
+
+
     tokens = []
     for token_key, token in tokens_data.items():
         status_key = next(
@@ -777,11 +795,13 @@ def installed_apps_dashboard_view(request):
             None,
         )
         status = status_data.get(status_key, {}) if status_key else {}
+        system_details = system_data.get(token["token"], {}) 
 
         token_details = {
             "token": token["token"],
             "details_url": f'/token-details/{token["token"]}/',
             "status": status.get("status", "N/A"),
+            "system_data": system_details # Include system data
         }
         print(token_details)
         tokens.append(token_details)
@@ -873,29 +893,40 @@ def reports_view(request):
 
 
 
-def generate_reports(request,token): 
-
+def generate_reports(request, token): 
     tokens_ref = db.reference("tokens")
     tokens_data = tokens_ref.order_by_child("token").get()
-    system_ref = db.reference("system_data")
-    system_data = system_ref.order_by_child("token").get()
+    cpu_data_ref = db.reference(f"cpu_data/{token}")
+    ram_data_ref = db.reference(f"ram_data/{token}")
+    disk_data_ref = db.reference(f"disk_data/{token}")        
+    system_data_ref = db.reference(f"system_data/{token}")
+    installed_apps_ref = db.reference(f"installed_apps/{token}")
+    ram_data = ram_data_ref.get()
+    disk_data = disk_data_ref.get()
+    system_data = system_data_ref.get()
+    cpu_data = cpu_data_ref.get() 
+    installed_app_data=  installed_apps_ref.get()
+
+    average_cpu_data = cpu_data.get("data", [])[-1]
+    average_ram_data = ram_data.get("data", [])[-1]
+    average_disk_data = disk_data.get("data",[])[-1]
 
     tokens = []
-    for token_key, token in tokens_data.items():
-        system_details = system_data.get(token["token"], {})  # Fetch system details based on token
+    token_details = {
+        "generate_report": f'/api/generate_pdf_report/{token}/',
+        "system_data": system_data , # Include system data,
+        "cpu_data" :average_cpu_data , 
+        "ram_data" :average_ram_data , 
+        "disk_data": average_disk_data, 
+        "installed_app_data": installed_app_data, 
+    }
 
-        # Create a dictionary with token details, status, and system data
-        token_details = {
-            "token": token["token"],
-            "generate_report": f'/api/generate_report/{token["token"]}/',
-            "system_data": system_details  # Include system data
-        }
-        tokens.append(token_details)
-
-    message =" report generated for :" + system_data.get("hostname") 
-    set_notification(message, "New_report")
+    tokens.append(token_details)
     
-    return render (request, 'generate_report.html', {'tokens': tokens})
+    # Get the hostname from system_data
+    hostname = system_data.get("hostname", "")
+
+    return render(request, 'generate_report.html', {'tokens': tokens})
 
 
  
@@ -1270,18 +1301,18 @@ def generate_pdf_report(request, token):
 
     tokens = []
     token_details = {
-            "token": token,
-            "generate_report": f'/api/generate_pdf_report/{"token"}/',
-            "system_data": system_data , # Include system data,
-            "cpu_data" :average_cpu_data , 
-            "ram_data" :average_ram_data , 
-            "disk_data": average_disk_data, 
-            "installed_app_data": installed_app_data, 
-        }
-    
-    print(token_details)
-    
+        "generate_report": f'/api/generate_pdf_report/{token}/',
+        "system_data": system_data , # Include system data,
+        "cpu_data" :average_cpu_data , 
+        "ram_data" :average_ram_data , 
+        "disk_data": average_disk_data, 
+        "installed_app_data": installed_app_data, 
+    }
+
     tokens.append(token_details)
+    
+    # Get the hostname from system_data
+    hostname = system_data.get("hostname", "")
 
     # Render the HTML template to a string
     html_string = render(request, 'report_template.html', {'tokens': tokens}).content.decode('utf-8')
@@ -1304,7 +1335,9 @@ def generate_pdf_report(request, token):
     response = HttpResponse(pdf_buffer, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
 
-    message =" report generated for :" + "host"
+    # Set the notification message with the hostname
+    message = f"Report generated for: {hostname}"
     set_notification(message, "New_report")
+
     return response
 

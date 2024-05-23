@@ -30,7 +30,7 @@
 	}
 </style>
 
-<div class=" mt-4">
+<div class=" mt-2">
 	<div class="">
 		<h1>System Overview</h1>
 		<nav>
@@ -42,83 +42,167 @@
 		</nav>
 	</div>
 
-
 	<div class="row">
-		<!-- Left side columns -->
 		<div class="col-lg-8">
 			<div class="row">
-				<!-- Online Systems Card -->
-				<div class="col-xxl-6 col-md-6">
-					<div class="card info-card sales-card">
-
-						<div class="card-body">
-							<h5 class="card-title">Total Systems </h5>
-
-							<div class="d-flex align-items-center">
-								<div
-									class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-									<i class="bi bi-people"></i>
-								</div>
-								<div class="ps-3">
-									<h6>{{ tokens|length }}</h6>
-									
+				<!-- Left side columns -->
+				<div class="col-lg">
+					<div class="row">
+						<!-- Online Systems Card -->
+						<div class="col-xxl-6 col-md-6">
+							<div class="card info-card sales-card">
+		
+								<div class="card-body">
+									<h5 class="card-title">Total Systems </h5>
+		
+									<div class="d-flex align-items-center">
+										<div
+											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+											<i class="bi bi-people"></i>
+										</div>
+										<div class="ps-3">
+											<h6>{{ tokens|length }}</h6>
+											
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				</div>
-				<div class="col-xxl-6 col-md-6">
-					<div class="card info-card revenue-card">
+						<div class="col-xxl-6 col-md-6">
+							<div class="card info-card revenue-card">
+		
+								<div class="card-body">
+									<h5 class="card-title">Online Systems <span>| Today</span></h5>
+		
+									<div class="d-flex align-items-center">
+										<div
+											class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+											<i class="bi bi-people"></i>
+										</div>
+										<div class="ps-3">
+											<h6>{{ online_count }}</h6>
+											<span class="text-success small pt-1 fw-bold" id="tokenPercentage">{{ tokens|length }}%</span>
 
-						<div class="card-body">
-							<h5 class="card-title">Online Systems <span>| Today</span></h5>
+<script>
+    // Assume `online_count` and `tokens` are passed from your backend and accessible in your template
+    const onlineCount = {{ online_count }};
+    const tokens = {{ tokens|length }};
 
-							<div class="d-flex align-items-center">
-								<div
-									class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-									<i class="bi bi-people"></i>
-								</div>
-								<div class="ps-3">
-									<h6>{{ online_count }}</h6>
-									<span class="text-success small pt-1 fw-bold">{{ tokens|length }}%</span>
-									<span class="text-muted small pt-2 ps-1">increase</span> 
+    // Calculate the result
+    const result = (onlineCount / tokens)*100;
+
+    // Update the HTML to show the result
+    document.getElementById('tokenPercentage').innerText = result.toFixed(2) + '%';
+</script>
+											<span class=" small pt-2 ps-1">online</span> 
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="col-md-4 ">
-			
-				<div class="card " style="height: 170px; ">
-					<div class="card-body">
-						<h5 class="card-title">Recent Activity <span>| Today</span></h5>
-					</div>
-						<div class="card-body" style="overflow-y: auto;">
-								
-								<div></div>
-								<div class="activity" >
-										{% for key, notification in notifications.items %}
-										<div class="activity-item d-flex">
-												<div class="activite-label">{{ notification.timestamp }}</div>
-												{% if notification.type == 'delete' %}
-												<i class="bi bi-circle-fill activity-badge text-danger align-self-start"></i>
+			<div class="row">
+
+
+				<div class="col-lg">
+					<div class="card">
+						<div class="card-body">
+							<table class="mt-4 mb-4">
+								<thead>
+									<tr>
+										<th>Host Name</th>
+										<th>User Name</th>
+										<th>OS</th>
+										<th>Status</th>
+										<th>Delete</th>
+									</tr>
+								</thead>
+								<tbody id="tokenTableBody">
+									
+						{% for token in tokens %}
+								<tr>
+										<td>{{ token.system_data.hostname }}</td>
+										<td>{{ token.system_data.username }}</td>
+										<td style="max-width: 100px;">
+											
+											<span>
+													{% if token.system_data.operating_system == "MacOS" %}
+															<img src="{% static "assets/img/macOS.png" %}" style="max-width: 24%; height: auto;">
+													{% elif token.system_data.operating_system == "Windows" %}
+															<img src="{% static "assets/img/Windows.png" %}" style="max-width: 45%; height: auto;">
+													{% endif %}
+											</span>
+									</td>           
+					
+									<td
+										class="status"
+										style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
+												{% if token.status == 'online' %}
+														Online
+					
 												{% else %}
-												<i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
+														Offline
 												{% endif %}
-												<div class="activity-content">
-														{{ notification.message }}
-												</div>
-										</div>
-										<!-- End activity item-->
-										{% endfor %}
-								</div>
+										</td>
+										<td>
+											<div
+												
+												onclick="deleteToken('{{ token.token }}')"
+												style="cursor: pointer; display: inline-block;  padding: 10px; border-radius: 5px;"
+											>
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width: 1em; height: 1em; fill: white;">
+												<path d="M170.5 51.6L151.5 80h145l-19-28.4c-1.5-2.2-4-3.6-6.7-3.6H177.1c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80H368h48 8c13.3 0 24 10.7 24 24s-10.7 24-24 24h-8V432c0 44.2-35.8 80-80 80H112c-44.2 0-80-35.8-80-80V128H24c-13.3 0-24-10.7-24-24S10.7 80 24 80h8H80 93.8l36.7-55.1C140.9 9.4 158.4 0 177.1 0h93.7c18.7 0 36.2 9.4 46.6 24.9zM80 128V432c0 17.7 14.3 32 32 32H336c17.7 0 32-14.3 32-32V128H80zm80 64V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16z"/>
+												</svg>
+											</div>
+										</td>
+										
+									</tr>
+									{% endfor %}
+					
+								</tbody>
+							</table>
 						</div>
+					</div>
 				</div>
+			</div>
 		</div>
-		
+		<div class="col-lg-4">
+			<div class="card " style="height: 670px; ">
+				<div class="card-body">
+					<h5 class="card-title">Recent Activity <span>| Today</span></h5>
+				</div>
+					<div class="card-body" style="overflow-y: auto;">
+							
+							<div></div>
+							<div class="activity" >
+								{% for key, notification in notifications.items %}
+    <div class="activity-item d-flex">
+        <div class="activite-label">{{ notification.timestamp }}</div>
+        {% if notification.type == 'delete' %}
+            <i class="bi bi-circle-fill activity-badge text-danger align-self-start"></i>
+        {% elif notification.type == 'New_report' %}
+            <i class="bi bi-circle-fill activity-badge text-warning align-self-start"></i>
+        {% else %}
+            <i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
+        {% endif %}
+        <div class="activity-content">
+            {{ notification.message }}
+        </div>
+    </div>
+    <!-- End activity item-->
+{% endfor %}
+							</div>
+					</div>
+			</div>
 		</div>
+
+	</div>
+
+	
+
+	
 	<script>
 		// Reload data every 5 seconds
 		setInterval(function () {
@@ -154,69 +238,5 @@
 	</script>
 </div>
 
-<div class="card">
-	<div class="card-body">
-		<table class="mt-4">
-			<thead>
-				<tr>
-					<th>Host Name</th>
-					<th>User Name</th>
-					<th>OS</th>
-					<th>Reboot</th>
-					<th>Latest Ping</th>
-					<th>IP Address</th>
-					<th>Status</th>
-					<th>Delete</th>
-				</tr>
-			</thead>
-			<tbody id="tokenTableBody">
-				
-	{% for token in tokens %}
-			<tr>
-					<td>{{ token.system_data.hostname }}</td>
-					<td>{{ token.system_data.username }}</td>
-					<td style="max-width: 100px;">
-						
-						<span>
-								{% if token.system_data.operating_system == "MacOS" %}
-										<img src="{% static "assets/img/macOS.png" %}" style="max-width: 24%; height: auto;">
-								{% elif token.system_data.operating_system == "Windows" %}
-										<img src="{% static "assets/img/Windows.png" %}" style="max-width: 45%; height: auto;">
-								{% endif %}
-						</span>
-				</td>           
-				<td>{{ token.system_data.username }}</td>
-					
-					<td>{{ token.system_data.username }}</td>
-					<td>{{ token.system_data.username }}</td>
 
-				<td
-					class="status"
-					style="color: {% if token.status == 'online' %}#28a745{% else %}#dc3545{% endif %};">
-							{% if token.status == 'online' %}
-									Online
-
-							{% else %}
-									Offline
-							{% endif %}
-					</td>
-					<td>
-						<div
-    					
-    					onclick="deleteToken('{{ token.token }}')"
-    					style="cursor: pointer; display: inline-block;  padding: 10px; border-radius: 5px;"
-						>
-    					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" style="width: 1em; height: 1em; fill: white;">
-        			<path d="M170.5 51.6L151.5 80h145l-19-28.4c-1.5-2.2-4-3.6-6.7-3.6H177.1c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80H368h48 8c13.3 0 24 10.7 24 24s-10.7 24-24 24h-8V432c0 44.2-35.8 80-80 80H112c-44.2 0-80-35.8-80-80V128H24c-13.3 0-24-10.7-24-24S10.7 80 24 80h8H80 93.8l36.7-55.1C140.9 9.4 158.4 0 177.1 0h93.7c18.7 0 36.2 9.4 46.6 24.9zM80 128V432c0 17.7 14.3 32 32 32H336c17.7 0 32-14.3 32-32V128H80zm80 64V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16z"/>
-    					</svg>
-						</div>
-					</td>
-					
-				</tr>
-				{% endfor %}
-
-			</tbody>
-		</table>
-	</div>
-</div>
 {% endblock %}
